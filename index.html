@@ -2991,7 +2991,7 @@ function drawAim(){
       const v=(power>0.02?power:0.45)*MAXV, imp0=0.98*v*(dx*nx+dy*ny), slip=v*(dx*(-ny)+dy*nx)-spinX*v*0.5, jt=throwJt(slip,imp0);
       ox=nx*imp0-ny*jt; oy=ny*imp0+nx*jt; const ol=Math.hypot(ox,oy)||1; ox/=ol; oy/=ol;
     }
-    ctx.beginPath(); ctx.moveTo(hit.x,hit.y); ctx.lineTo(hit.x+ox*90,hit.y+oy*90); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hit.x,hit.y); ctx.lineTo(hit.x+ox*30,hit.y+oy*30); ctx.stroke();
     const dot=dx*nx+dy*ny, topC=NAT+(spinY*1.25-NAT)*Math.exp(-t*TOP_DECAY), kk=topC*TOP_KICK*0.98*dot;
     const px=dx-nx*dot+dx*kk, py=dy-ny*dot+dy*kk, pl=Math.hypot(px,py);
     if(pl>0.03){ const len=14+75*Math.min(1.2,pl);
