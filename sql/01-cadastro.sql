@@ -14,7 +14,9 @@ create table if not exists public.perfis (
 create unique index if not exists perfis_apelido_unico on public.perfis (lower(apelido));
 
 -- cada jogador só enxerga e altera o próprio perfil
-grant select, insert, update on public.perfis to authenticated;
+grant select on public.perfis to authenticated;
+grant insert (id, apelido, dados) on public.perfis to authenticated;
+grant update (dados, atualizado_em) on public.perfis to authenticated;
 alter table public.perfis enable row level security;
 
 drop policy if exists "ver o proprio perfil" on public.perfis;
