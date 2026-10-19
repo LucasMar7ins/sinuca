@@ -1967,7 +1967,7 @@ function shoot(){
 }
 function resolve(){
   const me=cur, op=1-cur, P=shot.potted.filter(n=>n!==0), scratch=shot.potted.includes(0);
-  let foul=false, why='', pre='';
+  let foul=false, why='', pre='', wrongBall=false, paid=null;
   const g=groups[me];
   if(scratch){foul=true;why='a branca caiu na caçapa'}
   else if(shot.firstHit==null){foul=true;why='nenhuma bola foi tocada'}
@@ -1975,7 +1975,7 @@ function resolve(){
     const fh=shot.firstHit;
     if(g){
       const target=shot.clearedAtStart?'oito':g;
-      if(typeOf(fh)!==target){foul=true;why=target==='oito'?'a primeira bola tocada precisava ser a 8':`a primeira bola tocada não era das ${g}`}
+      if(typeOf(fh)!==target){foul=true;wrongBall=true;why=target==='oito'?'a primeira bola tocada precisava ser a 8':fh===8?'bateu primeiro na 8 antes da hora':`a primeira bola tocada não era das ${g}`}
     }else if(fh===8){foul=true;why='a 8 foi a primeira bola tocada'}
   }
   if(P.includes(8)){
@@ -2006,11 +2006,19 @@ function resolve(){
   isBreak=false; kitchenOnly=false; state='aim';
   const keep=!foul&&mine; streak=keep?streak+(P2.length?1:0):0;
   if(!said&&keep&&streak===3) said=pick(CPU.on&&me===1?ZE.streakCpu:ZE.streak)();
+  if(wrongBall&&groups[op]){
+    const pb=balls.filter(b=>!b.in&&b.n!==0&&typeOf(b.n)===groups[op]).sort((a,b)=>a.n-b.n)[0];
+    if(pb){
+      let h=PHOLES[0], d=1e9; for(const q of PHOLES){ const dd=Math.hypot(pb.x-q.x,pb.y-q.y); if(dd<d){d=dd;h=q;} }
+      pot(pb,[h.x,h.y]); paid=pb.n; gamePots[op]++;
+      said=pick(ZE.payball)(paid,names[op]);
+    }
+  }
   if(foul){
     // regra de bar: bola na mão só quando a branca cai, e sempre na meia lua; nas outras faltas joga de onde parou
     cur=op; ballInHand=scratch;
     if(scratch){ kitchenOnly=true; placeCue(HEAD-DR*0.5,TH/2,true); }
-    setStatus(pre+`Falta: ${why}. <b>${names[op]}</b> `+(scratch?'joga com bola na mão na meia lua.':'joga de onde a branca parou.'),true);
+    setStatus(pre+`Falta: ${why}.`+(paid!=null?` Pagou a ${paid} pro <b>${names[op]}</b>.`:'')+` <b>${names[op]}</b> `+(scratch?'joga com bola na mão na meia lua.':'joga de onde a branca parou.'),true);
   }else if(mine){
     setStatus(pre+`Encaçapou! <b>${names[me]}</b> continua.`);
   }else{
@@ -2097,6 +2105,7 @@ const ZE={
   win2p:[w=>`${w} fechou a mesa! Quem perdeu paga a próxima ficha.`,w=>`${w} limpou a mesa. Vai mais uma ficha aí?`],
   winNet:[()=>`Levou o pote! Hoje quem paga a rodada é o outro.`,()=>`Ganhou na mesa do bar. Assim que se faz!`],
   loseNet:[()=>`Perdeu essa. Respira, passa giz e volta pra mesa.`,()=>`Quem perde paga a ficha. Na próxima a sorte vira!`],
+  payball:[(n,w)=>`Bateu na bola errada! Pagou a ${n} pro ${w}.`,(n,w)=>`Errou a bola, paga a bola! A ${n} vai pra caçapa do ${w}.`,(n,w)=>`Aqui no bar é assim: tocou na errada, paga uma. A ${n} é do ${w}.`],
   eightEarly:[()=>`Matou a 8 antes da hora! Paga a ficha, parceiro.`,()=>`A 8 caiu cedo demais. Essa doeu!`],
 };
 let zeOn=true, narrT=null, bannerT=null, streak=0, pendingBanner=[null,null];
