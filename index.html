@@ -916,6 +916,14 @@ sb.auth.getSession().then(({data})=>{
 .waitpill{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:24;display:flex;align-items:center;gap:10px;background:#161616;border:1px solid var(--acc,#ffd84d);color:#f5f3ee;border-radius:999px;padding:8px 8px 8px 16px;font:600 16px var(--ui);box-shadow:0 10px 30px rgba(0,0,0,.5);white-space:nowrap}
 .waitpill button{border:0;border-radius:999px;background:#2a2a2a;color:#f5f3ee;font:700 14px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;cursor:pointer}
 .waitpill i{width:9px;height:9px;border-radius:50%;background:#ffd84d;animation:lobPulse 1.4s infinite}
+/* no celular deitado o aviso de espera fica no lugar do texto de status, fora da mesa */
+html.land.waiting .status{visibility:hidden}
+html:not(.land) .waitpill{top:max(12px,env(safe-area-inset-top,0px));bottom:auto}
+html.land .waitpill{position:absolute;bottom:auto;transform:none;white-space:normal;font-size:12px;line-height:1.2;padding:5px 5px 5px 10px;gap:8px;border-radius:12px;box-shadow:none;z-index:4}
+html.land .waitpill button{font-size:11px;padding:5px 9px;flex:none}
+html.land .waitpill span{flex:1;min-width:0}
+html.land.cue-side .waitpill{top:2px;left:calc(46px + 2 * 178px + 18px);right:110px;height:40px;box-sizing:border-box}
+html.land:not(.cue-side) .waitpill{top:140px;left:0;width:min(150px,var(--gut,104px));flex-wrap:wrap;box-sizing:border-box}
 /* chegou gente */
 .arrive{position:fixed;inset:0;z-index:45;background:rgba(6,5,4,.8);display:grid;place-items:center;padding:16px;font-family:var(--ui);color:#f5f3ee}
 .arrive[hidden]{display:none}
@@ -1115,7 +1123,7 @@ async function refresh(){
 const refreshSoon=()=>{ clearTimeout(refreshT); refreshT=setTimeout(refresh,250); };
 function openLobby(v,bar){
   if(v) view=v; if(bar) curBar=bar;
-  errMsg=''; lob.hidden=false; $('waitPill').hidden=true; render(); refresh(); syncSaldo(); track();
+  errMsg=''; lob.hidden=false; setPill(false); render(); refresh(); syncSaldo(); track();
   clearInterval(pollT); pollT=setInterval(()=>{ if(!lob.hidden&&view!=='wait') refresh(); },15000);
 }
 function closeLobby(){ lob.hidden=true; clearInterval(pollT); setTimeout(track,50); }
@@ -1150,7 +1158,7 @@ lob.addEventListener('click',async e=>{
     return sentar(()=>rpc('sentar',{bar,patente:S().rank(),nova:false}));
   }
   if(act==='levantar'){ await levantar(); return; }
-  if(act==='treinoW'){ closeLobby(); S().startCpu(); $('waitPill').hidden=false; $('waitPillTxt').textContent='Esperando adversário · '+barOf(M.row.bar).nome; return; }
+  if(act==='treinoW'){ closeLobby(); S().startCpu(); setPill(true,'Esperando adversário · '+barOf(M.row.bar).nome); return; }
 });
 lob.addEventListener('submit',e=>{
   const f=e.target.closest('form'); if(!f) return; e.preventDefault();
@@ -1183,6 +1191,7 @@ $('inviteOk').addEventListener('click',()=>{ const p=invitePend; $('invite').hid
   if(S().inGame()&&!S().online()) S().menu();
   openLobby(view==='wait'?'bares':view); sentar(()=>rpc('entrar_codigo',{cod:p.code,patente:S().rank()})); });
 $('inviteNo').addEventListener('click',()=>{ const p=invitePend; $('invite').hidden=true; invitePend=null; if(p) sendTo(p.fromId,{t:'resp',ok:false,from:nick}); });
+function setPill(on,txt){ const p=$('waitPill'); if(!p) return; p.hidden=!on; if(txt) $('waitPillTxt').textContent=txt; document.documentElement.classList.toggle('waiting',!!on); }
 $('waitPillBack').addEventListener('click',()=>{ if(M&&M.phase==='wait'){ S().menu(); openLobby('wait'); } });
 
 async function sentar(call,after){
@@ -1220,7 +1229,7 @@ function arrived(){
   if(!M||M.phase!=='wait'||M.arriving) return; M.arriving=true;
   const r=M.row, op=r.apelido2||'Alguém';
   if(!S().inGame()||!lob.hidden&&view==='wait'){ play(true); return; }
-  $('waitPill').hidden=true;
+  setPill(false);
   $('arriveTxt').textContent=`${op} sentou na sua mesa no ${barOf(r.bar).nome}. A partida já vai começar!`;
   $('arrive').hidden=false; let n=6; const go=$('arriveGo'); go.textContent=`Bora jogar (${n})`;
   clearInterval(M.arT); M.arT=setInterval(()=>{ n--; go.textContent=`Bora jogar (${n})`; if(n<=0){ clearInterval(M.arT); $('arrive').hidden=true; play(true); } },1000);
@@ -1229,7 +1238,7 @@ function arrived(){
 function play(fresh){
   const r=M.row, me=r.j1===uid?0:1, f=r.ficha;
   M.phase='play'; M.me=me; M.opGone=null; M.reported=false; M.opNick=me===0?r.apelido2:r.apelido1;
-  closeLobby(); $('waitPill').hidden=true; $('arrive').hidden=true;
+  closeLobby(); setPill(false); $('arrive').hidden=true;
   S().startOnline({me,names:[r.apelido1,r.apelido2||'?'],send,premio:premio(f),ficha:f,bar:r.bar,fresh,oppIcon:M.oppIcon});
   send('eu',{ico:S().icon()});
   $('frBtn').hidden=false;
@@ -1325,7 +1334,7 @@ function stopChannel(){ if(M&&M.ch){ try{ sb.removeChannel(M.ch); }catch(e){} M.
 function endMatch(){
   if(!M) return;
   clearInterval(M.hb); clearInterval(M.syncT); clearInterval(M.arT); stopChannel();
-  M=null; if($('revBtn')){ $('revBtn').hidden=true; $('revBtn').classList.remove('ask'); } $('frBtn').hidden=true; $('frPop').hidden=true; $('waitPill').hidden=true; $('arrive').hidden=true; setConfirm(false);
+  M=null; if($('revBtn')){ $('revBtn').hidden=true; $('revBtn').classList.remove('ask'); } $('frBtn').hidden=true; $('frPop').hidden=true; setPill(false); $('arrive').hidden=true; setConfirm(false);
   if(S()) S().stop();
   track();
 }
