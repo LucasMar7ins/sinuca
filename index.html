@@ -299,8 +299,21 @@ html.land .bn-text{font-size:15px}
 .cc-use{grid-area:act;border:1px solid #f5f3ee;background:none;color:#f5f3ee;border-radius:8px;font-family:var(--ui);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;cursor:pointer}
 .cc-eq{grid-area:act;background:#ffd84d;color:#1c1a10;border-radius:8px;font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:7px 12px}
 .cc-lock{grid-area:act;color:#6f6b64;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.cuecard.locked .cc-stick{filter:brightness(0);opacity:.45}
-.cuecard.locked .cc-info b{color:#6f6b64}
+.cuecard{position:relative}
+.cuecard.locked{background:#0b0b0b;border-style:dashed;border-left-style:solid}
+.cuecard.locked .cc-stick{filter:grayscale(.6) brightness(.72) drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.cuecard.locked .cc-info b{color:#a39d93}
+.cc-st{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.cc-st svg{width:13px;height:13px;flex:none}
+.cc-st.ok{color:#57d68d}
+.cc-st.no{color:#8a857c}
+.cc-lock{text-align:right;line-height:1.25;max-width:140px}
+.invtabs{display:flex;gap:4px;background:#0c0c0c;border:1px solid #2a2a2a;border-radius:10px;padding:4px;margin:12px 0 14px}
+.invtabs button{flex:1;border:0;background:none;color:#9a968e;font-family:var(--ui);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;padding:8px 6px;border-radius:7px;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.invtabs small{font-size:.85em;opacity:.7;margin-left:3px}
+@media (max-width:820px){ .invtabs button{font-size:13px;letter-spacing:.03em;padding:6px 2px;white-space:normal;line-height:1.15} .invtabs small{display:block;margin:1px 0 0} .cc-lock{max-width:110px} }
+.invtabs button[aria-pressed="true"]{background:#f5f3ee;color:#111}
+.invsec{grid-column:1/-1;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9a968e;margin:6px 0 -2px}
 /* abertura da caixa */
 .reveal{position:fixed;inset:0;z-index:40;background:rgba(6,5,4,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;font-family:var(--ui);color:#f5f3ee;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));text-align:center}
 .rvcrate{display:flex;flex-direction:column;align-items:center;gap:16px}
@@ -1263,6 +1276,7 @@ window.__onlineInit=async()=>{
 <section class="sheet2" id="inv" hidden>
   <div class="s2box">
     <div class="s2head"><h2>Inventário</h2><span class="s2count" id="invCount"></span><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
+    <div class="invtabs" id="invTabs" role="group" aria-label="Filtrar tacos"><button type="button" data-tab="todos" aria-pressed="true"></button><button type="button" data-tab="lib" aria-pressed="false"></button><button type="button" data-tab="blo" aria-pressed="false"></button></div>
     <div class="invgrid" id="invGrid"></div>
   </div>
 </section>
@@ -2842,21 +2856,34 @@ window.SINUCA={
 
 /* ---------- telas: inventário, caixas e abertura ---------- */
 const coinOld='<svg class="coin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#e8b93c" stroke="#9a7420" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#9a7420" stroke-width="1.2" stroke-dasharray="2 1.6"/></svg>';
+const ICON_OK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+const ICON_LOCK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="7" width="10" height="7.5" rx="1.6"/><path d="M5.3 7V5a2.7 2.7 0 0 1 5.4 0v2"/></svg>';
 function cueCard(c,owned){
   const r=RAR[c.r], eq=prof.eq===c.id;
+  const how=c.excl?`Patente<br>${(RANKS.find(k=>k.prize&&k.prize.cue===c.id)||{}).nome||''}`:(c.r==='ouro'?'Caixa Prata<br>ou de Ouro':c.r==='prata'?'Qualquer<br>caixa':'Qualquer<br>caixa');
   return `<div class="cuecard ${owned?'':'locked'} r-${c.r}">
     <div class="cc-stick" style="background:${cueCSS(c,'270deg')}"></div>
-    <div class="cc-info"><b>${owned?c.nome:'???'}</b><span class="rar" style="color:${r.cor}">${r.nome}</span></div>
-    ${owned?(eq?'<span class="cc-eq">Em uso</span>':`<button class="cc-use" type="button" data-use="${c.id}">Usar</button>`):(c.excl?`<span class="cc-lock">Patente ${(RANKS.find(r=>r.prize&&r.prize.cue===c.id)||{}).nome||''}</span>`:'<span class="cc-lock">Nas caixas</span>')}
+    <div class="cc-info"><b>${c.nome}</b><span class="rar" style="color:${r.cor}">${r.nome}</span>${owned?`<span class="cc-st ok">${ICON_OK}Liberado</span>`:`<span class="cc-st no">${ICON_LOCK}Bloqueado</span>`}</div>
+    ${owned?(eq?'<span class="cc-eq">Em uso</span>':`<button class="cc-use" type="button" data-use="${c.id}">Usar</button>`):`<span class="cc-lock">${how}</span>`}
   </div>`;
 }
+let invTab='todos';
 function renderInv(){
-  const n=prof.owned.length;
-  document.getElementById('invCount').textContent=`${n} de ${CUES.length} tacos`;
+  const n=prof.owned.length, tot=CUES.length;
+  document.getElementById('invCount').textContent=`${n} de ${tot} liberados`;
+  const lbl={todos:['Todos',tot],lib:['Liberados',n],blo:['Bloqueados',tot-n]};
+  document.querySelectorAll('#invTabs button').forEach(b=>{ b.innerHTML=`${lbl[b.dataset.tab][0]} <small>${lbl[b.dataset.tab][1]}</small>`; b.setAttribute('aria-pressed',b.dataset.tab===invTab); });
   const order={ouro:0,prata:1,comum:2};
-  document.getElementById('invGrid').innerHTML=CUES.slice().sort((a,b)=>{ const oa=prof.owned.includes(a.id), ob=prof.owned.includes(b.id); return (ob-oa)||(order[a.r]-order[b.r]); }).map(c=>cueCard(c,prof.owned.includes(c.id))).join('');
+  const own=c=>prof.owned.includes(c.id);
+  const sorted=CUES.slice().sort((a,b)=>(order[a.r]-order[b.r])||((a.excl?1:0)-(b.excl?1:0)));
+  const lib=sorted.filter(own), blo=sorted.filter(c=>!own(c));
+  let html='';
+  if(invTab!=='blo'){ if(invTab==='todos') html+=`<div class="invsec">Liberados · ${lib.length}</div>`; html+=lib.map(c=>cueCard(c,true)).join(''); }
+  if(invTab!=='lib'){ if(invTab==='todos') html+=`<div class="invsec">Bloqueados · ${blo.length}</div>`; html+=blo.length?blo.map(c=>cueCard(c,false)).join(''):'<div class="invsec" style="color:#57d68d">Você liberou todos os tacos!</div>'; }
+  document.getElementById('invGrid').innerHTML=html;
   document.querySelectorAll('[data-use]').forEach(b=>b.addEventListener('click',()=>{ prof.eq=b.dataset.use; saveProf(); applyCue(); renderInv(); }));
 }
+document.getElementById('invTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; invTab=b.dataset.tab; renderInv(); document.getElementById('invGrid').scrollTop=0; });
 function renderShop(){
   document.getElementById('shopGrid').innerHTML=BOXES.map(b=>{
     const free=prof.free[b.id]||0, can=free>0||prof.pts>=b.preco, pct=v=>Math.round(v*100)+'%';
