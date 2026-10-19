@@ -479,6 +479,24 @@ html.land .bn-text{font-size:15px}
 .hs-split th{color:#9a968e;font-size:12px;letter-spacing:.1em;text-transform:uppercase;text-align:right;font-weight:700;padding:6px 4px}
 .hs-split th:first-child,.hs-split td:first-child{text-align:left}
 .hs-split td{text-align:right;padding:9px 4px;border-top:1px solid #2a2a2a;font-weight:700}
+.rk-prize{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#2a2206,#141414 60%);border:1px solid #6a5418;border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.rk-prize .cstick{width:120px;height:10px;border-radius:6px;flex:none;box-shadow:0 0 14px rgba(242,193,78,.45);animation:rkglow 2.4s ease-in-out infinite}
+@keyframes rkglow{50%{box-shadow:0 0 24px rgba(242,193,78,.85)}}
+.rk-prize b{display:block;font-size:17px;color:#ffd84d}.rk-prize span{display:block;color:#c9c4b8;font-size:14px;line-height:1.3}
+.rk-champ{display:flex;align-items:center;gap:10px;color:#c9c4b8;font-size:15px;margin:-2px 0 12px}
+.rk-champ .ic{width:28px;height:28px}
+.rk-me{display:flex;justify-content:space-between;align-items:center;background:#0c0c0c;border:1px solid #ffd84d;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-weight:700}
+.rk-me small{color:#9a968e;font-weight:600;font-size:14px}
+.rk-list{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:4px}
+.rk-list li{display:grid;grid-template-columns:30px 34px 1fr auto;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:#101010}
+.rk-list li.me{background:#2a2410;outline:1px solid #6a5418}
+.rk-list li.few{opacity:.6}
+.rk-list .ps{font-weight:800;text-align:center;color:#9a968e}
+.rk-list li:nth-child(1) .ps{color:#ffd84d}.rk-list li:nth-child(2) .ps{color:#d7e0ea}.rk-list li:nth-child(3) .ps{color:#e0a46a}
+.rk-list .ic{width:34px;height:34px}
+.rk-list .nm{min-width:0}.rk-list .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:17px}
+.rk-list .nm small{color:#9a968e;font-size:13px}
+.rk-list .mo{text-align:right;font-weight:800;font-size:19px}.rk-list .mo small{display:block;color:#9a968e;font-size:12px;font-weight:600}
 .hs-note{color:#9a968e;font-size:14px;margin:0}
 .pf-act{display:flex;gap:10px;flex-wrap:wrap}
 .pf-act button{flex:1;min-width:140px;border:1px solid #3a3a3a;background:none;color:#f5f3ee;border-radius:10px;font:700 16px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:12px;cursor:pointer}
@@ -958,6 +976,10 @@ sb.auth.getSession().then(({data})=>{
 .lob .codebox .row2 button{font-size:16px;padding:11px}
 .lob .ghost.wa{border-color:#25d366;color:#25d366}
 /* menu: botão do online */
+.mscreen .onlline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 2px;flex-wrap:wrap}
+.mscreen .onlline .onlcount{margin:0}
+.mscreen .rkbtn{display:flex;align-items:center;gap:6px;background:none;border:0;color:#ffd84d;font:700 15px var(--ui);letter-spacing:.04em;cursor:pointer;padding:4px 0}
+.mscreen .rkbtn svg{width:18px;height:18px}.mscreen .rkbtn i{font-style:normal;font-size:18px}
 .mscreen .onlcount{display:flex;align-items:center;gap:8px;color:#cfcac0;font-weight:600;font-size:16px;margin:-4px 0 2px}
 .mscreen .onlcount i{width:9px;height:9px;border-radius:50%;background:#57d68d;box-shadow:0 0 0 4px rgba(87,214,141,.15)}
 .revbtn{background:#ffd84d!important;color:#1a1408!important;border-color:#ffd84d!important}
@@ -1049,8 +1071,21 @@ async function syncSaldo(){ try{ const v=await rpc('meu_saldo'); if(typeof v==='
 
 /* pontos ganhos e gastos fora do online passam pelo servidor */
 window.__pts=(n,motivo,ref)=>{
+  if(motivo==='patente'){ setTimeout(syncConta,1500); return; }   // o prêmio de patente o servidor entrega sozinho
   rpc('pontos',{motivo,valor:n,ref:ref||null}).then(v=>{ if(S()) S().setPts(v); }).catch(e=>{ syncSaldo(); if(motivo==='icone') syncIcons(); if(S()) S().toast(motivo==='icone'?'A compra do ícone não foi aceita':'Esses pontos não foram aceitos pelo servidor',2600); });
 };
+async function syncConta(){ try{ const c=await rpc('minha_conta'); if(c&&S()){ S().setXp(c.xp); S().setCampeao(c.campeao); if(typeof c.saldo==='number') S().setPts(c.saldo); } }catch(e){} }
+window.__xp=(nivel,venceu,limpa)=>{ rpc('xp_treino',{nivel,venceu:!!venceu,limpa:!!limpa}).then(x=>{ if(S()) S().setXp(x); }).catch(()=>{}); };
+window.__ranking=()=>rpc('ranking_semana');
+window.__suspeita=()=>{ if(M&&M.row) rpc('suspeita',{pid:M.row.id}).catch(()=>{}); };
+function showMoral(r){
+  if(!M||M.moralShown||!r||r.status!=='fim') return;
+  const d=M.me===0?r.moral1:r.moral2;
+  if(r.ranqueada==null) return;                 // ainda contando
+  M.moralShown=true; setTimeout(syncConta,600);
+  if(typeof d==='number'&&d!==0) setTimeout(()=>S().toast(d>0?`Moral no bar: +${d}`:`Moral no bar: ${d}`,2600),1400);
+  else if(r.ranqueada===false) setTimeout(()=>S().toast('Essa partida não contou pro ranking',2400),1400);
+}
 async function syncIcons(){ try{ const l=await rpc('meus_icones'); if(Array.isArray(l)&&S()) S().setIcons(l); }catch(e){} }
 window.__icon=()=>{ track(); if(!lob.hidden&&view!=='wait') render(); if(M&&M.ch) send('eu',{ico:S().icon()});
 };
@@ -1339,6 +1374,7 @@ function startHb(){
   beat(); M.hb=setInterval(beat,10000);
 }
 async function checkEnd(){ if(!M) return; try{ const r=await rpc('minha_partida'); if(!r||!r.id){ const x=await sb.from('partidas').select('*').eq('id',M.row.id).maybeSingle(); if(x.data) finished(x.data); } }catch(e){} }
+async function checkMoral(){ if(!M||M.moralShown||!M.row) return; try{ const x=await sb.from('partidas').select('*').eq('id',M.row.id).maybeSingle(); if(x.data) showMoral(x.data); }catch(e){} }
 function finished(r){
   if(!M) return;
   M.row=r;
@@ -1347,7 +1383,7 @@ function finished(r){
     if(r.status==='cancelada'){ S().endNet(M.me,'A partida foi cancelada e as fichas voltaram.'); }
     else { M.lastWhy='saiu'; S().endNet(r.vencedor, r.vencedor===M.me?'O adversário saiu da mesa. Você leva o pote.':'Você saiu da mesa e entregou a partida.'); }
   }
-  M.phase='over'; syncSaldo();
+  M.phase='over'; syncSaldo(); showMoral(r); if(r.status==='fim'&&r.ranqueada==null) setTimeout(checkMoral,2000);
   if(r.status==='fim'&&!M.opGone&&!/saiu/.test(String(M.lastWhy||''))) showRev(r.vencedor!==M.me||true);
 }
 function showRev(){ const b=$('revBtn'); if(!b||!M) return; b.hidden=false; b.disabled=false; b.classList.remove('ask'); b.textContent=M.row.ficha?`Mais uma ficha? (${M.row.ficha})`:'Revanche?'; M.revAsked=false; }
@@ -1368,14 +1404,14 @@ window.__netEnd=async(w)=>{
   let tries=0;
   const go=async()=>{ try{ const r=await rpc('resultado',{pid:M.row.id,vencedor:w}); M.row=r;
       if(r.status==='jogando'&&tries++<40) return setTimeout(go,2000);
-      syncSaldo(); if(r.status==='fim'&&M&&M.phase==='over') showRev();
+      syncSaldo(); if(r.status==='fim'){ showMoral(r); if(r.ranqueada==null) setTimeout(checkMoral,2000); } if(r.status==='fim'&&M&&M.phase==='over') showRev();
     }catch(e){ if(tries++<6) setTimeout(go,4000); } };
   go();
 };
 window.__netLeave=()=>{
   // botão "Voltar ao bar" ou "Entregar e sair"
   const r=M&&M.row, bar=r?r.bar:curBar;
-  if(M&&M.phase==='play'&&!S().isOver()){ send('bye',{}); rpc('levantar',{pid:r.id}).then(()=>syncSaldo()).catch(()=>{}); }
+  if(M&&M.phase==='play'&&!S().isOver()){ send('bye',{}); rpc('levantar',{pid:r.id}).then(x=>{ syncSaldo(); setTimeout(syncConta,600); const d=x&&(x.j1===uid?x.moral1:x.moral2); if(typeof d==='number'&&d) setTimeout(()=>S().toast(`Moral no bar: ${d>0?'+':''}${d}`,2600),900); }).catch(()=>{}); }
   else if(M&&M.phase==='over') send('sai',{nick});
   endMatch(); S().menu(); openLobby('bar',bar||'calcada');
   return true;
@@ -1419,7 +1455,9 @@ function patchMenu(){
   btn.innerHTML='Jogar online<small>Bares e mesas com gente de verdade</small>';
   btn.onclick=()=>openLobby('bares');
   const cnt=document.createElement('div'); cnt.className='onlcount'; cnt.id='onlCount'; cnt.innerHTML='<i></i><span>Conectando…</span>';
-  nav.prepend(sect,btn,cnt);
+  const rk=document.createElement('button'); rk.type='button'; rk.className='rkbtn'; rk.id='openRankMenu'; rk.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v3M8.5 20h7M9.5 17h5"/></svg><span>Ranking da semana</span><i>›</i>'; rk.onclick=()=>S().openRanking();
+  const line=document.createElement('div'); line.className='onlline'; line.append(cnt,rk);
+  nav.prepend(sect,btn,line);
   const cpuSect=[...nav.querySelectorAll('.sect')].find(s=>/máquina/i.test(s.textContent)); if(cpuSect) cpuSect.textContent='Treino com o Seu Zé';
   const pc=document.getElementById('playCpu'); if(pc){ pc.classList.add('sec'); pc.textContent='Treinar'; }
 }
@@ -1428,7 +1466,7 @@ function patchMenu(){
 window.__onlineInit=async()=>{
   sb=window.__sb; uid=window.__uid; nick=window.__nick||'';
   if(!sb||!S()) return;
-  patchMenu(); await syncSaldo(); syncIcons();
+  patchMenu(); await syncSaldo(); syncIcons(); syncConta();
   const w=document.getElementById('wrap'); if(w) w.append($('frBtn'),$('frPop'),$('frSay'));
   const rt=document.getElementById('root'); if(rt) rt.append($('arrive'),$('waitPill'));
   lobCh=sb.channel('lobby',{config:{presence:{key:uid}}});
@@ -1500,6 +1538,7 @@ window.__onlineInit=async()=>{
   <button class="tm-btn" type="button" id="tmBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menu do perfil"><span class="tm-ic" id="tmIc"></span><span class="tm-bars" aria-hidden="true"><i></i><i></i><i></i></span></button>
   <div class="tm-pop" id="tmPop" role="menu" hidden>
    <button type="button" role="menuitem" data-tm="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Perfil</button>
+   <button type="button" role="menuitem" data-tm="ranking" id="tmRank" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v3M8.5 20h7M9.5 17h5"/></svg>Ranking</button>
    <button type="button" role="menuitem" data-tm="hist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 4v4h4"/><path d="M12 7.5V12l3 2"/></svg>Histórico</button>
    <button type="button" role="menuitem" data-tm="icones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M8.5 15c2 2 5 2 7 0"/></svg>Ícones</button>
    <button type="button" role="menuitem" data-tm="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5"/></svg>Ajustes</button>
@@ -1597,6 +1636,12 @@ window.__onlineInit=async()=>{
   <div class="s2box">
     <div class="s2head"><h2>Perfil</h2><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
     <div id="pfBody"></div>
+  </div>
+</section>
+<section class="sheet2" id="ranking" hidden>
+  <div class="s2box">
+    <div class="s2head"><h2>Ranking da semana</h2><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
+    <div id="rkBody"></div>
   </div>
 </section>
 <section class="sheet2" id="hist" hidden>
@@ -2264,6 +2309,8 @@ const CUES=[
   {id:'carnaval',nome:'Carnaval',r:'ouro',shaft:['#f6e7b0','#eccd6a'],ring:'#f2c14e',butt:['#5b1f8a','#2e0d4a'],bands:[[.66,.685,'#ff4fa0'],[.69,.715,'#ffd23f'],[.72,.745,'#3fd07a'],[.75,.775,'#3fa8ff'],[.86,.88,'#f2c14e']]},
   {id:'jabuticaba',nome:'Jabuticaba',r:'ouro',shaft:['#3a1d33','#22101e'],ring:'#f2c14e',butt:['#2a0f24','#0f040c'],bands:[[.72,.73,'#f2c14e'],[.82,.83,'#f2c14e'],[.92,.93,'#f2c14e']],cap:'#f2c14e'},
   {id:'macico',nome:'Ouro Maciço',r:'ouro',ferrule:'#fff3c4',shaft:['#ffe58a','#d9a52b'],ring:'#fff3c4',butt:['#e8b93c','#9a6d12'],bands:[[.78,.79,'#fff3c4'],[.9,.91,'#fff3c4']],cap:'#fff3c4'},
+  // exclusivo do campeão do ranking semanal (só um jogador tem por vez)
+  {id:'coroa',nome:'Taco da Coroa',r:'ouro',excl:true,champ:true,ferrule:'#ffe58a',shaft:['#fbf6e9','#ebe0c6'],ring:'#ffd75e',butt:['#c4142a','#5c0610'],bands:[[.64,.67,'#ffd75e'],[.675,.69,'#fbf6e9'],[.695,.725,'#ffd75e'],[.78,.79,'#fbf6e9'],[.84,.87,'#ffd75e'],[.92,.935,'#fbf6e9']],cap:'#ffd75e'},
   // exclusivo da última patente
   {id:'donodobar',nome:'Taco do Dono do Bar',r:'ouro',excl:true,shaft:['#1f1f1f','#0f0f0f'],ring:'#f2c14e',butt:['#7a1010','#3d0505'],bands:[[.66,.68,'#f2c14e'],[.76,.77,'#f2c14e'],[.86,.88,'#f2c14e']],cap:'#f2c14e'},
 ];
@@ -2423,6 +2470,7 @@ function finishMatch(w){
   if(!CPU.on) return null;
   const won=w===0, clean=won&&gamePots[1]===0;
   prof.hist.cpu.j++; if(won) prof.hist.cpu.v++;
+  if(window.__xp) window.__xp(CPU.level,won,clean);
   const r0=rankIdx(prof.xp);
   const xp=(won?XP_WIN[CPU.level]:XP_LOSS)+(clean?XP_CLEAN:0);
   const pts=won?(WIN_PTS[CPU.level]+(clean?CLEAN_PTS:0)):0;
@@ -3185,8 +3233,15 @@ function snap(){
 }
 function flashClock(){ clockEl.classList.remove('flash'); void clockEl.offsetWidth; clockEl.classList.add('flash'); }
 function netSendState(){ if(NET.on&&NET.send) NET.send('state',snap()); }
+function audit(s){
+  const r=NET.replay; NET.replay=null;
+  if(!r||r.brk||s.n!==r.n) return;
+  const got=s.b.filter(x=>x[0]!==0&&x[3]).map(x=>x[0]).sort((a,b)=>a-b).join(',');
+  if(got!==r.inn){ NET.mism=(NET.mism||0)+1; console.warn('tacada não bateu',r.inn,'x',got); if(NET.mism>=2&&!NET.flagged){ NET.flagged=true; if(window.__suspeita) window.__suspeita(); } }
+}
 function applySnap(s){
   if(s.n<NET.turnNo) return;
+  audit(s);
   NET.turnNo=s.n;
   for(const [n,x,y,i] of s.b){ const b=balls.find(q=>q.n===n); if(!b) continue; const wasIn=b.in; b.x=x; b.y=y; b.vx=b.vy=0; b.in=!!i; b.fall=null; b.top=0; b.side=0; if(!b.in||wasIn) b.anim=null; }
   cur=s.cur; groups=s.groups; isBreak=s.isBreak; ballInHand=s.ballInHand; kitchenOnly=s.kitchenOnly; gamePots=s.gp;
@@ -3198,11 +3253,11 @@ function applySnap(s){
 function netAfter(){
   NET.t0=performance.now(); NET.timedOut=false;
   if(NET.shooter===NET.me){ for(const b of balls){ b.x=+b.x.toFixed(2); b.y=+b.y.toFixed(2); } netSendState(); if(!winner&&cur===NET.me) flashClock(); }
-  else if(NET.pending){ const p=NET.pending; NET.pending=null; applySnap(p); }
+  else { if(NET.shooter>=0) NET.replay={n:NET.turnNo,brk:NET.replayBrk,inn:balls.filter(b=>b.n!==0&&b.in).map(b=>b.n).sort((a,b)=>a-b).join(',')}; if(NET.pending){ const p=NET.pending; NET.pending=null; applySnap(p); } }
   NET.shooter=-1;
 }
 function netTick(now){
-  if(NET.pending&&state==='moving'&&now-NET.pendingAt>4000){ const p=NET.pending; NET.pending=null; for(const b of balls){ b.vx=b.vy=0; b.curve=null; } state='aim'; NET.shooter=-1; applySnap(p); }
+  if(NET.pending&&state==='moving'&&now-NET.pendingAt>4000){ const p=NET.pending; NET.pending=null; for(const b of balls){ b.vx=b.vy=0; b.curve=null; } state='aim'; NET.shooter=-1; NET.replay=null; applySnap(p); }
   if(state==='aim'&&!winner&&!NET.wait){
     const left=Math.max(0,Math.ceil(NET.turnS-(now-NET.t0)/1000)), mine=cur===NET.me;
     clockEl.hidden=false; clockEl.innerHTML=`<i></i>${mine?'Sua vez':names[cur]} · ${left}s`;
@@ -3228,6 +3283,7 @@ function netRecv(type,d){
     if(state!=='aim'||cur===NET.me){ console.warn('tacada ignorada',state,cur,NET.me,d.n,NET.turnNo); return; }
     NET.turnNo=Math.max(NET.turnNo,d.n);
     cue.in=false; cue.x=d.cx; cue.y=d.cy; aim=d.a; spinX=d.s; spinY=d.t;
+    NET.replayBrk=isBreak; NET.replay=null;
     strike(d.a,d.p,d.t,d.s,d.g);
     shot={firstHit:null,potted:[],wasBreak:isBreak,clearedAtStart:groups[cur]?remaining(groups[cur])===0:false};
     sCue(d.p,cue.x,cue.y); NET.shooter=cur; state='moving'; power=0; ballInHand=false; setStatus('');
@@ -3239,7 +3295,7 @@ function netStop(){ NET.on=false; NET.wait=false; NET.pending=null; clockEl.hidd
 function startOnline(o){
   CPU.on=false; CPU.busy=false;
   NET.on=true; NET.me=o.me; NET.send=o.send; NET.premio=o.premio; NET.ficha=o.ficha; NET.bar=o.bar||'';
-  NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false;
+  NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false; NET.mism=0; NET.flagged=false; NET.replay=null;
   names[0]=o.names[0]; names[1]=o.names[1];
   setAv(o.me,myIcon()); setAv(1-o.me,o.oppIcon||'oito');
   document.querySelector('#p0 .pname').textContent=names[0]+(o.me===0?' (você)':'');
@@ -3260,6 +3316,7 @@ window.SINUCA={
   rank:()=>RANKS[rankIdx(prof.xp)].nome, icon:()=>myIcon(), icHtml:(id)=>icHtml(id), setOppIcon:(id)=>{ if(NET.on&&ICONS.some(i=>i.id===id)) setAv(1-NET.me,id); }, openIcons:()=>openSheet('icons'), openPerfil:()=>openSheet('perfil'), setIcons:(l)=>setIcons(l), rankOf:(xp)=>RANKS[rankIdx(xp||0)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
   resend:()=>{ if(NET.on&&!NET.wait&&state==='aim') netSendState(); },
   endNet:(w,why)=>{ if(NET.on&&winner==null){ NET.noStat=/cancelada/.test(why||''); charging=false; drag=null; endGame(w,why||'',false); } },
+  setXp:(x)=>setXp(x), setCampeao:(on)=>setCampeao(!!on), openRanking:()=>openRanking(),
   isOver:()=>winner!=null, waiting:()=>NET.on&&NET.wait, turnNo:()=>NET.turnNo,
   unwait:()=>{ if(NET.on&&NET.wait&&NET.turnNo===0){ NET.wait=false; NET.t0=performance.now(); setStatus(`<b>${names[cur]}</b> abre a partida. Posicione a branca na meia lua e tacada!`); netSendState(); } },
 };
@@ -3270,7 +3327,7 @@ const ICON_OK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke
 const ICON_LOCK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="7" width="10" height="7.5" rx="1.6"/><path d="M5.3 7V5a2.7 2.7 0 0 1 5.4 0v2"/></svg>';
 function cueCard(c,owned){
   const r=RAR[c.r], eq=prof.eq===c.id;
-  const how=c.excl?`Patente<br>${(RANKS.find(k=>k.prize&&k.prize.cue===c.id)||{}).nome||''}`:(c.r==='ouro'?'Caixa Prata<br>ou de Ouro':c.r==='prata'?'Qualquer<br>caixa':'Qualquer<br>caixa');
+  const how=c.champ?'Campeão do<br>ranking semanal':c.excl?`Patente<br>${(RANKS.find(k=>k.prize&&k.prize.cue===c.id)||{}).nome||''}`:(c.r==='ouro'?'Caixa Prata<br>ou de Ouro':c.r==='prata'?'Qualquer<br>caixa':'Qualquer<br>caixa');
   return `<div class="cuecard ${owned?'':'locked'} r-${c.r}">
     <div class="cc-stick" style="background:${cueCSS(c,'270deg')}"></div>
     <div class="cc-info"><b>${c.nome}</b><span class="rar" style="color:${r.cor}">${r.nome}</span>${owned?`<span class="cc-st ok">${ICON_OK}Liberado</span>`:`<span class="cc-st no">${ICON_LOCK}Bloqueado</span>`}</div>
@@ -3333,8 +3390,8 @@ document.getElementById('icGrid').addEventListener('click',e=>{
 });
 document.getElementById('openIcons').addEventListener('click',()=>openSheet('icons'));
 
-function openSheet(id){ ['inv','shop','rank','daily','icons','perfil','ajustes','hist'].forEach(s=>document.getElementById(s).hidden=s!==id); if(id==='inv') renderInv(); if(id==='icons') renderIcons(); if(id==='perfil') renderPerfil(); if(id==='hist') renderHist(); if(id==='shop') renderShop(); if(id==='rank'){ renderRanks(); requestAnimationFrame(scrollRank); } if(id==='daily') renderDaily(); }
-function closeSheets(){ ['inv','shop','reveal','rank','daily','icons','perfil','ajustes','hist'].forEach(s=>document.getElementById(s).hidden=true); }
+function openSheet(id){ ['inv','shop','rank','daily','icons','perfil','ajustes','hist','ranking'].forEach(s=>document.getElementById(s).hidden=s!==id); if(id==='inv') renderInv(); if(id==='icons') renderIcons(); if(id==='perfil') renderPerfil(); if(id==='hist') renderHist(); if(id==='shop') renderShop(); if(id==='rank'){ renderRanks(); requestAnimationFrame(scrollRank); } if(id==='daily') renderDaily(); }
+function closeSheets(){ ['inv','shop','reveal','rank','daily','icons','perfil','ajustes','hist','ranking'].forEach(s=>document.getElementById(s).hidden=true); }
 function openBox(b){
   const free=(prof.free[b.id]||0)>0;
   if(!free&&prof.pts<b.preco) return;
@@ -3375,11 +3432,37 @@ document.getElementById('rvMore').addEventListener('click',()=>{ document.getEle
 const tmBtn=document.getElementById('tmBtn'), tmPop=document.getElementById('tmPop');
 document.getElementById('ajBody').appendChild(cfgDr); cfgDr.hidden=false; cfgBtn.hidden=true;
 function tmClose(){ tmPop.hidden=true; tmBtn.setAttribute('aria-expanded','false'); }
-tmBtn.addEventListener('click',e=>{ e.stopPropagation(); tmPop.hidden=!tmPop.hidden; tmBtn.setAttribute('aria-expanded',String(!tmPop.hidden)); const out=!!window.__logout; document.getElementById('tmSair').hidden=!out; document.getElementById('tmSep').hidden=!out; });
+tmBtn.addEventListener('click',e=>{ e.stopPropagation(); tmPop.hidden=!tmPop.hidden; tmBtn.setAttribute('aria-expanded',String(!tmPop.hidden)); const out=!!window.__logout; document.getElementById('tmSair').hidden=!out; document.getElementById('tmSep').hidden=!out; document.getElementById('tmRank').hidden=!window.__ranking; });
 document.addEventListener('click',e=>{ if(!tmPop.hidden&&!e.target.closest('.topmenu')) tmClose(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') tmClose(); });
 tmPop.addEventListener('click',e=>{ const b=e.target.closest('[data-tm]'); if(!b) return; tmClose(); const k=b.dataset.tm;
-  if(k==='perfil') openSheet('perfil'); if(k==='hist') openSheet('hist'); if(k==='icones') openSheet('icons'); if(k==='ajustes') openSheet('ajustes'); if(k==='sair'&&window.__logout) window.__logout(); });
+  if(k==='perfil') openSheet('perfil'); if(k==='hist') openSheet('hist'); if(k==='ranking') openRanking(); if(k==='icones') openSheet('icons'); if(k==='ajustes') openSheet('ajustes'); if(k==='sair'&&window.__logout) window.__logout(); });
+function openRanking(){
+  openSheet('ranking'); const el=document.getElementById('rkBody'); el.innerHTML='<p class="hs-note">Carregando o ranking…</p>';
+  if(!window.__ranking){ el.innerHTML='<p class="hs-note">O ranking é do online. Entre com sua conta no site pra disputar.</p>'; return; }
+  window.__ranking().then(renderRanking).catch(()=>{ el.innerHTML='<p class="hs-note">Não deu pra carregar o ranking. Confira sua internet.</p>'; });
+}
+function renderRanking(d){
+  const el=document.getElementById('rkBody'); if(!d||!el) return;
+  const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const ms=Math.max(0,new Date(d.fim)-new Date(d.agora)), dd=Math.floor(ms/864e5), hh=Math.floor(ms%864e5/36e5), mm=Math.floor(ms%36e5/6e4);
+  const falta=dd?`${dd}d ${hh}h`:hh?`${hh}h ${mm}min`:`${mm}min`;
+  const coroa=CUES.find(c=>c.id==='coroa'), me=window.__uid;
+  const lista=d.lista||[];
+  const row=r=>`<li class="${r.id===me?'me':''}${r.j<5?' few':''}"><span class="ps">${r.pos}</span>${icHtml(ICONS.some(i=>i.id===r.ico)?r.ico:'oito')}<span class="nm"><b>${esc(r.apelido)}</b><small>${RANKS[rankIdx(r.xp||0)].nome} · ${r.v}V ${r.j-r.v}D</small></span><span class="mo">${r.moral}<small>moral</small></span></li>`;
+  el.innerHTML=`
+    <div class="rk-prize"><span class="cstick" style="background:${cueCSS(coroa,'90deg')}"></span><div><b>Prêmio: Taco da Coroa</b><span>Exclusivo do campeão. Ele usa a semana seguinte inteira, até alguém tomar a coroa.</span></div></div>
+    ${d.campeao?`<div class="rk-champ">${icHtml(ICONS.some(i=>i.id===d.campeao.ico)?d.campeao.ico:'oito')}<span>Campeão da semana passada: <b>${esc(d.campeao.apelido)}</b></span></div>`:''}
+    <div class="rk-me">${d.eu?`<span>Você: ${d.eu.pos}º lugar</span><span>${d.eu.moral} <small>moral · ${d.eu.v}V ${d.eu.j-d.eu.v}D</small></span>`:'<span>Jogue uma partida online pra entrar no ranking</span>'}</div>
+    ${lista.length?`<ol class="rk-list">${lista.map(row).join('')}</ol>`:'<p class="hs-note" style="margin-bottom:12px">Ninguém jogou essa semana ainda. A coroa está livre!</p>'}
+    <p class="hs-note">Zera em ${falta} (segunda, 0h). Todo mundo começa a semana com 1000 de moral. Ganhar de quem tem mais moral vale mais, e perder pra quem tem menos tira mais. Pra levar a coroa precisa de pelo menos 5 partidas na semana. Contra o mesmo adversário, só as 3 primeiras partidas do dia contam. Vale em todos os bares, inclusive na Calçada.</p>`;
+}
+function setXp(x){ if(typeof x!=='number'||x<0) return; prof.xp=x; saveProf(); syncProgress(); }
+function setCampeao(on){
+  const has=prof.owned.includes('coroa');
+  if(on&&!has){ prof.owned.push('coroa'); saveProf(); toast('Você é o campeão da semana! O Taco da Coroa é seu até segunda.',4200); }
+  if(!on&&has){ prof.owned=prof.owned.filter(id=>id!=='coroa'); if(prof.eq==='coroa'){ prof.eq='casa'; applyCue(); } saveProf(); }
+}
 function renderHist(){
   const c=prof.hist.cpu, n=prof.hist.net, j=c.j+n.j, v=c.v+n.v, d=j-v, b=c.b+n.b, pc=j?Math.round(v/j*100):0;
   const row=(t,h)=>`<tr><td>${t}</td><td>${h.j}</td><td>${h.v}</td><td>${h.j-h.v}</td><td>${h.b}</td></tr>`;
