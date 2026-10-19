@@ -98,8 +98,13 @@ html.cue-side .power .lbl{inset:auto 0 6px 0;justify-content:center;font-size:12
 #narrText{font-size:16px;font-weight:600;line-height:1.25}
 .winze{font-size:16px!important;color:var(--muted)!important;font-style:italic}
 .winze span:first-of-type{color:var(--brass);font-style:normal;font-weight:700}
-html.land .narr{bottom:8px;padding:6px 12px 6px 6px}
-html.land #narrText{font-size:13px}
+html.land .narr{bottom:8px;left:8px;transform:none;padding:4px 10px 4px 4px;gap:6px;max-width:44%;border-radius:12px;opacity:.94}
+html.land .narr .nr-who{font-size:0;gap:0}
+html.land .narr .zeav{width:24px;height:24px}
+html.land #narrText{font-size:12px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.land .toast{font-size:12px;padding:4px 12px;top:8px;letter-spacing:.04em}
+.netclock.flash{animation:clockFlash .5s ease-in-out 3}
+@keyframes clockFlash{50%{transform:scale(1.12);border-color:#57d68d}}
 html.land .bn-title{font-size:30px}
 html.land .bn-text{font-size:15px}
 @media (prefers-reduced-motion:reduce){.banner.in,.narr.in{animation:none}}
@@ -840,7 +845,7 @@ sb.auth.getSession().then(({data})=>{
 .frpop{position:absolute;z-index:5;top:94px;left:10px;display:flex;flex-direction:column;gap:6px;background:#161616;border:1px solid #333;border-radius:14px;padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
 .frpop button{border:0;border-radius:9px;background:#222;color:#f5f3ee;font:600 17px var(--ui);padding:9px 14px;text-align:left;cursor:pointer;white-space:nowrap}
 .frpop button:hover{background:#2c2c2c}
-.frsay{position:absolute;z-index:6;left:50%;transform:translateX(-50%);top:52px;background:#161616;border:1px solid #ffd84d;color:#f5f3ee;border-radius:14px;padding:8px 16px;font:600 18px var(--ui);box-shadow:0 10px 26px rgba(0,0,0,.5);pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.frsay{position:absolute;z-index:6;left:58px;top:52px;background:rgba(22,22,22,.94);border:1px solid #ffd84d;color:#f5f3ee;border-radius:999px;padding:5px 12px;font:600 15px var(--ui);box-shadow:0 6px 16px rgba(0,0,0,.45);pointer-events:none;max-width:min(320px,55%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .frsay b{color:#ffd84d}
 .frsay[hidden]{display:none}
 </style>
@@ -1247,7 +1252,7 @@ let lastFr=0;
 $('frPop').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; $('frPop').hidden=true;
   if(Date.now()-lastFr<2500) return; lastFr=Date.now(); const i=+b.dataset.i; send('frase',{nick,i}); showFrase('Você',FRASES[i]); });
 let sayT=null;
-function showFrase(who,txt){ if(!txt) return; const el=$('frSay'); el.innerHTML=`<b>${esc(who)}:</b> ${esc(txt)}`; el.hidden=false; clearTimeout(sayT); sayT=setTimeout(()=>el.hidden=true,2800); }
+function showFrase(who,txt){ if(!txt) return; const el=$('frSay'); el.innerHTML=`<b>${esc(who)}:</b> ${esc(txt)}`; el.hidden=false; clearTimeout(sayT); sayT=setTimeout(()=>el.hidden=true,2400); }
 
 /* ---------- menu: botão do online ---------- */
 function patchMenu(){
@@ -1987,7 +1992,7 @@ function narrate(text){
   if(!zeOn) return;
   const el=document.getElementById('narr'); document.getElementById('narrText').textContent=text;
   el.hidden=false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
-  clearTimeout(narrT); narrT=setTimeout(()=>el.hidden=true,3400);
+  clearTimeout(narrT); narrT=setTimeout(()=>el.hidden=true,document.documentElement.classList.contains('land')?2600:3400);
 }
 function groupBanner(p,first){
   const g=groups[p], el=document.getElementById('banner'), G=cap(g);
@@ -2769,22 +2774,27 @@ function moveCue(p){
   if(free(x,y,cue)){cue.x=x;cue.y=y}
 }
 cv.addEventListener('pointerdown',e=>{
+  document.getElementById('narr').hidden=true;
   ensureAudio(); if(state!=='aim'||winner||locked()) return; hideSpin();
   try{cv.setPointerCapture(e.pointerId)}catch(_){}
   const p=toWorld(e);
   if(ballInHand&&Math.hypot(p.x-cue.x,p.y-cue.y)<R*3){drag='cue';moveCue(p)}
   else if(e.pointerType==='mouse'){drag='aim';setAim(p)}
-  else { drag='rel'; rel={x:e.clientX,y:e.clientY,t:performance.now(),aim0:aim,a0:Math.atan2(p.y-cue.y,p.x-cue.x),p,moved:false}; }
+  else { drag='rel'; rel={x:e.clientX,y:e.clientY,t:performance.now(),p,last:p,moved:false}; }
 });
 /* toque: arrastar gira a mira em volta da branca, devagar (quanto mais longe, mais fino); toque rápido mira direto */
-let rel=null;
+let rel=null; const AIM_SENS=300;
 const wrapA=a=>Math.atan2(Math.sin(a),Math.cos(a));
 cv.addEventListener('pointermove',e=>{
   if(!drag) return; const p=toWorld(e);
   if(drag==='cue') return moveCue(p);
   if(drag==='aim') return setAim(p);
   if(Math.hypot(e.clientX-rel.x,e.clientY-rel.y)>8) rel.moved=true;
-  if(rel.moved&&Math.hypot(p.x-cue.x,p.y-cue.y)>R*1.5){ aim=rel.aim0+wrapA(Math.atan2(p.y-cue.y,p.x-cue.x)-rel.a0)*0.45; }
+  if(!rel.moved){ rel.last=p; return; }
+  // o quanto o dedo andou "em volta" da branca vira giro; a sensibilidade não depende da distância do dedo até a bola
+  const rx=rel.last.x-cue.x, ry=rel.last.y-cue.y, rl=Math.hypot(rx,ry);
+  if(rl>R*1.2){ const dx=p.x-rel.last.x, dy=p.y-rel.last.y; aim=wrapA(aim+((rx*dy-ry*dx)/rl)/AIM_SENS); }
+  rel.last=p;
 });
 cv.addEventListener('pointerup',()=>{ if(drag==='rel'&&rel&&!rel.moved&&performance.now()-rel.t<350) setAim(rel.p); drag=null; rel=null; });
 cv.addEventListener('pointercancel',()=>{ drag=null; rel=null; });
@@ -2924,6 +2934,7 @@ function snap(){
   for(const b of balls){ b.x=+b.x.toFixed(2); b.y=+b.y.toFixed(2); }
   return {n:NET.turnNo, b:balls.map(b=>[b.n,b.x,b.y,b.in?1:0]), cur, groups:[...groups], isBreak, ballInHand, kitchenOnly, winner, gp:[...gamePots], st:statusEl.innerHTML, foul:statusEl.classList.contains('foul')};
 }
+function flashClock(){ clockEl.classList.remove('flash'); void clockEl.offsetWidth; clockEl.classList.add('flash'); }
 function netSendState(){ if(NET.on&&NET.send) NET.send('state',snap()); }
 function applySnap(s){
   if(s.n<NET.turnNo) return;
@@ -2933,11 +2944,11 @@ function applySnap(s){
   NET.wait=false; NET.timedOut=false; NET.t0=performance.now(); power=0; setFill(); setSpin(0,0);
   cards(); setStatus(s.st,s.foul);
   if(s.winner!=null){ if(winner!==s.winner){ NET.applying=true; endGame(s.winner,'',false); NET.applying=false; } else if(window.__netEnd) window.__netEnd(s.winner,''); }
-  else { if(winner!=null){ winner=null; document.getElementById('over').hidden=true; } state='aim'; if(cur===NET.me) toast('Sua vez',1400); }
+  else { if(winner!=null){ winner=null; document.getElementById('over').hidden=true; } state='aim'; if(cur===NET.me) flashClock(); }
 }
 function netAfter(){
   NET.t0=performance.now(); NET.timedOut=false;
-  if(NET.shooter===NET.me){ for(const b of balls){ b.x=+b.x.toFixed(2); b.y=+b.y.toFixed(2); } netSendState(); if(!winner&&cur===NET.me) toast('Sua vez de novo',1400); }
+  if(NET.shooter===NET.me){ for(const b of balls){ b.x=+b.x.toFixed(2); b.y=+b.y.toFixed(2); } netSendState(); if(!winner&&cur===NET.me) flashClock(); }
   else if(NET.pending){ const p=NET.pending; NET.pending=null; applySnap(p); }
   NET.shooter=-1;
 }
