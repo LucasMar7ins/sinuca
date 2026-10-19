@@ -419,6 +419,7 @@ html.menu-open .xbtn{display:none}
 /* celular deitado: placar à esquerda, mesa no meio, controles à direita */
 html.land #root{padding-block:6px}
 html.land .app{display:grid;grid-template-columns:1fr;grid-template-rows:1fr auto;grid-template-areas:"table" "ctrl";gap:6px;max-width:none;position:relative}
+html.land header,html.land .status{pointer-events:none}
 html.land header{position:absolute;top:46px;left:0;width:min(150px,var(--gut,104px));z-index:3;flex-direction:column;align-items:stretch;gap:5px}
 html.land .brand,html.land .minis{display:none}
 html.land .players{grid-template-columns:1fr;gap:5px}
