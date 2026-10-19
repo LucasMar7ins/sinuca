@@ -467,6 +467,19 @@ html.land .bn-text{font-size:15px}
 .pf-st{background:#0c0c0c;border:1px solid #2a2a2a;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px}
 .pf-st b{font-size:26px;line-height:1}
 .pf-st span{color:#9a968e;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.hs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.hs-grid .pf-st{padding:16px 14px}
+.hs-grid .pf-st b{font-size:38px}
+.hs-grid .pf-st.win b{color:#57d68d}.hs-grid .pf-st.loss b{color:#ff8f80}
+.hs-rate{background:#0c0c0c;border:1px solid #2a2a2a;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.hs-rate .rk-top{display:flex;justify-content:space-between;font-size:16px;font-weight:700}
+.hs-rate .rk-top span{color:#9a968e;letter-spacing:.1em;text-transform:uppercase;font-size:13px}
+.hs-bar{height:8px;border-radius:99px;background:#5a2a25;overflow:hidden}.hs-bar i{display:block;height:100%;background:#57d68d}
+.hs-split{width:100%;border-collapse:collapse;font-size:16px;margin-bottom:10px}
+.hs-split th{color:#9a968e;font-size:12px;letter-spacing:.1em;text-transform:uppercase;text-align:right;font-weight:700;padding:6px 4px}
+.hs-split th:first-child,.hs-split td:first-child{text-align:left}
+.hs-split td{text-align:right;padding:9px 4px;border-top:1px solid #2a2a2a;font-weight:700}
+.hs-note{color:#9a968e;font-size:14px;margin:0}
 .pf-act{display:flex;gap:10px;flex-wrap:wrap}
 .pf-act button{flex:1;min-width:140px;border:1px solid #3a3a3a;background:none;color:#f5f3ee;border-radius:10px;font:700 16px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:12px;cursor:pointer}
 .pf-act button.danger{border-color:#5a2a25;color:#ff8f80}
@@ -738,7 +751,16 @@ function startGame(){
 function showAcct(){
   // conta: nome, e-mail e sair ficam no Perfil (menu do canto)
   window.__email=(user&&user.email)||'';
-  window.__logout=async()=>{ flush(); await new Promise(r=>setTimeout(r,400)); await sb.auth.signOut(); try{localStorage.removeItem(LOCAL_KEY);}catch(e){} location.reload(); };
+  window.__logout=async()=>{
+    if(window.__saindo) return; window.__saindo=true;
+    try{ if(window.SINUCA&&SINUCA.toast) SINUCA.toast('Saindo da conta…',3000); }catch(e){}
+    try{ flush(); }catch(e){}
+    await new Promise(r=>setTimeout(r,400));
+    // sai mesmo sem resposta do servidor: limpa a sessão guardada no aparelho
+    try{ await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(r=>setTimeout(r,2500))]); }catch(e){}
+    try{ for(const k of Object.keys(localStorage)) if(k===LOCAL_KEY||/^sb-.*-auth-token/.test(k)) localStorage.removeItem(k); }catch(e){}
+    location.replace(location.pathname+location.search);
+  };
   const old=document.getElementById('acct'); if(old) old.remove();
 }
 
@@ -1419,9 +1441,9 @@ window.__onlineInit=async()=>{
   lobCh.subscribe(st=>{ if(st==='SUBSCRIBED') track(); });
   sb.channel('mesas-db').on('postgres_changes',{event:'*',schema:'public',table:'partidas'},()=>{ if(!lob.hidden&&view!=='wait') refreshSoon(); }).subscribe();
   try{ const r=await rpc('minha_partida'); if(r&&r.id){ onRow(r,false); return; } }catch(e){}
-  openLobby('bares');
+  // depois do login a pessoa cai no menu principal; o lobby só abre sozinho pelo link de mesa particular
   const mm=location.hash.match(/mesa=([A-Za-z0-9]{4,8})/);
-  if(mm){ try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} sentar(()=>rpc('entrar_codigo',{cod:mm[1],patente:S().rank()})); }
+  if(mm){ openLobby('bares'); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} sentar(()=>rpc('entrar_codigo',{cod:mm[1],patente:S().rank()})); }
 };
 })();
 </script>
@@ -1478,6 +1500,7 @@ window.__onlineInit=async()=>{
   <button class="tm-btn" type="button" id="tmBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menu do perfil"><span class="tm-ic" id="tmIc"></span><span class="tm-bars" aria-hidden="true"><i></i><i></i><i></i></span></button>
   <div class="tm-pop" id="tmPop" role="menu" hidden>
    <button type="button" role="menuitem" data-tm="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Perfil</button>
+   <button type="button" role="menuitem" data-tm="hist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 4v4h4"/><path d="M12 7.5V12l3 2"/></svg>Histórico</button>
    <button type="button" role="menuitem" data-tm="icones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M8.5 15c2 2 5 2 7 0"/></svg>Ícones</button>
    <button type="button" role="menuitem" data-tm="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5"/></svg>Ajustes</button>
    <div class="tm-sep" id="tmSep" hidden></div>
@@ -1574,6 +1597,12 @@ window.__onlineInit=async()=>{
   <div class="s2box">
     <div class="s2head"><h2>Perfil</h2><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
     <div id="pfBody"></div>
+  </div>
+</section>
+<section class="sheet2" id="hist" hidden>
+  <div class="s2box">
+    <div class="s2head"><h2>Histórico</h2><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
+    <div id="hsBody"></div>
   </div>
 </section>
 <section class="sheet2" id="ajustes" hidden>
@@ -2023,6 +2052,7 @@ function shoot(){
 }
 function resolve(){
   const me=cur, op=1-cur, P=shot.potted.filter(n=>n!==0), scratch=shot.potted.includes(0);
+  if(P.length&&prof.hist){ const hk=NET.on?(me===NET.me?'net':null):(CPU.on&&me===0?'cpu':null); if(hk){ prof.hist[hk].b+=P.length; saveProf(); } }
   let foul=false, why='', pre='', wrongBall=false, paid=null;
   const g=groups[me];
   if(scratch){foul=true;why='a branca caiu na caçapa'}
@@ -2245,7 +2275,7 @@ const BOXES=[
   {id:'ouro',nome:'Caixa de Ouro',preco:500,odds:{comum:0,prata:.70,ouro:.30}},
 ];
 const WIN_PTS=[5,10,15], CLEAN_PTS=5;
-let prof={pts:0,owned:['casa'],eq:'casa',icons:[],ico:'oito'};
+let prof={pts:0,owned:['casa'],eq:'casa',icons:[],ico:'oito',hist:null};
 try{ const p=JSON.parse(localStorage.getItem('sinuca-perfil')||'null'); if(p&&Array.isArray(p.owned)) prof=Object.assign(prof,p); }catch(e){}
 if(!prof.owned.includes('casa')) prof.owned.unshift('casa');
 function addPts(n,motivo,ref){ if(!n) return; prof.pts+=n; if(window.__pts) window.__pts(n,motivo,ref); }
@@ -2382,7 +2412,9 @@ function chEvent(ev,n){
 /* fim de partida contra o computador: experiência, pontos, patente e desafios */
 function finishMatch(w){
   if(NET.on){
-    const won=w===NET.me, r0=rankIdx(prof.xp), xp=won?40:10; prof.xp+=xp;
+    const won=w===NET.me, r0=rankIdx(prof.xp), xp=won?40:10;
+    if(NET.noStat){ NET.noStat=false; return null; }
+    prof.xp+=xp; prof.hist.net.j++; if(won) prof.hist.net.v++;
     const r1=rankIdx(prof.xp); let up=null;
     for(let k=r0+1;k<=r1;k++){ const pz=RANKS[k].prize; if(pz.box) prof.free[pz.box]++; if(pz.pts) addPts(pz.pts,'patente',String(k)); if(pz.cue&&!prof.owned.includes(pz.cue)) prof.owned.push(pz.cue); up=RANKS[k]; }
     saveProf(); syncPts(); syncProgress();
@@ -2390,6 +2422,7 @@ function finishMatch(w){
   }
   if(!CPU.on) return null;
   const won=w===0, clean=won&&gamePots[1]===0;
+  prof.hist.cpu.j++; if(won) prof.hist.cpu.v++;
   const r0=rankIdx(prof.xp);
   const xp=(won?XP_WIN[CPU.level]:XP_LOSS)+(clean?XP_CLEAN:0);
   const pts=won?(WIN_PTS[CPU.level]+(clean?CLEAN_PTS:0)):0;
@@ -3226,7 +3259,7 @@ window.SINUCA={
   pts:()=>prof.pts, toast:(m,ms)=>toast(m,ms), narrate:(t)=>narrate(t),
   rank:()=>RANKS[rankIdx(prof.xp)].nome, icon:()=>myIcon(), icHtml:(id)=>icHtml(id), setOppIcon:(id)=>{ if(NET.on&&ICONS.some(i=>i.id===id)) setAv(1-NET.me,id); }, openIcons:()=>openSheet('icons'), openPerfil:()=>openSheet('perfil'), setIcons:(l)=>setIcons(l), rankOf:(xp)=>RANKS[rankIdx(xp||0)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
   resend:()=>{ if(NET.on&&!NET.wait&&state==='aim') netSendState(); },
-  endNet:(w,why)=>{ if(NET.on&&winner==null){ charging=false; drag=null; endGame(w,why||'',false); } },
+  endNet:(w,why)=>{ if(NET.on&&winner==null){ NET.noStat=/cancelada/.test(why||''); charging=false; drag=null; endGame(w,why||'',false); } },
   isOver:()=>winner!=null, waiting:()=>NET.on&&NET.wait, turnNo:()=>NET.turnNo,
   unwait:()=>{ if(NET.on&&NET.wait&&NET.turnNo===0){ NET.wait=false; NET.t0=performance.now(); setStatus(`<b>${names[cur]}</b> abre a partida. Posicione a branca na meia lua e tacada!`); netSendState(); } },
 };
@@ -3300,8 +3333,8 @@ document.getElementById('icGrid').addEventListener('click',e=>{
 });
 document.getElementById('openIcons').addEventListener('click',()=>openSheet('icons'));
 
-function openSheet(id){ ['inv','shop','rank','daily','icons','perfil','ajustes'].forEach(s=>document.getElementById(s).hidden=s!==id); if(id==='inv') renderInv(); if(id==='icons') renderIcons(); if(id==='perfil') renderPerfil(); if(id==='shop') renderShop(); if(id==='rank'){ renderRanks(); requestAnimationFrame(scrollRank); } if(id==='daily') renderDaily(); }
-function closeSheets(){ ['inv','shop','reveal','rank','daily','icons','perfil','ajustes'].forEach(s=>document.getElementById(s).hidden=true); }
+function openSheet(id){ ['inv','shop','rank','daily','icons','perfil','ajustes','hist'].forEach(s=>document.getElementById(s).hidden=s!==id); if(id==='inv') renderInv(); if(id==='icons') renderIcons(); if(id==='perfil') renderPerfil(); if(id==='hist') renderHist(); if(id==='shop') renderShop(); if(id==='rank'){ renderRanks(); requestAnimationFrame(scrollRank); } if(id==='daily') renderDaily(); }
+function closeSheets(){ ['inv','shop','reveal','rank','daily','icons','perfil','ajustes','hist'].forEach(s=>document.getElementById(s).hidden=true); }
 function openBox(b){
   const free=(prof.free[b.id]||0)>0;
   if(!free&&prof.pts<b.preco) return;
@@ -3346,7 +3379,21 @@ tmBtn.addEventListener('click',e=>{ e.stopPropagation(); tmPop.hidden=!tmPop.hid
 document.addEventListener('click',e=>{ if(!tmPop.hidden&&!e.target.closest('.topmenu')) tmClose(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') tmClose(); });
 tmPop.addEventListener('click',e=>{ const b=e.target.closest('[data-tm]'); if(!b) return; tmClose(); const k=b.dataset.tm;
-  if(k==='perfil') openSheet('perfil'); if(k==='icones') openSheet('icons'); if(k==='ajustes') openSheet('ajustes'); if(k==='sair'&&window.__logout) window.__logout(); });
+  if(k==='perfil') openSheet('perfil'); if(k==='hist') openSheet('hist'); if(k==='icones') openSheet('icons'); if(k==='ajustes') openSheet('ajustes'); if(k==='sair'&&window.__logout) window.__logout(); });
+function renderHist(){
+  const c=prof.hist.cpu, n=prof.hist.net, j=c.j+n.j, v=c.v+n.v, d=j-v, b=c.b+n.b, pc=j?Math.round(v/j*100):0;
+  const row=(t,h)=>`<tr><td>${t}</td><td>${h.j}</td><td>${h.v}</td><td>${h.j-h.v}</td><td>${h.b}</td></tr>`;
+  document.getElementById('hsBody').innerHTML=`
+    <div class="hs-grid">
+      <div class="pf-st"><b>${j}</b><span>Partidas</span></div>
+      <div class="pf-st win"><b>${v}</b><span>Vitórias</span></div>
+      <div class="pf-st loss"><b>${d}</b><span>Derrotas</span></div>
+      <div class="pf-st"><b>${b}</b><span>Bolas encaçapadas</span></div>
+    </div>
+    <div class="hs-rate"><div class="rk-top"><span>Aproveitamento</span>${j?pc+'%':'Sem partidas ainda'}</div><div class="hs-bar"${j?'':' style="background:#2a2a2a"'}><i style="width:${pc}%"></i></div></div>
+    <table class="hs-split"><tr><th></th><th>Jogos</th><th>Vit.</th><th>Der.</th><th>Bolas</th></tr>${row('Online',n)}${row('Treino',c)}</table>
+    <p class="hs-note">Partidas de 2 jogadores no mesmo aparelho não entram no histórico.</p>`;
+}
 function renderPerfil(){
   const i=rankIdx(prof.xp), r=RANKS[i], nx=RANKS[i+1], a=nx?(prof.xp-r.xp)/(nx.xp-r.xp):1;
   const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3369,6 +3416,7 @@ function renderPerfil(){
 document.getElementById('pfBody').addEventListener('click',e=>{ const b=e.target.closest('[data-pf]'); if(!b) return; const k=b.dataset.pf;
   if(k==='icones') openSheet('icons'); if(k==='patentes') openSheet('rank'); if(k==='inv') openSheet('inv'); if(k==='sair'&&window.__logout) window.__logout(); });
 
+if(!prof.hist||typeof prof.hist!=='object') prof.hist={}; for(const k of ['cpu','net']){ const h=prof.hist[k]=prof.hist[k]||{}; for(const f of ['j','v','b']) h[f]=+h[f]||0; }
 if(!Array.isArray(prof.icons)) prof.icons=[]; if(!prof.ico) prof.ico='oito';
 syncPts(); applyCue(); syncProgress(); syncMenuIcon(); setAv(0,myIcon());
 
