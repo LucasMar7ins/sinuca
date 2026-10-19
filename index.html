@@ -667,6 +667,7 @@ sb.auth.getSession().then(({data})=>{
 .lob *{box-sizing:border-box}
 .lob .page{display:grid;grid-template-columns:360px 1fr;min-height:100%}
 .lob aside{background:#161616;border-right:1px solid var(--line);padding:24px 28px max(28px,env(safe-area-inset-bottom,0px)) max(28px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px}
+.lob .mback{display:block;margin:0 0 10px;font-size:15px}
 .lob .back{align-self:flex-start;background:none;border:0;color:var(--mut);font:700 16px var(--ui);letter-spacing:.1em;text-transform:uppercase;padding:4px 0;cursor:pointer}
 .lob h1{font-family:var(--display);font-weight:400;font-size:36px;line-height:1.02;margin:0}
 .lob h1 span{color:var(--acc)}
@@ -877,7 +878,7 @@ function render(){
       <div class="err">${esc(errMsg)}</div>
       <div class="sect f">Acontecendo agora</div><div class="feed feedwrap">${feedHtml()}</div>
     </aside><main>
-      <div class="mh"><div><h2>Escolha o bar</h2><p>Quem perde paga a ficha. O Seu Zé fica com 10% do pote.</p></div><div class="online"><i class="dot"></i>${total} ${total===1?'pessoa online':'online agora'}</div></div>
+      <button class="back mback" type="button" data-act="menu">‹ Voltar ao menu</button><div class="mh"><div><h2>Escolha o bar</h2><p>Quem perde paga a ficha. O Seu Zé fica com 10% do pote.</p></div><div class="online"><i class="dot"></i>${total} ${total===1?'pessoa online':'online agora'}</div></div>
       <div class="bars">${cards}</div></main></div>`;
   }else{
     const b=barOf(curBar), ms=data.mesas.filter(m=>m.bar===b.id).sort((x,y)=>(x.status==='esperando'?0:1)-(y.status==='esperando'?0:1));
@@ -904,7 +905,7 @@ function render(){
       <div class="err">${esc(errMsg)}</div>
       <div class="zeline"><b>Seu Zé:</b> ${dica}</div>
     </aside><main>
-      <div class="mh"><div><h2>Mesas</h2><p>Toque numa mesa amarela pra jogar na hora.</p></div><div class="online"><i class="dot"></i>${ms.length} ${ms.length===1?'mesa aberta':'mesas abertas'}</div></div>
+      <button class="back mback" type="button" data-act="bares">‹ Voltar aos bares</button><div class="mh"><div><h2>Mesas</h2><p>Toque numa mesa amarela pra jogar na hora.</p></div><div class="online"><i class="dot"></i>${ms.length} ${ms.length===1?'mesa aberta':'mesas abertas'}</div></div>
       <div class="tables">${tbs.join('')}</div></main></div>`;
   }
 }
