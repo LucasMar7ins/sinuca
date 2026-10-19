@@ -1075,7 +1075,10 @@ window.__pts=(n,motivo,ref)=>{
   rpc('pontos',{motivo,valor:n,ref:ref||null}).then(v=>{ if(S()) S().setPts(v); }).catch(e=>{ syncSaldo(); if(motivo==='icone') syncIcons(); if(S()) S().toast(motivo==='icone'?'A compra do ícone não foi aceita':'Esses pontos não foram aceitos pelo servidor',2600); });
 };
 async function syncConta(){ try{ const c=await rpc('minha_conta'); if(c&&S()){ S().setXp(c.xp); S().setCampeao(c.campeao); if(typeof c.saldo==='number') S().setPts(c.saldo); } }catch(e){} }
-window.__xp=(nivel,venceu,limpa)=>{ rpc('xp_treino',{nivel,venceu:!!venceu,limpa:!!limpa}).then(x=>{ if(S()) S().setXp(x); }).catch(()=>{}); };
+window.__xp=(nivel,venceu,limpa,bolas)=>{ rpc('xp_treino',{nivel,venceu:!!venceu,limpa:!!limpa,bolas:bolas|0}).then(x=>{ if(S()) S().setXp(x); syncHist(); }).catch(()=>{}); };
+window.__hist=()=>rpc('meu_historico');
+async function syncHist(){ try{ const h=await rpc('meu_historico'); if(h&&S()) S().setHist(h); }catch(e){} }
+function sendBolas(){ if(!M||!M.row||M.ballsSent) return; M.ballsSent=true; rpc('bolas',{pid:M.row.id,n:S().myBalls()}).then(()=>setTimeout(syncHist,800)).catch(()=>{}); }
 window.__ranking=()=>rpc('ranking_semana');
 window.__suspeita=()=>{ if(M&&M.row) rpc('suspeita',{pid:M.row.id}).catch(()=>{}); };
 function showMoral(r){
@@ -1377,6 +1380,7 @@ async function checkEnd(){ if(!M) return; try{ const r=await rpc('minha_partida'
 async function checkMoral(){ if(!M||M.moralShown||!M.row) return; try{ const x=await sb.from('partidas').select('*').eq('id',M.row.id).maybeSingle(); if(x.data) showMoral(x.data); }catch(e){} }
 function finished(r){
   if(!M) return;
+  if(r.status==='fim'&&M.phase!=='wait') sendBolas();
   M.row=r;
   if(M.phase==='wait'){ endMatch(); if(!S().inGame()) openLobby('bar',r.bar); return; }
   if(!S().isOver()){
@@ -1400,7 +1404,7 @@ function startRematch(row){
   S().toast('Revanche! Nova ficha na mesa',1800);
 }
 window.__netEnd=async(w)=>{
-  if(!M||M.reported) return; M.reported=true; M.phase='over';
+  if(!M||M.reported) return; M.reported=true; M.phase='over'; sendBolas();
   let tries=0;
   const go=async()=>{ try{ const r=await rpc('resultado',{pid:M.row.id,vencedor:w}); M.row=r;
       if(r.status==='jogando'&&tries++<40) return setTimeout(go,2000);
@@ -1411,7 +1415,7 @@ window.__netEnd=async(w)=>{
 window.__netLeave=()=>{
   // botão "Voltar ao bar" ou "Entregar e sair"
   const r=M&&M.row, bar=r?r.bar:curBar;
-  if(M&&M.phase==='play'&&!S().isOver()){ send('bye',{}); rpc('levantar',{pid:r.id}).then(x=>{ syncSaldo(); setTimeout(syncConta,600); const d=x&&(x.j1===uid?x.moral1:x.moral2); if(typeof d==='number'&&d) setTimeout(()=>S().toast(`Moral no bar: ${d>0?'+':''}${d}`,2600),900); }).catch(()=>{}); }
+  if(M&&M.phase==='play'&&!S().isOver()){ send('bye',{}); sendBolas(); rpc('levantar',{pid:r.id}).then(x=>{ syncSaldo(); setTimeout(syncConta,600); const d=x&&(x.j1===uid?x.moral1:x.moral2); if(typeof d==='number'&&d) setTimeout(()=>S().toast(`Moral no bar: ${d>0?'+':''}${d}`,2600),900); }).catch(()=>{}); }
   else if(M&&M.phase==='over') send('sai',{nick});
   endMatch(); S().menu(); openLobby('bar',bar||'calcada');
   return true;
@@ -1466,7 +1470,7 @@ function patchMenu(){
 window.__onlineInit=async()=>{
   sb=window.__sb; uid=window.__uid; nick=window.__nick||'';
   if(!sb||!S()) return;
-  patchMenu(); await syncSaldo(); syncIcons(); syncConta();
+  patchMenu(); await syncSaldo(); syncIcons(); syncConta(); syncHist();
   const w=document.getElementById('wrap'); if(w) w.append($('frBtn'),$('frPop'),$('frSay'));
   const rt=document.getElementById('root'); if(rt) rt.append($('arrive'),$('waitPill'));
   lobCh=sb.channel('lobby',{config:{presence:{key:uid}}});
@@ -2097,7 +2101,7 @@ function shoot(){
 }
 function resolve(){
   const me=cur, op=1-cur, P=shot.potted.filter(n=>n!==0), scratch=shot.potted.includes(0);
-  if(P.length&&prof.hist){ const hk=NET.on?(me===NET.me?'net':null):(CPU.on&&me===0?'cpu':null); if(hk){ prof.hist[hk].b+=P.length; saveProf(); } }
+  if(P.length&&prof.hist){ const hk=NET.on?(me===NET.me?'net':null):(CPU.on&&me===0?'cpu':null); if(hk){ prof.hist[hk].b+=P.length; myBalls+=P.length; saveProf(); } }
   let foul=false, why='', pre='', wrongBall=false, paid=null;
   const g=groups[me];
   if(scratch){foul=true;why='a branca caiu na caçapa'}
@@ -2183,7 +2187,9 @@ function endGame(w,why,early){
   setStatus(`Fim de jogo. <b>${names[w]}</b> venceu.`);
   if(NET.on&&(NET.shooter===NET.me||NET.applying)&&window.__netEnd) window.__netEnd(w,why);
 }
+let myBalls=0;
 function newGame(){
+  myBalls=0;
   rack(); starter=1-starter; cur=starter; groups=[null,null]; isBreak=true; ballInHand=true; kitchenOnly=true;
   aim=0; power=0; winner=null; shot=null; state='aim'; setFill();
   document.getElementById('over').hidden=true;
@@ -2470,7 +2476,7 @@ function finishMatch(w){
   if(!CPU.on) return null;
   const won=w===0, clean=won&&gamePots[1]===0;
   prof.hist.cpu.j++; if(won) prof.hist.cpu.v++;
-  if(window.__xp) window.__xp(CPU.level,won,clean);
+  if(window.__xp) window.__xp(CPU.level,won,clean,myBalls);
   const r0=rankIdx(prof.xp);
   const xp=(won?XP_WIN[CPU.level]:XP_LOSS)+(clean?XP_CLEAN:0);
   const pts=won?(WIN_PTS[CPU.level]+(clean?CLEAN_PTS:0)):0;
@@ -3237,7 +3243,10 @@ function audit(s){
   const r=NET.replay; NET.replay=null;
   if(!r||r.brk||s.n!==r.n) return;
   const got=s.b.filter(x=>x[0]!==0&&x[3]).map(x=>x[0]).sort((a,b)=>a-b).join(',');
-  if(got!==r.inn){ NET.mism=(NET.mism||0)+1; console.warn('tacada não bateu',r.inn,'x',got); if(NET.mism>=2&&!NET.flagged){ NET.flagged=true; if(window.__suspeita) window.__suspeita(); } }
+  NET.audN=(NET.audN||0)+1;
+  if(got!==r.inn){ NET.mism=(NET.mism||0)+1; console.warn('tacada não bateu',r.inn,'x',got,'n',s.n); }
+  // a física pode variar um pouco entre aparelhos: só avisa quando a maioria das tacadas não bate
+  if(!NET.flagged&&NET.mism>=3&&NET.mism*2>=NET.audN){ NET.flagged=true; if(window.__suspeita) window.__suspeita(); }
 }
 function applySnap(s){
   if(s.n<NET.turnNo) return;
@@ -3295,7 +3304,7 @@ function netStop(){ NET.on=false; NET.wait=false; NET.pending=null; clockEl.hidd
 function startOnline(o){
   CPU.on=false; CPU.busy=false;
   NET.on=true; NET.me=o.me; NET.send=o.send; NET.premio=o.premio; NET.ficha=o.ficha; NET.bar=o.bar||'';
-  NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false; NET.mism=0; NET.flagged=false; NET.replay=null;
+  NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false; NET.mism=0; NET.audN=0; NET.flagged=false; NET.replay=null;
   names[0]=o.names[0]; names[1]=o.names[1];
   setAv(o.me,myIcon()); setAv(1-o.me,o.oppIcon||'oito');
   document.querySelector('#p0 .pname').textContent=names[0]+(o.me===0?' (você)':'');
@@ -3316,7 +3325,7 @@ window.SINUCA={
   rank:()=>RANKS[rankIdx(prof.xp)].nome, icon:()=>myIcon(), icHtml:(id)=>icHtml(id), setOppIcon:(id)=>{ if(NET.on&&ICONS.some(i=>i.id===id)) setAv(1-NET.me,id); }, openIcons:()=>openSheet('icons'), openPerfil:()=>openSheet('perfil'), setIcons:(l)=>setIcons(l), rankOf:(xp)=>RANKS[rankIdx(xp||0)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
   resend:()=>{ if(NET.on&&!NET.wait&&state==='aim') netSendState(); },
   endNet:(w,why)=>{ if(NET.on&&winner==null){ NET.noStat=/cancelada/.test(why||''); charging=false; drag=null; endGame(w,why||'',false); } },
-  setXp:(x)=>setXp(x), setCampeao:(on)=>setCampeao(!!on), openRanking:()=>openRanking(),
+  setXp:(x)=>setXp(x), setHist:(h)=>setHist(h), myBalls:()=>myBalls, setCampeao:(on)=>setCampeao(!!on), openRanking:()=>openRanking(),
   isOver:()=>winner!=null, waiting:()=>NET.on&&NET.wait, turnNo:()=>NET.turnNo,
   unwait:()=>{ if(NET.on&&NET.wait&&NET.turnNo===0){ NET.wait=false; NET.t0=performance.now(); setStatus(`<b>${names[cur]}</b> abre a partida. Posicione a branca na meia lua e tacada!`); netSendState(); } },
 };
@@ -3463,7 +3472,9 @@ function setCampeao(on){
   if(on&&!has){ prof.owned.push('coroa'); saveProf(); toast('Você é o campeão da semana! O Taco da Coroa é seu até segunda.',4200); }
   if(!on&&has){ prof.owned=prof.owned.filter(id=>id!=='coroa'); if(prof.eq==='coroa'){ prof.eq='casa'; applyCue(); } saveProf(); }
 }
-function renderHist(){
+function setHist(h){ if(!h||typeof h!=='object') return; for(const k of ['cpu','net']){ const x=h[k]||{}; prof.hist[k]={j:+x.j||0,v:+x.v||0,b:+x.b||0}; } saveProf(); if(!document.getElementById('hist').hidden) renderHist(true); }
+function renderHist(fromServer){
+  if(!fromServer&&window.__hist) window.__hist().then(setHist).catch(()=>{});
   const c=prof.hist.cpu, n=prof.hist.net, j=c.j+n.j, v=c.v+n.v, d=j-v, b=c.b+n.b, pc=j?Math.round(v/j*100):0;
   const row=(t,h)=>`<tr><td>${t}</td><td>${h.j}</td><td>${h.v}</td><td>${h.j-h.v}</td><td>${h.b}</td></tr>`;
   document.getElementById('hsBody').innerHTML=`
