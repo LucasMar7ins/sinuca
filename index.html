@@ -779,7 +779,45 @@ sb.auth.getSession().then(({data})=>{
   .lob .tables{grid-template-columns:1fr 1fr}
 }
 @media (max-width:380px){ .lob .tables{grid-template-columns:1fr} }
+/* amigos, código e convite */
+.lob .flist{display:flex;flex-direction:column;gap:10px}
+.lob .fr{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.lob .fr .av{width:40px;height:40px;font-size:17px}
+.lob .fr .nm{flex:1;min-width:0}
+.lob .fr .nm b{display:block;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lob .fr .nm small{font-size:14px;color:var(--mut)}
+.lob .fst{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.lob .fst i{width:8px;height:8px;border-radius:50%;background:#555}
+.lob .fst.on{color:var(--ok)} .lob .fst.on i{background:var(--ok)}
+.lob .fst.busy{color:var(--busy)} .lob .fst.busy i{background:var(--busy)}
+.lob .fst.off{color:#6f6b64}
+.lob .fr .fbtn{border:0;border-radius:9px;background:var(--acc);color:#1a1408;font:700 15px var(--ui);letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;cursor:pointer;white-space:nowrap}
+.lob .fr .fbtn.sec{background:none;border:1px solid #444;color:#f5f3ee}
+.lob .fr .fbtn:disabled{background:#2a2a2a;color:#666;cursor:default}
+.lob .fr .fx{background:none;border:0;color:#6f6b64;font-size:22px;line-height:1;padding:4px 6px;cursor:pointer}
+.lob .addf{display:flex;gap:8px}
+.lob .addf input,.lob .codef input{flex:1;min-width:0;font:600 18px var(--ui);color:#f5f3ee;background:#0c0c0c;border:1px solid #333;border-radius:10px;padding:10px 12px;outline:none}
+.lob .addf input:focus,.lob .codef input:focus{border-color:var(--acc)}
+.lob .addf button,.lob .codef button{border:0;border-radius:10px;background:#f5f3ee;color:#111;font:700 15px var(--ui);letter-spacing:.1em;text-transform:uppercase;padding:0 14px;cursor:pointer}
+.lob .codef{display:flex;gap:8px}
+.lob .codef input{text-transform:uppercase;letter-spacing:.2em}
+.lob .barpick{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.lob .barpick button{border:1px solid #333;border-radius:999px;background:none;color:#cfcac0;font:700 15px var(--ui);letter-spacing:.06em;padding:7px 13px;cursor:pointer}
+.lob .barpick button[aria-pressed="true"]{background:#f5f3ee;color:#111;border-color:#f5f3ee}
+.lob .barpick button:disabled{opacity:.4;cursor:default}
+.lob .empty{color:var(--mut);font-size:17px;background:var(--card);border:1px dashed #333;border-radius:12px;padding:18px;text-align:center}
+.lob .codebox{width:100%;background:#0c0c0c;border:1px dashed var(--acc);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.lob .codebox small{color:var(--mut);font-size:14px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.lob .codebox b{font-family:var(--display);font-weight:400;font-size:40px;letter-spacing:.18em;color:var(--acc)}
+.lob .codebox .row2 button{font-size:16px;padding:11px}
+.lob .ghost.wa{border-color:#25d366;color:#25d366}
 /* menu: botão do online */
+.mscreen .onlcount{display:flex;align-items:center;gap:8px;color:#cfcac0;font-weight:600;font-size:16px;margin:-4px 0 2px}
+.mscreen .onlcount i{width:9px;height:9px;border-radius:50%;background:#57d68d;box-shadow:0 0 0 4px rgba(87,214,141,.15)}
+.revbtn{background:#ffd84d!important;color:#1a1408!important;border-color:#ffd84d!important}
+.revbtn.ask{animation:revPulse 1.2s ease-in-out infinite}
+.revbtn:disabled{background:#2a2a2a!important;color:#888!important;border-color:#333!important;animation:none}
+@keyframes revPulse{50%{box-shadow:0 0 0 6px rgba(255,216,77,.25)}}
 .mscreen .onl{margin-top:0}
 .mscreen .onl small{display:block;font-size:14px;letter-spacing:.04em;font-weight:600;opacity:.75;text-transform:none;margin-top:-2px}
 .mscreen .primary.onl{height:auto;padding:12px 0}
@@ -809,6 +847,7 @@ sb.auth.getSession().then(({data})=>{
 
 <section class="lob" id="lob" hidden aria-label="Bares e mesas"></section>
 <div class="waitpill" id="waitPill" hidden><i></i><span id="waitPillTxt">Esperando adversário</span><button type="button" id="waitPillBack">Ver mesa</button></div>
+<div class="arrive" id="invite" hidden><div class="box"><h3>Te chamaram!</h3><p id="inviteTxt"></p><button type="button" id="inviteOk">Aceitar</button><button type="button" id="inviteNo" style="background:none;border:1px solid #444;color:#f5f3ee;font-size:17px;padding:10px">Agora não</button></div></div>
 <div class="arrive" id="arrive" hidden><div class="box"><h3>Chegou gente!</h3><p id="arriveTxt"></p><button type="button" id="arriveGo">Bora jogar</button></div></div>
 <button class="frbtn" id="frBtn" type="button" hidden aria-label="Frases da partida"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
 <div class="frpop" id="frPop" hidden></div>
@@ -832,7 +871,7 @@ const $=id=>document.getElementById(id);
 const lob=$('lob');
 
 let sb=null, uid=null, nick='', view='bares', curBar=null, data={mesas:[],feed:[]}, busy=false, errMsg='';
-let lobCh=null, presence={}, refreshT=null, pollT=null;
+let lobCh=null, meCh=null, presence={}, refreshT=null, pollT=null, friends=[], invBar='calcada', invitePend=null;
 let M=null;            // partida atual: {row, me, ch, hb, phase:'wait'|'play'|'over', opGone, ...}
 const S=()=>window.SINUCA;
 const saldo=()=>S()?S().pts():0;
@@ -845,6 +884,11 @@ const msgErr=e=>{ const m=(e&&e.message)||String(e);
   if(/já está numa mesa/.test(m)) return 'Você já está numa mesa.';
   if(/fiado já usado/.test(m)) return 'O fiado de hoje já foi. Volta amanhã, freguês!';
   if(/ainda tem ficha/.test(m)) return 'Você ainda tem pontos pra ficha.';
+  if(/código não encontrado/.test(m)) return 'Não achei mesa com esse código. Confere com quem te mandou.';
+  if(/essa mesa é sua/.test(m)) return 'Essa mesa é sua. Manda o código pra um amigo!';
+  if(/apelido não encontrado/.test(m)) return 'Não achei ninguém com esse apelido.';
+  if(/esse é você/.test(m)) return 'Esse apelido é o seu!';
+  if(/revanche expirou/.test(m)) return 'A revanche expirou.';
   if(/fetch|network|Failed/i.test(m)) return 'Sem conexão. Confira sua internet.';
   return m; };
 async function syncSaldo(){ try{ const v=await rpc('meu_saldo'); if(typeof v==='number'&&S()) S().setPts(v); }catch(e){} }
@@ -855,7 +899,10 @@ window.__pts=(n,motivo,ref)=>{
 };
 
 /* ---------- presença: quantos estão online e em qual bar ---------- */
-function track(){ if(lobCh) try{ lobCh.track({nick,bar:M&&M.row?M.row.bar:(view==='bar'?curBar:null),t:Date.now()}); }catch(e){} }
+function myStatus(){ if(M) return M.phase==='wait'?'esperando':'jogando'; if(!lob.hidden) return 'lobby'; return S()&&S().inGame()?'treino':'menu'; }
+function track(){ if(lobCh) try{ lobCh.track({nick,bar:M&&M.row?M.row.bar:(view==='bar'?curBar:null),st:myStatus(),t:Date.now()}); }catch(e){} }
+function presOf(id){ const p=presence[id]; return p&&p[0]; }
+function updCount(){ const el=document.getElementById('onlCount'); if(!el) return; const n=Math.max(onlineCount(),1); el.querySelector('span').textContent=`${n} ${n===1?'pessoa online':'pessoas online agora'}`; }
 function onlineCount(bar){ let n=0; for(const k in presence){ const p=presence[k]&&presence[k][0]; if(!p) continue; if(!bar||p.bar===bar) n++; } return n; }
 
 /* ---------- telas ---------- */
@@ -873,6 +920,7 @@ function render(){
   if(lob.hidden) return;
   lob.classList.toggle('waitv',view==='wait');
   if(view==='wait') return renderWait();
+  if(view==='amigos') return renderFriends();
   const total=Math.max(onlineCount(),1);
   if(view==='bares'){
     const cards=BARS.map(b=>{
@@ -888,6 +936,8 @@ function render(){
       <h1>Sinuca <span>de Bar</span></h1>${asideCommon()}
       <button class="big" type="button" data-act="agora"${busy?' disabled':''}>Jogar agora<small>Te coloca na primeira mesa com alguém esperando</small></button>
       <button class="ghost" type="button" data-act="treino">Treinar com o Seu Zé</button>
+      <button class="ghost" type="button" data-act="amigos">Amigos${friendsOnline()?` · ${friendsOnline()} online`:''}</button>
+      <form class="codef" data-form="code"><input name="cod" maxlength="8" placeholder="Código" autocomplete="off" aria-label="Código da mesa particular"><button type="submit">Entrar</button></form>
       <div class="err">${esc(errMsg)}</div>
       <div class="sect f">Acontecendo agora</div><div class="feed feedwrap">${feedHtml()}</div>
     </aside><main>
@@ -914,7 +964,8 @@ function render(){
       <div class="chips"><span class="chip">${b.ficha?'Ficha '+b.ficha:'Grátis'}</span><span class="chip">Vencedor ${b.ficha?'leva '+premio(b.ficha):'ganha 5'}</span><span class="chip">${onlineCount(b.id)} online</span></div>
       ${asideCommon()}
       <button class="big" type="button" data-act="agora"${busy?' disabled':''}>Jogar agora<small>${w.length?'Senta com quem está esperando':'Abre uma mesa e espera alguém'}</small></button>
-      <button class="ghost" type="button" data-act="treino">Treinar com o Seu Zé</button>
+      <button class="ghost" type="button" data-act="particular">Abrir mesa particular</button>
+      <button class="ghost" type="button" data-act="amigos">Amigos${friendsOnline()?` · ${friendsOnline()} online`:''}</button>
       <div class="err">${esc(errMsg)}</div>
       <div class="zeline"><b>Seu Zé:</b> ${dica}</div>
     </aside><main>
@@ -922,14 +973,43 @@ function render(){
       <div class="tables">${tbs.join('')}</div></main></div>`;
   }
 }
+function friendsOnline(){ return friends.filter(f=>presOf(f.id)).length; }
+const ST={lobby:['on','No bar'],menu:['on','Online'],treino:['on','Treinando'],esperando:['on','Esperando mesa'],jogando:['busy','Jogando']};
+function renderFriends(){
+  const list=friends.slice().sort((a,b)=>(presOf(b.id)?1:0)-(presOf(a.id)?1:0));
+  const rows=list.map(f=>{
+    const p=presOf(f.id), st=p?(ST[p.st]||ST.menu):null, busyF=p&&p.st==='jogando';
+    const act=!f.meu?`<button class="fbtn sec" type="button" data-addback="${esc(f.apelido)}">Adicionar</button>`:p?`<button class="fbtn" type="button" data-invite="${f.id}"${busyF?' disabled':''}>${busyF?'Jogando':'Chamar'}</button>`:'';
+    return `<div class="fr"><div class="av">${esc(f.apelido[0])}</div><div class="nm"><b>${esc(f.apelido)}</b><small>${esc(S().rankOf(f.xp))}</small><br><span class="fst ${st?st[0]:'off'}"><i></i>${st?st[1]:'Offline'}</span></div>${act}${f.meu?`<button class="fx" type="button" data-unfriend="${f.id}" aria-label="Remover ${esc(f.apelido)}">×</button>`:''}</div>`;
+  }).join('');
+  const picks=BARS.map(b=>`<button type="button" data-invbar="${b.id}" aria-pressed="${b.id===invBar}"${b.ficha>saldo()?' disabled':''}>${esc(b.nome)}${b.ficha?' · '+b.ficha:''}</button>`).join('');
+  lob.innerHTML=`<div class="page"><aside>
+    <button class="back" type="button" data-act="bares">‹ Bares</button>
+    <h1>Seus <span>amigos</span></h1>${asideCommon()}
+    <form class="addf" data-form="add"><input name="ap" maxlength="16" placeholder="Apelido do amigo" autocomplete="off" aria-label="Apelido do amigo"><button type="submit">Adicionar</button></form>
+    <form class="codef" data-form="code"><input name="cod" maxlength="8" placeholder="Código" autocomplete="off" aria-label="Código da mesa particular"><button type="submit">Entrar</button></form>
+    <div class="err">${esc(errMsg)}</div>
+    <div class="zeline"><b>Seu Zé:</b> Chama a turma! A mesa é particular: só entra quem você chamar ou quem tiver o código.</div>
+  </aside><main>
+    <button class="back mback" type="button" data-act="bares">‹ Voltar aos bares</button>
+    <div class="mh"><div><h2>Amigos</h2><p>Escolha o bar da partida e toque em Chamar.</p></div><div class="online"><i class="dot"></i>${friendsOnline()} de ${friends.length} online</div></div>
+    <div class="barpick">${picks}</div>
+    <div class="flist">${rows||'<div class="empty">Você ainda não adicionou ninguém. Digite o apelido de um amigo ao lado.</div>'}</div>
+    <div style="margin-top:18px"><button class="ghost" type="button" data-act="particular">Abrir mesa particular sem chamar ninguém</button></div>
+  </main></div>`;
+}
 function renderWait(){
   const r=M.row, b=barOf(r.bar);
+  const link=r.codigo?location.origin+location.pathname+'#mesa='+r.codigo:'';
+  const codeBox=r.privada&&r.codigo?`<div class="codebox"><small>Código da mesa particular</small><b>${esc(r.codigo)}</b>
+      <div class="row2"><button class="ghost" type="button" data-copy="${esc(link)}">Copiar link</button><button class="ghost wa" type="button" data-wa="${esc(link)}">Mandar no WhatsApp</button></div></div>`:'';
   lob.innerHTML=`<div class="wbox">
     <span class="tag">${esc(b.nome)}</span>
     <div class="seats"><div class="seat"><div class="av">${esc(nick[0])}</div><b>${esc(nick)}</b><small>${esc(S().rank())}</small></div><div class="vsb">VS</div>
-      <div class="seat empty"><div class="av">?</div><b>Esperando…</b><small>alguém sentar</small></div></div>
+      <div class="seat empty"><div class="av">?</div><b>${M.invited?esc(M.invited):'Esperando…'}</b><small>${M.invited?'foi chamado':'alguém sentar'}</small></div></div>
+    ${codeBox}
     <div class="pot">${r.ficha?`Pote: <b>${r.ficha*2}</b> · quem vencer leva <b>${premio(r.ficha)}</b>`:'Mesa grátis · quem vencer ganha <b>5</b> da casa'}</div>
-    <div class="ze"><i class="zeav"></i><span><b>Seu Zé:</b> Senta aí e passa giz no taco, já já chega alguém. Enquanto isso, quer bater uma comigo?</span></div>
+    <div class="ze"><i class="zeav"></i><span><b>Seu Zé:</b> ${r.privada?'Mesa reservada! Manda o código pra turma e passa giz no taco enquanto isso.':'Senta aí e passa giz no taco, já já chega alguém. Enquanto isso, quer bater uma comigo?'}</span></div>
     <div class="row2"><button class="big" type="button" data-act="treinoW" style="font-size:19px;padding:13px">Treinar enquanto espera</button><button class="ghost" type="button" data-act="levantar">Levantar da mesa</button></div>
     <div class="err">${esc(errMsg)}</div>
   </div>`;
@@ -945,7 +1025,7 @@ function openLobby(v,bar){
   errMsg=''; lob.hidden=false; $('waitPill').hidden=true; render(); refresh(); syncSaldo(); track();
   clearInterval(pollT); pollT=setInterval(()=>{ if(!lob.hidden&&view!=='wait') refresh(); },15000);
 }
-function closeLobby(){ lob.hidden=true; clearInterval(pollT); }
+function closeLobby(){ lob.hidden=true; clearInterval(pollT); setTimeout(track,50); }
 
 /* ---------- ações ---------- */
 lob.addEventListener('click',async e=>{
@@ -955,6 +1035,14 @@ lob.addEventListener('click',async e=>{
   if(t.dataset.join) return sentar(()=>rpc('entrar',{pid:t.dataset.join,patente:S().rank()}));
   if(act==='menu'){ closeLobby(); S().menu(); return; }
   if(act==='bares'){ view='bares'; errMsg=''; render(); track(); return refresh(); }
+  if(act==='amigos'){ view='amigos'; errMsg=''; render(); track(); return loadFriends(); }
+  if(act==='particular'){ const bar=view==='bar'?curBar:invBar; return sentar(()=>rpc('abrir_particular',{bar,patente:S().rank()})); }
+  if(t.dataset.invbar){ invBar=t.dataset.invbar; return render(); }
+  if(t.dataset.invite){ const f=friends.find(x=>x.id===t.dataset.invite); if(!f) return; return sentar(()=>rpc('abrir_particular',{bar:invBar,patente:S().rank()}),row=>{ if(M&&row.codigo){ M.invited=f.apelido; render(); sendTo(f.id,{t:'inv',from:nick,fromId:uid,code:row.codigo,bar:row.bar,ficha:row.ficha}); } }); }
+  if(t.dataset.unfriend){ try{ await rpc('remover_amigo',{amigo:t.dataset.unfriend}); }catch(err){} return loadFriends(); }
+  if(t.dataset.addback){ return addFriend(t.dataset.addback); }
+  if(t.dataset.copy){ try{ await navigator.clipboard.writeText(t.dataset.copy); t.textContent='Link copiado!'; }catch(err){ prompt('Copie o link:',t.dataset.copy); } return; }
+  if(t.dataset.wa){ const b=barOf(M&&M.row?M.row.bar:'calcada'); const txt=`Seu Zé guardou uma mesa pra gente no ${b.nome}${b.ficha?` (ficha ${b.ficha})`:''}. Bora? ${t.dataset.wa}`; window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank'); return; }
   if(act==='treino'){ closeLobby(); S().startCpu(); return; }
   if(act==='fiado'){ try{ const v=await rpc('pontos',{motivo:'fiado',valor:0,ref:null}); S().setPts(v); S().narrate&&0; errMsg=''; render(); S().toast('Seu Zé pendurou uma ficha no caderno: +10',2600); }catch(err){ errMsg=msgErr(err); render(); } return; }
   if(act==='nova') return sentar(()=>rpc('sentar',{bar:curBar,patente:S().rank(),nova:true}));
@@ -970,11 +1058,42 @@ lob.addEventListener('click',async e=>{
   if(act==='levantar'){ await levantar(); return; }
   if(act==='treinoW'){ closeLobby(); S().startCpu(); $('waitPill').hidden=false; $('waitPillTxt').textContent='Esperando adversário · '+barOf(M.row.bar).nome; return; }
 });
+lob.addEventListener('submit',e=>{
+  const f=e.target.closest('form'); if(!f) return; e.preventDefault();
+  if(f.dataset.form==='add'){ const v=f.ap.value.trim(); if(v) addFriend(v); }
+  if(f.dataset.form==='code'){ const v=f.cod.value.trim(); if(v) sentar(()=>rpc('entrar_codigo',{cod:v,patente:S().rank()})); }
+});
+async function loadFriends(){ try{ friends=await rpc('meus_amigos')||[]; }catch(e){} render(); }
+async function addFriend(ap){
+  try{ const f=await rpc('adicionar_amigo',{apelido:ap}); errMsg=''; await loadFriends(); S().toast(`${f.apelido} agora é seu amigo`,2200); sendTo(f.id,{t:'add',from:nick}); }
+  catch(e){ errMsg=msgErr(e); render(); }
+}
+/* mensagem direta para outro jogador (convites) */
+function sendTo(id,payload){
+  const ch=sb.channel('user:'+id,{config:{broadcast:{self:false}}});
+  ch.subscribe(st=>{ if(st==='SUBSCRIBED'){ try{ ch.send({type:'broadcast',event:'g',payload}); }catch(e){} setTimeout(()=>{ try{ sb.removeChannel(ch); }catch(e){} },2500); } });
+}
+function onDirect(p){
+  if(!p) return;
+  if(p.t==='add'){ if(S()) S().toast(`${p.from} te adicionou como amigo`,2600); loadFriends(); return; }
+  if(p.t==='resp'){ if(S()) S().toast(p.ok?`${p.from} aceitou!`:p.busy?`${p.from} está jogando agora`:`${p.from} não pode agora`,2800); return; }
+  if(p.t==='inv'){
+    if(M){ sendTo(p.fromId,{t:'resp',ok:false,busy:true,from:nick}); return; }
+    invitePend=p; const b=barOf(p.bar);
+    $('inviteTxt').textContent=`${p.from} te chamou pra uma partida no ${b.nome}${p.ficha?` (ficha ${p.ficha})`:' (grátis)'}.`;
+    $('invite').hidden=false;
+  }
+}
+$('inviteOk').addEventListener('click',()=>{ const p=invitePend; $('invite').hidden=true; invitePend=null; if(!p) return;
+  sendTo(p.fromId,{t:'resp',ok:true,from:nick});
+  if(S().inGame()&&!S().online()) S().menu();
+  openLobby(view==='wait'?'bares':view); sentar(()=>rpc('entrar_codigo',{cod:p.code,patente:S().rank()})); });
+$('inviteNo').addEventListener('click',()=>{ const p=invitePend; $('invite').hidden=true; invitePend=null; if(p) sendTo(p.fromId,{t:'resp',ok:false,from:nick}); });
 $('waitPillBack').addEventListener('click',()=>{ if(M&&M.phase==='wait'){ S().menu(); openLobby('wait'); } });
 
-async function sentar(call){
+async function sentar(call,after){
   if(busy) return; busy=true; errMsg=''; render();
-  try{ const row=await call(); busy=false; await syncSaldo(); onRow(row,true); }
+  try{ const row=await call(); busy=false; await syncSaldo(); onRow(row,true); if(after) after(row); }
   catch(e){ busy=false; errMsg=msgErr(e); render(); refresh(); }
 }
 
@@ -1004,6 +1123,7 @@ function onRow(row,fromMe){
 }
 function arrived(){
   // alguém sentou na minha mesa
+  if(!M||M.phase!=='wait'||M.arriving) return; M.arriving=true;
   const r=M.row, op=r.apelido2||'Alguém';
   if(!S().inGame()||!lob.hidden&&view==='wait'){ play(true); return; }
   $('waitPill').hidden=true;
@@ -1014,7 +1134,7 @@ function arrived(){
 }
 function play(fresh){
   const r=M.row, me=r.j1===uid?0:1, f=r.ficha;
-  M.phase='play'; M.me=me; M.opGone=null; M.reported=false;
+  M.phase='play'; M.me=me; M.opGone=null; M.reported=false; M.opNick=me===0?r.apelido2:r.apelido1;
   closeLobby(); $('waitPill').hidden=true; $('arrive').hidden=true;
   S().startOnline({me,names:[r.apelido1,r.apelido2||'?'],send,premio:premio(f),ficha:f,bar:r.bar,fresh});
   $('frBtn').hidden=false;
@@ -1024,6 +1144,10 @@ function play(fresh){
 }
 function onMsg(p){
   if(!M||!p) return;
+  if(p.t==='rev'){ const b=$('revBtn'); if(M.phase==='over'&&b&&!b.hidden&&!M.revAsked){ b.textContent='Aceitar revanche'; b.classList.add('ask'); S().toast(`${p.d.nick} quer revanche!`,2600); } return; }
+  if(p.t==='revgo'){ rpc('minha_partida').then(r=>{ if(r&&r.id&&r.status==='jogando') startRematch(r); }).catch(()=>{}); return; }
+  if(p.t==='revno'){ const b=$('revBtn'); if(b){ b.textContent='Revanche não rolou'; b.disabled=true; } if(p.d&&p.d.why) S().toast(p.d.why,2800); return; }
+  if(p.t==='sai'){ const b=$('revBtn'); if(b&&!b.hidden){ b.textContent=`${M.opNick||'O adversário'} saiu da mesa`; b.disabled=true; b.classList.remove('ask'); } return; }
   if(p.t==='join'){ if(M.phase==='wait') rpc('minha_partida').then(r=>{ if(r&&r.status==='jogando'){ M.row=r; arrived(); } }); return; }
   if(p.t==='frase'){ showFrase(p.d.nick,FRASES[p.d.i]); return; }
   if(p.t==='bye'){ checkEnd(); setTimeout(checkEnd,2500); return; }
@@ -1060,16 +1184,30 @@ function finished(r){
   if(M.phase==='wait'){ endMatch(); if(!S().inGame()) openLobby('bar',r.bar); return; }
   if(!S().isOver()){
     if(r.status==='cancelada'){ S().endNet(M.me,'A partida foi cancelada e as fichas voltaram.'); }
-    else S().endNet(r.vencedor, r.vencedor===M.me?'O adversário saiu da mesa. Você leva o pote.':'Você saiu da mesa e entregou a partida.');
+    else { M.lastWhy='saiu'; S().endNet(r.vencedor, r.vencedor===M.me?'O adversário saiu da mesa. Você leva o pote.':'Você saiu da mesa e entregou a partida.'); }
   }
-  M.phase='over'; syncSaldo(); setTimeout(()=>{ if(M&&M.phase==='over') stopChannel(); },8000);
+  M.phase='over'; syncSaldo();
+  if(r.status==='fim'&&!M.opGone&&!/saiu/.test(String(M.lastWhy||''))) showRev(r.vencedor!==M.me||true);
+}
+function showRev(){ const b=$('revBtn'); if(!b||!M) return; b.hidden=false; b.disabled=false; b.classList.remove('ask'); b.textContent=M.row.ficha?`Mais uma ficha? (${M.row.ficha})`:'Revanche?'; M.revAsked=false; }
+async function askRev(){
+  if(!M||M.phase!=='over') return; const b=$('revBtn');
+  try{
+    const r=await rpc('revanche',{pid:M.row.id});
+    if(r&&r.status==='jogando'&&r.id!==M.row.id){ send('revgo',{id:r.id}); await syncSaldo(); startRematch(r); return; }
+    M.revAsked=true; b.disabled=true; b.classList.remove('ask'); b.textContent=`Esperando ${M.opNick||'o adversário'} aceitar…`; send('rev',{nick});
+  }catch(e){ const why=/saldo/.test(e.message||'')?'Alguém está sem pontos pra outra ficha.':msgErr(e); b.textContent='Revanche não rolou'; b.disabled=true; S().toast(why,2800); send('revno',{why}); }
+}
+function startRematch(row){
+  endMatch(); M={row,phase:'wait',ch:null}; M.ch=chanFor(row); startHb(); syncSaldo(); play(true);
+  S().toast('Revanche! Nova ficha na mesa',1800);
 }
 window.__netEnd=async(w)=>{
   if(!M||M.reported) return; M.reported=true; M.phase='over';
   let tries=0;
   const go=async()=>{ try{ const r=await rpc('resultado',{pid:M.row.id,vencedor:w}); M.row=r;
-      if(r.status==='jogando'&&tries++<18) return setTimeout(go,5000);
-      syncSaldo(); setTimeout(()=>{ if(M&&M.phase==='over') stopChannel(); },8000);
+      if(r.status==='jogando'&&tries++<40) return setTimeout(go,2000);
+      syncSaldo(); if(r.status==='fim'&&M&&M.phase==='over') showRev();
     }catch(e){ if(tries++<6) setTimeout(go,4000); } };
   go();
 };
@@ -1077,6 +1215,7 @@ window.__netLeave=()=>{
   // botão "Voltar ao bar" ou "Entregar e sair"
   const r=M&&M.row, bar=r?r.bar:curBar;
   if(M&&M.phase==='play'&&!S().isOver()){ send('bye',{}); rpc('levantar',{pid:r.id}).then(()=>syncSaldo()).catch(()=>{}); }
+  else if(M&&M.phase==='over') send('sai',{nick});
   endMatch(); S().menu(); openLobby('bar',bar||'calcada');
   return true;
 };
@@ -1090,7 +1229,7 @@ function stopChannel(){ if(M&&M.ch){ try{ sb.removeChannel(M.ch); }catch(e){} M.
 function endMatch(){
   if(!M) return;
   clearInterval(M.hb); clearInterval(M.syncT); clearInterval(M.arT); stopChannel();
-  M=null; $('frBtn').hidden=true; $('frPop').hidden=true; $('waitPill').hidden=true; $('arrive').hidden=true; setConfirm(false);
+  M=null; if($('revBtn')){ $('revBtn').hidden=true; $('revBtn').classList.remove('ask'); } $('frBtn').hidden=true; $('frPop').hidden=true; $('waitPill').hidden=true; $('arrive').hidden=true; setConfirm(false);
   if(S()) S().stop();
   track();
 }
@@ -1118,7 +1257,8 @@ function patchMenu(){
   const btn=document.createElement('button'); btn.type='button'; btn.className='primary onl'; btn.id='openOnline';
   btn.innerHTML='Jogar online<small>Bares e mesas com gente de verdade</small>';
   btn.onclick=()=>openLobby('bares');
-  nav.prepend(sect,btn);
+  const cnt=document.createElement('div'); cnt.className='onlcount'; cnt.id='onlCount'; cnt.innerHTML='<i></i><span>Conectando…</span>';
+  nav.prepend(sect,btn,cnt);
   const cpuSect=[...nav.querySelectorAll('.sect')].find(s=>/máquina/i.test(s.textContent)); if(cpuSect) cpuSect.textContent='Treino com o Seu Zé';
   const pc=document.getElementById('playCpu'); if(pc){ pc.classList.add('sec'); pc.textContent='Treinar'; }
 }
@@ -1131,11 +1271,18 @@ window.__onlineInit=async()=>{
   const w=document.getElementById('wrap'); if(w) w.append($('frBtn'),$('frPop'),$('frSay'));
   const rt=document.getElementById('root'); if(rt) rt.append($('arrive'),$('waitPill'));
   lobCh=sb.channel('lobby',{config:{presence:{key:uid}}});
-  lobCh.on('presence',{event:'sync'},()=>{ presence=lobCh.presenceState(); if(!lob.hidden) render(); });
+  lobCh.on('presence',{event:'sync'},()=>{ presence=lobCh.presenceState(); updCount(); if(!lob.hidden&&view!=='wait') render(); });
+  meCh=sb.channel('user:'+uid,{config:{broadcast:{self:false}}});
+  meCh.on('broadcast',{event:'g'},({payload})=>onDirect(payload)); meCh.subscribe();
+  const row2=document.querySelector('#over .row2');
+  if(row2&&!$('revBtn')){ const rb=document.createElement('button'); rb.className='btn revbtn'; rb.id='revBtn'; rb.type='button'; rb.hidden=true; rb.onclick=askRev; row2.prepend(rb); }
+  loadFriends();
   lobCh.subscribe(st=>{ if(st==='SUBSCRIBED') track(); });
   sb.channel('mesas-db').on('postgres_changes',{event:'*',schema:'public',table:'partidas'},()=>{ if(!lob.hidden&&view!=='wait') refreshSoon(); }).subscribe();
   try{ const r=await rpc('minha_partida'); if(r&&r.id){ onRow(r,false); return; } }catch(e){}
   openLobby('bares');
+  const mm=location.hash.match(/mesa=([A-Za-z0-9]{4,8})/);
+  if(mm){ try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} sentar(()=>rpc('entrar_codigo',{cod:mm[1],patente:S().rank()})); }
 };
 })();
 </script>
@@ -2774,7 +2921,8 @@ document.getElementById('again').addEventListener('click',newGame);
 /* ---------- online ---------- */
 const clockEl=document.createElement('div'); clockEl.className='netclock'; clockEl.hidden=true; wrap.appendChild(clockEl);
 function snap(){
-  return {n:NET.turnNo, b:balls.map(b=>[b.n,+b.x.toFixed(2),+b.y.toFixed(2),b.in?1:0]), cur, groups:[...groups], isBreak, ballInHand, kitchenOnly, winner, gp:[...gamePots], st:statusEl.innerHTML, foul:statusEl.classList.contains('foul')};
+  for(const b of balls){ b.x=+b.x.toFixed(2); b.y=+b.y.toFixed(2); }
+  return {n:NET.turnNo, b:balls.map(b=>[b.n,b.x,b.y,b.in?1:0]), cur, groups:[...groups], isBreak, ballInHand, kitchenOnly, winner, gp:[...gamePots], st:statusEl.innerHTML, foul:statusEl.classList.contains('foul')};
 }
 function netSendState(){ if(NET.on&&NET.send) NET.send('state',snap()); }
 function applySnap(s){
@@ -2847,7 +2995,7 @@ window.SINUCA={
   menu:()=>{ netStop(); hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); },
   setPts:(v)=>{ prof.pts=v; syncPts(); try{ if(!document.getElementById('shop').hidden) renderShop(); }catch(e){} },
   pts:()=>prof.pts, toast:(m,ms)=>toast(m,ms), narrate:(t)=>narrate(t),
-  rank:()=>RANKS[rankIdx(prof.xp)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
+  rank:()=>RANKS[rankIdx(prof.xp)].nome, rankOf:(xp)=>RANKS[rankIdx(xp||0)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
   resend:()=>{ if(NET.on&&!NET.wait&&state==='aim') netSendState(); },
   endNet:(w,why)=>{ if(NET.on&&winner==null){ charging=false; drag=null; endGame(w,why||'',false); } },
   isOver:()=>winner!=null, waiting:()=>NET.on&&NET.wait, turnNo:()=>NET.turnNo,
