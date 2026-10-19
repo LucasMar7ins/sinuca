@@ -384,6 +384,11 @@ html.land .bn-text{font-size:15px}
 .play.danger{background:none;border:1px solid var(--danger);color:var(--danger)}
 .xbtn{position:fixed;top:max(10px,env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:42px;height:42px;border-radius:50%;background:rgba(23,18,15,.82);border:1px solid rgba(240,231,215,.28);color:var(--fg);display:grid;place-items:center;cursor:pointer;z-index:4;padding:0}
 .xbtn svg{width:18px;height:18px}
+.netclock{position:absolute;top:10px;left:10px;z-index:3;display:flex;align-items:center;gap:6px;background:rgba(23,18,15,.85);border:1px solid rgba(240,231,215,.28);color:var(--fg);border-radius:999px;padding:4px 12px 4px 8px;font-weight:700;font-size:15px;letter-spacing:.04em;font-variant-numeric:tabular-nums;pointer-events:none}
+.netclock i{width:9px;height:9px;border-radius:50%;background:#57d68d;flex:none}
+.netclock.op i{background:#a8977f}
+.netclock.low{border-color:#e0664f;color:#ffb3a6}
+.netclock.low i{background:#e0664f}
 html.menu-open .xbtn{display:none}
 .xbtn:hover{border-color:var(--fg)}
 .scrim{position:fixed;inset:0;background:rgba(10,7,5,.66);display:flex;align-items:center;justify-content:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:30}
@@ -583,6 +588,8 @@ async function enter(){
   auth.hidden=true; say('');
   if(!started){ started=true; startGame(); }
   showAcct();
+  window.__sb=sb; window.__uid=user.id;
+  if(window.__onlineInit) window.__onlineInit();
 }
 function startGame(){
   const src=document.getElementById('gameSrc').textContent;
@@ -650,6 +657,472 @@ sb.auth.onAuthStateChange((evt,session)=>{
 sb.auth.getSession().then(({data})=>{
   if(data.session && !location.hash.includes('type=recovery')){ user=data.session.user; enter(); }
 });
+})();
+</script>
+
+<style>
+/* ---------- online: bares, mesas e espera ---------- */
+.lob{position:fixed;inset:0;z-index:25;background:#0f0f0f;color:#f5f3ee;font-family:var(--ui);overflow-y:auto;--acc:#ffd84d;--line:#2a2a2a;--mut:#9a968e;--card:#1b1b1b;--ok:#57d68d;--wait:#ffd84d;--busy:#ff7a6b}
+.lob[hidden],.lob [hidden]{display:none!important}
+.lob *{box-sizing:border-box}
+.lob .page{display:grid;grid-template-columns:360px 1fr;min-height:100%}
+.lob aside{background:#161616;border-right:1px solid var(--line);padding:24px 28px max(28px,env(safe-area-inset-bottom,0px)) max(28px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px}
+.lob .back{align-self:flex-start;background:none;border:0;color:var(--mut);font:700 16px var(--ui);letter-spacing:.1em;text-transform:uppercase;padding:4px 0;cursor:pointer}
+.lob h1{font-family:var(--display);font-weight:400;font-size:36px;line-height:1.02;margin:0}
+.lob h1 span{color:var(--acc)}
+.lob .who{display:flex;align-items:center;gap:12px;background:#0c0c0c;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.lob .av{width:42px;height:42px;border-radius:50%;background:#3a2d22;display:grid;place-items:center;font-weight:700;font-size:18px;color:var(--acc);flex:none;border:2px solid #4a3a2c;text-transform:uppercase}
+.lob .who b{font-size:20px;display:block}
+.lob .who small{color:var(--mut);font-size:15px;letter-spacing:.04em}
+.lob .bal{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:700}
+.lob .bal span{color:var(--mut);font-size:15px;letter-spacing:.12em;text-transform:uppercase}
+.lob .coin{width:20px;height:20px}
+.lob .big{border:0;border-radius:12px;background:var(--acc);color:#1a1408;font:700 24px var(--ui);letter-spacing:.14em;text-transform:uppercase;padding:14px;cursor:pointer;width:100%}
+.lob .big small{display:block;font-size:14px;letter-spacing:.04em;font-weight:600;opacity:.75;text-transform:none}
+.lob .big:disabled{opacity:.6;cursor:wait}
+.lob .ghost{border:1px solid #333;border-radius:12px;background:none;color:#f5f3ee;font:700 18px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:12px;width:100%;cursor:pointer}
+.lob .fiado{border:1px dashed var(--acc);color:var(--acc)}
+.lob .sect{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:6px 0 -6px}
+.lob .feed{display:flex;flex-direction:column;gap:9px;font-size:16px;color:#cfcac0}
+.lob .feed i{font-style:normal;color:var(--mut);font-size:14px}
+.lob .feed b{color:#f5f3ee}
+.lob .feed em{font-style:normal;color:var(--acc)}
+.lob .chips{display:flex;gap:8px;flex-wrap:wrap}
+.lob .chip{border:1px solid #333;border-radius:999px;padding:5px 11px;font-size:15px;color:#cfcac0}
+.lob .zeline{color:var(--mut);font-size:17px;font-style:italic}
+.lob .zeline b{color:var(--acc);font-style:normal}
+.lob main{padding:30px 36px max(30px,env(safe-area-inset-bottom,0px));min-width:0}
+.lob .mh{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
+.lob .mh h2{font-family:var(--display);font-weight:400;font-size:34px;margin:0}
+.lob .mh p{margin:4px 0 0;color:var(--mut);font-size:17px}
+.lob .online{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;color:#cfcac0;white-space:nowrap}
+.lob .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(87,214,141,.15)}
+.lob .bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.lob .barc{border-radius:14px;overflow:hidden;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column}
+.lob .barc .top{height:92px;padding:16px 18px;display:flex;align-items:flex-end;justify-content:space-between;background:var(--bgc)}
+.lob .barc h3{font-family:var(--display);font-weight:400;font-size:25px;margin:0;line-height:1.05}
+.lob .tag{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;background:rgba(0,0,0,.45);padding:4px 9px;border-radius:999px;white-space:nowrap}
+.lob .barc .body{padding:14px 18px 16px;display:flex;flex-direction:column;gap:11px;flex:1}
+.lob .stake{display:flex;align-items:baseline;gap:10px}
+.lob .stake .v{font-size:34px;font-weight:700;line-height:1}
+.lob .stake .v.free{color:var(--ok)}
+.lob .stake .l{color:var(--mut);font-size:15px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.lob .prize{font-size:17px;color:#cfcac0}
+.lob .prize b{color:var(--acc)}
+.lob .stats{display:flex;gap:16px;font-size:16px;color:#cfcac0;font-weight:600}
+.lob .stats .w{color:var(--wait)}
+.lob .enter{margin-top:auto;border:0;border-radius:10px;background:#f5f3ee;color:#111;font:700 18px var(--ui);letter-spacing:.12em;text-transform:uppercase;padding:11px;width:100%;cursor:pointer}
+.lob .lock{margin-top:auto;border-radius:10px;border:1px dashed #444;color:var(--mut);font:700 16px var(--ui);letter-spacing:.04em;text-align:center;padding:10px}
+.lob .barc.locked .top,.lob .barc.locked .stake{opacity:.55}
+.lob .tables{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.lob .tb{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.lob .felt{position:relative;height:84px;border-radius:9px;background:#5a3a22;padding:7px}
+.lob .felt::before{content:"";position:absolute;inset:7px;border-radius:4px;background:radial-gradient(ellipse at 50% 45%,#2a9461,#1a6643)}
+.lob .felt i{position:absolute;width:9px;height:9px;border-radius:50%;background:#111;z-index:1}
+.lob .felt .b{position:absolute;width:8px;height:8px;border-radius:50%;z-index:1}
+.lob .felt .num{position:absolute;left:14px;top:12px;z-index:2;font-family:var(--display);font-size:16px;color:rgba(255,255,255,.85)}
+.lob .st{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.lob .st .d{width:8px;height:8px;border-radius:50%;background:currentColor}
+.lob .pl{display:flex;align-items:center;gap:8px;font-size:17px;min-height:30px;flex-wrap:wrap}
+.lob .pl .av{width:28px;height:28px;font-size:13px;border-width:1px}
+.lob .pl small{color:var(--mut);font-size:14px}
+.lob .vs{color:var(--mut);font-size:14px}
+.lob .tb button{border:0;border-radius:9px;font:700 16px var(--ui);letter-spacing:.12em;text-transform:uppercase;padding:9px;width:100%;cursor:pointer}
+.lob .b-sit{background:#f5f3ee;color:#111}
+.lob .b-play{background:var(--acc);color:#1a1408}
+.lob .b-busy{background:#222;color:#666;cursor:default}
+.lob .tb.wait{border-color:rgba(255,216,77,.55);box-shadow:0 0 0 1px rgba(255,216,77,.25)}
+.lob .err{color:#ff8f80;font-size:16px;font-weight:600;min-height:20px}
+/* espera */
+.lob.waitv{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 30%,#22301f,#0f0f0f 70%);padding:20px 16px}
+.lob .wbox{width:min(560px,100%);text-align:center;display:flex;flex-direction:column;gap:18px;align-items:center}
+.lob .wbox .tag{background:#222}
+.lob .seats{display:flex;justify-content:space-between;align-items:center;width:100%;gap:14px}
+.lob .seat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.lob .seat .av{width:54px;height:54px;font-size:22px}
+.lob .seat b{font-size:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lob .seat small{color:var(--mut);font-size:15px}
+.lob .seat.empty{border-style:dashed;color:var(--mut)}
+.lob .seat.empty .av{background:none;border-style:dashed;color:#555;animation:lobPulse 1.6s ease-in-out infinite}
+@keyframes lobPulse{50%{opacity:.35}}
+.lob .vsb{font-family:var(--display);font-size:20px;color:var(--mut)}
+.lob .pot{font-size:18px;color:#cfcac0}
+.lob .pot b{color:var(--acc);font-size:22px}
+.lob .ze{display:flex;gap:12px;align-items:center;background:#0c0c0c;border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:left;font-size:18px;color:#cfcac0}
+.lob .ze .zeav{width:40px;height:40px;flex:none}
+.lob .ze b{color:var(--acc)}
+.lob .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+@media (max-width:820px){
+  .lob .page{grid-template-columns:1fr}
+  .lob aside{border-right:0;border-bottom:1px solid var(--line);padding:max(20px,env(safe-area-inset-top,0px)) 18px 20px;gap:13px}
+  .lob .feedwrap,.lob .sect.f{display:none}
+  .lob h1{font-size:30px}
+  .lob main{padding:20px 16px max(28px,env(safe-area-inset-bottom,0px))}
+  .lob .mh{flex-direction:column;align-items:flex-start;gap:8px}
+  .lob .mh h2{font-size:28px}
+  .lob .bars{grid-template-columns:1fr;gap:12px}
+  .lob .barc .top{height:74px}
+  .lob .tables{grid-template-columns:1fr 1fr}
+}
+@media (max-width:380px){ .lob .tables{grid-template-columns:1fr} }
+/* menu: botão do online */
+.mscreen .onl{margin-top:0}
+.mscreen .onl small{display:block;font-size:14px;letter-spacing:.04em;font-weight:600;opacity:.75;text-transform:none;margin-top:-2px}
+.mscreen .primary.onl{height:auto;padding:12px 0}
+.mscreen #playCpu.sec{background:none;border:1px solid #3a3a3a;color:#f5f3ee;font-size:19px;height:48px}
+/* pílula de espera durante o treino */
+.waitpill{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:24;display:flex;align-items:center;gap:10px;background:#161616;border:1px solid var(--acc,#ffd84d);color:#f5f3ee;border-radius:999px;padding:8px 8px 8px 16px;font:600 16px var(--ui);box-shadow:0 10px 30px rgba(0,0,0,.5);white-space:nowrap}
+.waitpill button{border:0;border-radius:999px;background:#2a2a2a;color:#f5f3ee;font:700 14px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;cursor:pointer}
+.waitpill i{width:9px;height:9px;border-radius:50%;background:#ffd84d;animation:lobPulse 1.4s infinite}
+/* chegou gente */
+.arrive{position:fixed;inset:0;z-index:45;background:rgba(6,5,4,.8);display:grid;place-items:center;padding:16px;font-family:var(--ui);color:#f5f3ee}
+.arrive[hidden]{display:none}
+.arrive .box{width:min(380px,100%);background:#161616;border:1px solid #ffd84d;border-radius:16px;padding:22px;text-align:center;display:flex;flex-direction:column;gap:12px}
+.arrive h3{font-family:var(--display);font-weight:400;font-size:28px;margin:0}
+.arrive p{margin:0;color:#cfcac0;font-size:18px}
+.arrive button{border:0;border-radius:12px;background:#ffd84d;color:#1a1408;font:700 22px var(--ui);letter-spacing:.12em;text-transform:uppercase;padding:13px;cursor:pointer}
+/* frases da partida */
+.frbtn{position:absolute;z-index:3;top:48px;left:10px;width:40px;height:40px;border-radius:50%;background:rgba(23,18,15,.85);border:1px solid rgba(240,231,215,.28);color:#f0e7d7;display:grid;place-items:center;cursor:pointer;padding:0}
+.frbtn svg{width:20px;height:20px}
+.frbtn[hidden],.frpop[hidden]{display:none}
+.frpop{position:absolute;z-index:5;top:94px;left:10px;display:flex;flex-direction:column;gap:6px;background:#161616;border:1px solid #333;border-radius:14px;padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.frpop button{border:0;border-radius:9px;background:#222;color:#f5f3ee;font:600 17px var(--ui);padding:9px 14px;text-align:left;cursor:pointer;white-space:nowrap}
+.frpop button:hover{background:#2c2c2c}
+.frsay{position:absolute;z-index:6;left:50%;transform:translateX(-50%);top:52px;background:#161616;border:1px solid #ffd84d;color:#f5f3ee;border-radius:14px;padding:8px 16px;font:600 18px var(--ui);box-shadow:0 10px 26px rgba(0,0,0,.5);pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.frsay b{color:#ffd84d}
+.frsay[hidden]{display:none}
+</style>
+
+<section class="lob" id="lob" hidden aria-label="Bares e mesas"></section>
+<div class="waitpill" id="waitPill" hidden><i></i><span id="waitPillTxt">Esperando adversário</span><button type="button" id="waitPillBack">Ver mesa</button></div>
+<div class="arrive" id="arrive" hidden><div class="box"><h3>Chegou gente!</h3><p id="arriveTxt"></p><button type="button" id="arriveGo">Bora jogar</button></div></div>
+<button class="frbtn" id="frBtn" type="button" hidden aria-label="Frases da partida"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+<div class="frpop" id="frPop" hidden></div>
+<div class="frsay" id="frSay" hidden></div>
+
+<script>
+(()=>{
+const BARS=[
+  {id:'calcada',nome:'Mesa da Calçada',br:'Mesa da<br>Calçada',ficha:0,bg:'linear-gradient(135deg,#2a3a2a,#18241a)'},
+  {id:'boteco',nome:'Boteco do Seu Zé',br:'Boteco do<br>Seu Zé',ficha:10,bg:'linear-gradient(135deg,#4a3320,#251912)'},
+  {id:'esquina',nome:'Bar da Esquina',br:'Bar da<br>Esquina',ficha:25,bg:'linear-gradient(135deg,#3b2440,#1e1222)'},
+  {id:'centro',nome:'Bar do Centro',br:'Bar do<br>Centro',ficha:50,bg:'linear-gradient(135deg,#1f3346,#101b26)'},
+];
+const FRASES=['Boa!','Que sorte, hein','Tá com medo?','Essa foi de bico','Pede música, Seu Zé','Bom jogo!'];
+const barOf=id=>BARS.find(b=>b.id===id)||BARS[0];
+const premio=f=>f?f*2-Math.floor(f*2/10):5;
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const coin='<svg class="coin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#e8b93c" stroke="#9a7420" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#9a7420" stroke-width="1.2" stroke-dasharray="2 1.6"/></svg>';
+const ago=t=>{ const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000); return s<60?'agora':s<3600?Math.round(s/60)+' min':Math.round(s/3600)+' h'; };
+const $=id=>document.getElementById(id);
+const lob=$('lob');
+
+let sb=null, uid=null, nick='', view='bares', curBar=null, data={mesas:[],feed:[]}, busy=false, errMsg='';
+let lobCh=null, presence={}, refreshT=null, pollT=null;
+let M=null;            // partida atual: {row, me, ch, hb, phase:'wait'|'play'|'over', opGone, ...}
+const S=()=>window.SINUCA;
+const saldo=()=>S()?S().pts():0;
+
+/* ---------- servidor ---------- */
+async function rpc(fn,args){ const {data,error}=await sb.rpc(fn,args||{}); if(error) throw error; return data; }
+const msgErr=e=>{ const m=(e&&e.message)||String(e);
+  if(/saldo insuficiente/.test(m)) return 'Pontos insuficientes pra essa ficha.';
+  if(/não está mais livre/.test(m)) return 'Essa mesa acabou de ser ocupada.';
+  if(/já está numa mesa/.test(m)) return 'Você já está numa mesa.';
+  if(/fiado já usado/.test(m)) return 'O fiado de hoje já foi. Volta amanhã, freguês!';
+  if(/ainda tem ficha/.test(m)) return 'Você ainda tem pontos pra ficha.';
+  if(/fetch|network|Failed/i.test(m)) return 'Sem conexão. Confira sua internet.';
+  return m; };
+async function syncSaldo(){ try{ const v=await rpc('meu_saldo'); if(typeof v==='number'&&S()) S().setPts(v); }catch(e){} }
+
+/* pontos ganhos e gastos fora do online passam pelo servidor */
+window.__pts=(n,motivo,ref)=>{
+  rpc('pontos',{motivo,valor:n,ref:ref||null}).then(v=>{ if(S()) S().setPts(v); }).catch(e=>{ syncSaldo(); if(S()) S().toast('Esses pontos não foram aceitos pelo servidor',2600); });
+};
+
+/* ---------- presença: quantos estão online e em qual bar ---------- */
+function track(){ if(lobCh) try{ lobCh.track({nick,bar:M&&M.row?M.row.bar:(view==='bar'?curBar:null),t:Date.now()}); }catch(e){} }
+function onlineCount(bar){ let n=0; for(const k in presence){ const p=presence[k]&&presence[k][0]; if(!p) continue; if(!bar||p.bar===bar) n++; } return n; }
+
+/* ---------- telas ---------- */
+function feedHtml(){
+  if(!data.feed.length) return '<div style="color:var(--mut)">Ninguém jogou ainda hoje. Seja o primeiro!</div>';
+  return data.feed.map(f=>{ const w=f.vencedor===0?f.apelido1:f.apelido2, b=barOf(f.bar);
+    return `<div><b>${esc(w)}</b> ganhou ${f.ficha?`<em>${f.premio}</em> no ${esc(b.nome)}`:`na ${esc(b.nome)}`} <i>· ${ago(f.terminada_em)}</i></div>`; }).join('');
+}
+function asideCommon(){
+  const fi=saldo()<10?`<button class="ghost fiado" type="button" data-act="fiado">Pegar fiado do Seu Zé (+10)</button>`:'';
+  return `<div class="who"><div class="av">${esc(nick[0]||'?')}</div><div><b>${esc(nick)}</b><small>${esc(S()?S().rank():'')}</small></div></div>
+    <div class="bal">${coin}<b class="ptsval">${saldo()}</b> <span>pontos</span></div>${fi}`;
+}
+function render(){
+  if(lob.hidden) return;
+  lob.classList.toggle('waitv',view==='wait');
+  if(view==='wait') return renderWait();
+  const total=Math.max(onlineCount(),1);
+  if(view==='bares'){
+    const cards=BARS.map(b=>{
+      const ms=data.mesas.filter(m=>m.bar===b.id), w=ms.filter(m=>m.status==='esperando').length, on=onlineCount(b.id);
+      const lockd=b.ficha>saldo();
+      return `<div class="barc${lockd?' locked':''}"><div class="top" style="--bgc:${b.bg}"><h3>${b.br}</h3><span class="tag">${b.ficha?'Ficha '+b.ficha:'Grátis'}</span></div>
+        <div class="body">${b.ficha?`<div class="stake"><span class="v">${b.ficha}</span><span class="l">pontos de ficha</span></div><div class="prize">Quem vence leva <b>${premio(b.ficha)}</b></div>`:`<div class="stake"><span class="v free">Sem ficha</span></div><div class="prize">Quem vence ganha <b>5 pontos</b> da casa</div>`}
+        <div class="stats"><span>${on} online</span><span class="${w?'w':''}">${w?'● ':''}${w} esperando</span></div>
+        ${lockd?`<div class="lock">🔒 Faltam ${b.ficha-saldo()} pontos pra entrar</div>`:`<button class="enter" type="button" data-bar="${b.id}">Entrar</button>`}</div></div>`;
+    }).join('');
+    lob.innerHTML=`<div class="page"><aside>
+      <button class="back" type="button" data-act="menu">‹ Menu</button>
+      <h1>Sinuca <span>de Bar</span></h1>${asideCommon()}
+      <button class="big" type="button" data-act="agora"${busy?' disabled':''}>Jogar agora<small>Te coloca na primeira mesa com alguém esperando</small></button>
+      <button class="ghost" type="button" data-act="treino">Treinar com o Seu Zé</button>
+      <div class="err">${esc(errMsg)}</div>
+      <div class="sect f">Acontecendo agora</div><div class="feed feedwrap">${feedHtml()}</div>
+    </aside><main>
+      <div class="mh"><div><h2>Escolha o bar</h2><p>Quem perde paga a ficha. O Seu Zé fica com 10% do pote.</p></div><div class="online"><i class="dot"></i>${total} ${total===1?'pessoa online':'online agora'}</div></div>
+      <div class="bars">${cards}</div></main></div>`;
+  }else{
+    const b=barOf(curBar), ms=data.mesas.filter(m=>m.bar===b.id).sort((x,y)=>(x.status==='esperando'?0:1)-(y.status==='esperando'?0:1));
+    const balls=n=>{ const cols=['#e7c13a','#c8322b','#2d63c8','#111','#f07a1a','#137a46']; let h=''; for(let i=0;i<n;i++){ const x=18+((i*37+n*11)%64), y=22+((i*53+7)%52); h+=`<span class="b" style="left:${x}%;top:${y}%;background:${cols[i%cols.length]}"></span>`; } return h+'<span class="b" style="left:30%;top:46%;background:#fff"></span>'; };
+    const pockets='<i style="left:5px;top:5px"></i><i style="right:5px;top:5px"></i><i style="left:5px;bottom:5px"></i><i style="right:5px;bottom:5px"></i>';
+    let k=0;
+    const tbs=ms.map(m=>{ k++;
+      if(m.status==='esperando') return `<div class="tb wait"><div class="felt"><span class="num">${k}</span>${pockets}${balls(0)}</div><div class="st" style="color:var(--wait)"><span class="d"></span>Esperando adversário</div>
+        <div class="pl"><div class="av">${esc(m.apelido1[0])}</div>${esc(m.apelido1)}${m.patente1?` <small>· ${esc(m.patente1)}</small>`:''}</div><button class="b-play" type="button" data-join="${m.id}">Jogar</button></div>`;
+      return `<div class="tb"><div class="felt"><span class="num">${k}</span>${pockets}${balls(3+(k%4))}</div><div class="st" style="color:var(--busy)"><span class="d"></span>Jogando</div>
+        <div class="pl"><div class="av">${esc(m.apelido1[0])}</div>${esc(m.apelido1)} <span class="vs">x</span> <div class="av">${esc((m.apelido2||'?')[0])}</div>${esc(m.apelido2||'')}</div><button class="b-busy" type="button" disabled>Em jogo</button></div>`;
+    });
+    const livres=Math.max(2,6-ms.length);
+    for(let i=0;i<livres;i++){ k++; tbs.push(`<div class="tb"><div class="felt"><span class="num">${k}</span>${pockets}</div><div class="st" style="color:var(--ok)"><span class="d"></span>Livre</div><div class="pl" style="color:var(--mut)">Ninguém sentado</div><button class="b-sit" type="button" data-act="nova">Sentar e esperar</button></div>`); }
+    const w=ms.filter(m=>m.status==='esperando');
+    const dica=w.length?`Tem ${w.length===1?'gente':w.length+' pessoas'} esperando adversário, freguês. Toca na mesa amarela!`:'Mesa vazia é mesa esperando dono. Senta numa e chama a turma!';
+    lob.innerHTML=`<div class="page"><aside>
+      <button class="back" type="button" data-act="bares">‹ Bares</button>
+      <h1>${b.br.replace('<br>',' ').replace(/(do |da )(.*)$/,'$1<span>$2</span>')}</h1>
+      <div class="chips"><span class="chip">${b.ficha?'Ficha '+b.ficha:'Grátis'}</span><span class="chip">Vencedor ${b.ficha?'leva '+premio(b.ficha):'ganha 5'}</span><span class="chip">${onlineCount(b.id)} online</span></div>
+      ${asideCommon()}
+      <button class="big" type="button" data-act="agora"${busy?' disabled':''}>Jogar agora<small>${w.length?'Senta com quem está esperando':'Abre uma mesa e espera alguém'}</small></button>
+      <button class="ghost" type="button" data-act="treino">Treinar com o Seu Zé</button>
+      <div class="err">${esc(errMsg)}</div>
+      <div class="zeline"><b>Seu Zé:</b> ${dica}</div>
+    </aside><main>
+      <div class="mh"><div><h2>Mesas</h2><p>Toque numa mesa amarela pra jogar na hora.</p></div><div class="online"><i class="dot"></i>${ms.length} ${ms.length===1?'mesa aberta':'mesas abertas'}</div></div>
+      <div class="tables">${tbs.join('')}</div></main></div>`;
+  }
+}
+function renderWait(){
+  const r=M.row, b=barOf(r.bar);
+  lob.innerHTML=`<div class="wbox">
+    <span class="tag">${esc(b.nome)}</span>
+    <div class="seats"><div class="seat"><div class="av">${esc(nick[0])}</div><b>${esc(nick)}</b><small>${esc(S().rank())}</small></div><div class="vsb">VS</div>
+      <div class="seat empty"><div class="av">?</div><b>Esperando…</b><small>alguém sentar</small></div></div>
+    <div class="pot">${r.ficha?`Pote: <b>${r.ficha*2}</b> · quem vencer leva <b>${premio(r.ficha)}</b>`:'Mesa grátis · quem vencer ganha <b>5</b> da casa'}</div>
+    <div class="ze"><i class="zeav"></i><span><b>Seu Zé:</b> Senta aí e passa giz no taco, já já chega alguém. Enquanto isso, quer bater uma comigo?</span></div>
+    <div class="row2"><button class="big" type="button" data-act="treinoW" style="font-size:19px;padding:13px">Treinar enquanto espera</button><button class="ghost" type="button" data-act="levantar">Levantar da mesa</button></div>
+    <div class="err">${esc(errMsg)}</div>
+  </div>`;
+}
+
+async function refresh(){
+  try{ const d=await rpc('lobby'); data={mesas:d.mesas||[],feed:d.feed||[]}; }catch(e){}
+  render();
+}
+const refreshSoon=()=>{ clearTimeout(refreshT); refreshT=setTimeout(refresh,250); };
+function openLobby(v,bar){
+  if(v) view=v; if(bar) curBar=bar;
+  errMsg=''; lob.hidden=false; $('waitPill').hidden=true; render(); refresh(); syncSaldo(); track();
+  clearInterval(pollT); pollT=setInterval(()=>{ if(!lob.hidden&&view!=='wait') refresh(); },15000);
+}
+function closeLobby(){ lob.hidden=true; clearInterval(pollT); }
+
+/* ---------- ações ---------- */
+lob.addEventListener('click',async e=>{
+  const t=e.target.closest('button'); if(!t||t.disabled) return;
+  const act=t.dataset.act;
+  if(t.dataset.bar){ view='bar'; curBar=t.dataset.bar; errMsg=''; render(); track(); return refresh(); }
+  if(t.dataset.join) return sentar(()=>rpc('entrar',{pid:t.dataset.join,patente:S().rank()}));
+  if(act==='menu'){ closeLobby(); S().menu(); return; }
+  if(act==='bares'){ view='bares'; errMsg=''; render(); track(); return refresh(); }
+  if(act==='treino'){ closeLobby(); S().startCpu(); return; }
+  if(act==='fiado'){ try{ const v=await rpc('pontos',{motivo:'fiado',valor:0,ref:null}); S().setPts(v); S().narrate&&0; errMsg=''; render(); S().toast('Seu Zé pendurou uma ficha no caderno: +10',2600); }catch(err){ errMsg=msgErr(err); render(); } return; }
+  if(act==='nova') return sentar(()=>rpc('sentar',{bar:curBar,patente:S().rank(),nova:true}));
+  if(act==='agora'){
+    let bar=curBar;
+    if(view==='bares'){
+      const opts=BARS.filter(b=>b.ficha<=saldo());
+      const withWait=opts.filter(b=>data.mesas.some(m=>m.bar===b.id&&m.status==='esperando'));
+      bar=(withWait[0]||opts[0]||BARS[0]).id;
+    }
+    return sentar(()=>rpc('sentar',{bar,patente:S().rank(),nova:false}));
+  }
+  if(act==='levantar'){ await levantar(); return; }
+  if(act==='treinoW'){ closeLobby(); S().startCpu(); $('waitPill').hidden=false; $('waitPillTxt').textContent='Esperando adversário · '+barOf(M.row.bar).nome; return; }
+});
+$('waitPillBack').addEventListener('click',()=>{ if(M&&M.phase==='wait'){ S().menu(); openLobby('wait'); } });
+
+async function sentar(call){
+  if(busy) return; busy=true; errMsg=''; render();
+  try{ const row=await call(); busy=false; await syncSaldo(); onRow(row,true); }
+  catch(e){ busy=false; errMsg=msgErr(e); render(); refresh(); }
+}
+
+/* ---------- partida ---------- */
+function chanFor(row){
+  const ch=sb.channel('mesa:'+row.id,{config:{broadcast:{self:false},presence:{key:uid}}});
+  ch.on('broadcast',{event:'g'},({payload})=>onMsg(payload));
+  ch.on('presence',{event:'sync'},()=>onPresence());
+  ch.subscribe(st=>{ if(st==='SUBSCRIBED'){ try{ ch.track({nick,t:Date.now()}); }catch(e){} if(M&&M.ch===ch&&M.onSub){ const f=M.onSub; M.onSub=null; f(); } } });
+  return ch;
+}
+const send=(t,d)=>{ if(M&&M.ch) try{ M.ch.send({type:'broadcast',event:'g',payload:{t,d}}); }catch(e){} };
+function onRow(row,fromMe){
+  if(!row||!row.id){ openLobby(); return; }
+  if(row.status==='esperando'){
+    if(!M||M.row.id!==row.id){ endMatch(); M={row,phase:'wait',ch:null}; M.ch=chanFor(row); startHb(); }
+    M.row=row; view='wait'; openLobby('wait'); track();
+  }else if(row.status==='jogando'){
+    const fresh=!!fromMe;
+    if(M&&M.row.id===row.id&&M.phase==='play') return;
+    if(M&&M.row.id===row.id&&M.phase==='wait'){ M.row=row; return arrived(); }
+    endMatch(); M={row,phase:'wait',ch:null}; M.ch=chanFor(row); startHb();
+    const me=row.j1===uid?0:1;
+    if(me===1&&fromMe){ M.onSub=()=>{ send('join',{nick}); }; }
+    play(fresh&&me===0);
+  }else{ endMatch(); openLobby('bar',row.bar); }
+}
+function arrived(){
+  // alguém sentou na minha mesa
+  const r=M.row, op=r.apelido2||'Alguém';
+  if(!S().inGame()||!lob.hidden&&view==='wait'){ play(true); return; }
+  $('waitPill').hidden=true;
+  $('arriveTxt').textContent=`${op} sentou na sua mesa no ${barOf(r.bar).nome}. A partida já vai começar!`;
+  $('arrive').hidden=false; let n=6; const go=$('arriveGo'); go.textContent=`Bora jogar (${n})`;
+  clearInterval(M.arT); M.arT=setInterval(()=>{ n--; go.textContent=`Bora jogar (${n})`; if(n<=0){ clearInterval(M.arT); $('arrive').hidden=true; play(true); } },1000);
+  go.onclick=()=>{ clearInterval(M.arT); $('arrive').hidden=true; play(true); };
+}
+function play(fresh){
+  const r=M.row, me=r.j1===uid?0:1, f=r.ficha;
+  M.phase='play'; M.me=me; M.opGone=null; M.reported=false;
+  closeLobby(); $('waitPill').hidden=true; $('arrive').hidden=true;
+  S().startOnline({me,names:[r.apelido1,r.apelido2||'?'],send,premio:premio(f),ficha:f,bar:r.bar,fresh});
+  $('frBtn').hidden=false;
+  setConfirm(true); track();
+  clearInterval(M.syncT); M.syncT=setInterval(()=>{ if(!M||M.phase!=='play') return clearInterval(M&&M.syncT);
+    if(S().waiting()){ send('sync',{}); M.waitN=(M.waitN||0)+1; if(me===0&&M.waitN>=2) S().unwait(); } },2500);
+}
+function onMsg(p){
+  if(!M||!p) return;
+  if(p.t==='join'){ if(M.phase==='wait') rpc('minha_partida').then(r=>{ if(r&&r.status==='jogando'){ M.row=r; arrived(); } }); return; }
+  if(p.t==='frase'){ showFrase(p.d.nick,FRASES[p.d.i]); return; }
+  if(p.t==='bye'){ checkEnd(); setTimeout(checkEnd,2500); return; }
+  if(M.phase==='play') S().recv(p.t,p.d);
+}
+function onPresence(){
+  if(!M||M.phase!=='play'||!M.ch) return;
+  const st=M.ch.presenceState(), here=Object.keys(st).some(k=>k!==uid);
+  if(here){ if(M.opGone){ M.opGone=null; S().toast('Seu adversário voltou',1800); } return; }
+  if(!M.opGone&&!S().isOver()){ M.opGone=Date.now(); S().toast('Seu adversário caiu. Esperando ele voltar…',3000); }
+}
+function startHb(){
+  clearInterval(M.hb);
+  const beat=async()=>{
+    if(!M) return;
+    try{
+      const r=await rpc('sinal',{pid:M.row.id});
+      if(!r||!M||r.id!==M.row.id) return;
+      if(M.phase==='wait'&&r.status==='jogando'){ M.row=r; arrived(); return; }
+      if(r.status==='fim'||r.status==='cancelada'){ finished(r); return; }
+      M.row=r;
+      if(M.phase==='play'&&M.opGone&&Date.now()-M.opGone>60000&&!S().isOver()){
+        const x=await rpc('resultado',{pid:r.id,vencedor:M.me});
+        if(x.status==='fim') finished(x);
+      }
+    }catch(e){}
+  };
+  beat(); M.hb=setInterval(beat,10000);
+}
+async function checkEnd(){ if(!M) return; try{ const r=await rpc('minha_partida'); if(!r||!r.id){ const x=await sb.from('partidas').select('*').eq('id',M.row.id).maybeSingle(); if(x.data) finished(x.data); } }catch(e){} }
+function finished(r){
+  if(!M) return;
+  M.row=r;
+  if(M.phase==='wait'){ endMatch(); if(!S().inGame()) openLobby('bar',r.bar); return; }
+  if(!S().isOver()){
+    if(r.status==='cancelada'){ S().endNet(M.me,'A partida foi cancelada e as fichas voltaram.'); }
+    else S().endNet(r.vencedor, r.vencedor===M.me?'O adversário saiu da mesa. Você leva o pote.':'Você saiu da mesa e entregou a partida.');
+  }
+  M.phase='over'; syncSaldo(); setTimeout(()=>{ if(M&&M.phase==='over') stopChannel(); },8000);
+}
+window.__netEnd=async(w)=>{
+  if(!M||M.reported) return; M.reported=true; M.phase='over';
+  let tries=0;
+  const go=async()=>{ try{ const r=await rpc('resultado',{pid:M.row.id,vencedor:w}); M.row=r;
+      if(r.status==='jogando'&&tries++<18) return setTimeout(go,5000);
+      syncSaldo(); setTimeout(()=>{ if(M&&M.phase==='over') stopChannel(); },8000);
+    }catch(e){ if(tries++<6) setTimeout(go,4000); } };
+  go();
+};
+window.__netLeave=()=>{
+  // botão "Voltar ao bar" ou "Entregar e sair"
+  const r=M&&M.row, bar=r?r.bar:curBar;
+  if(M&&M.phase==='play'&&!S().isOver()){ send('bye',{}); rpc('levantar',{pid:r.id}).then(()=>syncSaldo()).catch(()=>{}); }
+  endMatch(); S().menu(); openLobby('bar',bar||'calcada');
+  return true;
+};
+async function levantar(){
+  if(!M) return openLobby('bares');
+  const bar=M.row.bar;
+  try{ await rpc('levantar',{pid:M.row.id}); }catch(e){}
+  endMatch(); syncSaldo(); openLobby('bar',bar);
+}
+function stopChannel(){ if(M&&M.ch){ try{ sb.removeChannel(M.ch); }catch(e){} M.ch=null; } }
+function endMatch(){
+  if(!M) return;
+  clearInterval(M.hb); clearInterval(M.syncT); clearInterval(M.arT); stopChannel();
+  M=null; $('frBtn').hidden=true; $('frPop').hidden=true; $('waitPill').hidden=true; $('arrive').hidden=true; setConfirm(false);
+  if(S()) S().stop();
+  track();
+}
+
+/* ---------- confirmação de saída e frases ---------- */
+const ct0={h:null,p:null,l:null};
+function setConfirm(on){
+  const h=document.getElementById('ct'), p=h&&h.nextElementSibling, l=$('leave'); if(!h) return;
+  if(ct0.h==null){ ct0.h=h.textContent; ct0.p=p.textContent; ct0.l=l.textContent; }
+  h.textContent=on?'Entregar a partida?':ct0.h; p.textContent=on?'Se sair agora, você perde e paga a ficha.':ct0.p; l.textContent=on?'Entregar e sair':ct0.l;
+}
+$('frPop').innerHTML=FRASES.map((f,i)=>`<button type="button" data-i="${i}">${f}</button>`).join('');
+$('frBtn').addEventListener('click',()=>{ $('frPop').hidden=!$('frPop').hidden; });
+let lastFr=0;
+$('frPop').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; $('frPop').hidden=true;
+  if(Date.now()-lastFr<2500) return; lastFr=Date.now(); const i=+b.dataset.i; send('frase',{nick,i}); showFrase('Você',FRASES[i]); });
+let sayT=null;
+function showFrase(who,txt){ if(!txt) return; const el=$('frSay'); el.innerHTML=`<b>${esc(who)}:</b> ${esc(txt)}`; el.hidden=false; clearTimeout(sayT); sayT=setTimeout(()=>el.hidden=true,2800); }
+
+/* ---------- menu: botão do online ---------- */
+function patchMenu(){
+  const nav=document.querySelector('#menu nav'); if(!nav||document.getElementById('openOnline')) return;
+  const soon=nav.querySelector('.row.soon'); if(soon) soon.remove();
+  const sect=document.createElement('div'); sect.className='sect'; sect.textContent='Online';
+  const btn=document.createElement('button'); btn.type='button'; btn.className='primary onl'; btn.id='openOnline';
+  btn.innerHTML='Jogar online<small>Bares e mesas com gente de verdade</small>';
+  btn.onclick=()=>openLobby('bares');
+  nav.prepend(sect,btn);
+  const cpuSect=[...nav.querySelectorAll('.sect')].find(s=>/máquina/i.test(s.textContent)); if(cpuSect) cpuSect.textContent='Treino com o Seu Zé';
+  const pc=document.getElementById('playCpu'); if(pc){ pc.classList.add('sec'); pc.textContent='Treinar'; }
+}
+
+/* ---------- início ---------- */
+window.__onlineInit=async()=>{
+  sb=window.__sb; uid=window.__uid; nick=window.__nick||'';
+  if(!sb||!S()) return;
+  patchMenu(); await syncSaldo();
+  const w=document.getElementById('wrap'); if(w) w.append($('frBtn'),$('frPop'),$('frSay'));
+  const rt=document.getElementById('root'); if(rt) rt.append($('arrive'),$('waitPill'));
+  lobCh=sb.channel('lobby',{config:{presence:{key:uid}}});
+  lobCh.on('presence',{event:'sync'},()=>{ presence=lobCh.presenceState(); if(!lob.hidden) render(); });
+  lobCh.subscribe(st=>{ if(st==='SUBSCRIBED') track(); });
+  sb.channel('mesas-db').on('postgres_changes',{event:'*',schema:'public',table:'partidas'},()=>{ if(!lob.hidden&&view!=='wait') refreshSoon(); }).subscribe();
+  try{ const r=await rpc('minha_partida'); if(r&&r.id){ onRow(r,false); return; } }catch(e){}
+  openLobby('bares');
+};
 })();
 </script>
 
@@ -1191,7 +1664,7 @@ function step(){
     if(b.in) continue;
     const sp=Math.hypot(b.vx,b.vy);
     if(sp<0.05&&!b.curve){b.vx=b.vy=0;b.top=0;b.side=0;continue;}
-    if(sp<0.05){continue;}
+    if(sp<0.05){ if(--b.curve.n<=0) b.curve=null; continue; }
     const k=Math.max(0,sp*0.9915-0.0075)/sp; b.vx*=k; b.vy*=k;
     if(b.side) b.side*=0.996;
     if(b.curve){ b.vx+=b.curve.x; b.vy+=b.curve.y; b.curve.x*=0.85; b.curve.y*=0.85; if(--b.curve.n<=0) b.curve=null; }
@@ -1201,14 +1674,17 @@ function moving(){ for(const b of balls) if(!b.in&&(b.vx||b.vy)) return true; re
 
 /* ---------- regras ---------- */
 let spinX=0, spinY=0;
-function strike(ang,pw,top,side){
-  const v=Math.max(1,pw*MAXV), g=(Math.random()+Math.random()+Math.random()-1.5)*0.0011*pw;
+function strike(ang,pw,top,side,g0){
+  const v=Math.max(1,pw*MAXV), g=g0!=null?g0:(Math.random()+Math.random()+Math.random()-1.5)*0.0011*pw;
   cue.vx=Math.cos(ang+g)*v; cue.vy=Math.sin(ang+g)*v;
-  cue.top=top*1.25; cue.side=side;
+  cue.top=top*1.25; cue.side=side; return g;
 }
 function shoot(){
   if(state!=='aim'||winner||cue.in) return;
-  strike(aim,power,spinY,spinX);
+  if(NET.on&&netLocked()) return;
+  const sx={a:aim,p:power,t:spinY,s:spinX,cx:cue.x,cy:cue.y};
+  sx.g=strike(aim,power,spinY,spinX);
+  if(NET.on){ NET.shooter=NET.me; NET.turnNo++; sx.n=NET.turnNo; NET.send('shot',sx); }
   shot={firstHit:null,potted:[],wasBreak:isBreak,clearedAtStart:groups[cur]?remaining(groups[cur])===0:false};
   sCue(power,cue.x,cue.y);
   state='moving'; power=0; ballInHand=false; setFill();
@@ -1275,19 +1751,23 @@ function resolve(){
 }
 function endGame(w,why,early){
   winner=w; state='over'; cards(); hideTalk();
-  document.getElementById('winTitle').textContent=CPU.on?(w===0?'Você venceu!':'O computador venceu'):`${names[w]} venceu`;
+  document.getElementById('winTitle').textContent=NET.on?(w===NET.me?'Você venceu!':`${names[w]} venceu`):CPU.on?(w===0?'Você venceu!':'O computador venceu'):`${names[w]} venceu`;
   document.getElementById('winWhy').textContent=why;
   document.querySelector('.winze').hidden=!zeOn;
-  document.getElementById('winZe').textContent=early?pick(ZE.eightEarly)():CPU.on?(w===0?pick(ZE.winYou)():pick(ZE.winCpu)()):pick(ZE.win2p)(names[w]);
+  document.getElementById('winZe').textContent=early?pick(ZE.eightEarly)():NET.on?(w===NET.me?pick(ZE.winNet)():pick(ZE.loseNet)()):CPU.on?(w===0?pick(ZE.winYou)():pick(ZE.winCpu)()):pick(ZE.win2p)(names[w]);
   const fm=finishMatch(w), wp=document.getElementById('winPts'), wx=document.getElementById('winXp');
   if(fm){
-    wp.innerHTML=fm.pts?coin+` +${fm.pts} pontos${fm.clean?' (com mesa limpa)':''}`:''; wp.hidden=!fm.pts;
+    if(NET.on){ const g=w===NET.me?NET.premio:(NET.ficha?-NET.ficha:0); wp.innerHTML=g>0?coin+` +${g} pontos`+(NET.ficha?' do pote':' da casa'):g<0?`Pagou a ficha: ${g} pontos`:''; wp.hidden=!g; }
+    else { wp.innerHTML=fm.pts?coin+` +${fm.pts} pontos${fm.clean?' (com mesa limpa)':''}`:''; wp.hidden=!fm.pts; }
     const i=rankIdx(prof.xp), nx=RANKS[i+1];
     wx.innerHTML=`<span class="wx-gain">+${fm.xp} XP</span>`+(fm.up?`<span class="wx-up">Nova patente: <b>${fm.up.nome}</b>${fm.up.txt?' · '+fm.up.txt:''}</span>`:`<span class="wx-to">${nx?`${nx.xp-prof.xp} XP para ${nx.nome}`:'Patente máxima'}</span>`)+fm.msgs.map(m=>`<span class="wx-ch">${m}</span>`).join('');
     wx.hidden=false;
   } else { wp.hidden=true; wx.hidden=true; }
+  document.getElementById('again').hidden=NET.on;
+  document.getElementById('tomenu').textContent=NET.on?'Voltar ao bar':'Menu';
   document.getElementById('over').hidden=false;
   setStatus(`Fim de jogo. <b>${names[w]}</b> venceu.`);
+  if(NET.on&&(NET.shooter===NET.me||NET.applying)&&window.__netEnd) window.__netEnd(w,why);
 }
 function newGame(){
   rack(); starter=1-starter; cur=starter; groups=[null,null]; isBreak=true; ballInHand=true; kitchenOnly=true;
@@ -1336,6 +1816,8 @@ const ZE={
   winYou:[()=>`Matou a 8! Hoje a saideira é por conta da casa.`,()=>`Fechou a mesa! Pode pedir a última gelada.`],
   winCpu:[()=>`O computador levou essa. Pega outra ficha e tenta de novo!`,()=>`Perdeu pra máquina? Fica entre nós, ninguém viu.`],
   win2p:[w=>`${w} fechou a mesa! Quem perdeu paga a próxima ficha.`,w=>`${w} limpou a mesa. Vai mais uma ficha aí?`],
+  winNet:[()=>`Levou o pote! Hoje quem paga a rodada é o outro.`,()=>`Ganhou na mesa do bar. Assim que se faz!`],
+  loseNet:[()=>`Perdeu essa. Respira, passa giz e volta pra mesa.`,()=>`Quem perde paga a ficha. Na próxima a sorte vira!`],
   eightEarly:[()=>`Matou a 8 antes da hora! Paga a ficha, parceiro.`,()=>`A 8 caiu cedo demais. Essa doeu!`],
 };
 let zeOn=true, narrT=null, bannerT=null, streak=0, pendingBanner=[null,null];
@@ -1422,6 +1904,7 @@ const WIN_PTS=[5,10,15], CLEAN_PTS=5;
 let prof={pts:0,owned:['casa'],eq:'casa'};
 try{ const p=JSON.parse(localStorage.getItem('sinuca-perfil')||'null'); if(p&&Array.isArray(p.owned)) prof=Object.assign(prof,p); }catch(e){}
 if(!prof.owned.includes('casa')) prof.owned.unshift('casa');
+function addPts(n,motivo,ref){ if(!n) return; prof.pts+=n; if(window.__pts) window.__pts(n,motivo,ref); }
 const saveProf=()=>{ try{ localStorage.setItem('sinuca-perfil',JSON.stringify(prof)); }catch(e){} if(window.__cloudSave) window.__cloudSave(prof); };
 const cueById=id=>CUES.find(c=>c.id===id)||CUES[0];
 const curCue=()=>cueById(prof.eq);
@@ -1508,25 +1991,32 @@ function chEvent(ev,n){
   for(const id of prof.day.ids){
     const c=chDef(id); if(c.ev!==ev||prof.day.done.includes(id)) continue;
     prof.day.prog[id]=Math.min(c.goal,(prof.day.prog[id]||0)+(n||1));
-    if(prof.day.prog[id]>=c.goal){ prof.day.done.push(id); prof.pts+=c.pts; out.push(`Desafio concluído: +${c.pts} pontos`); }
+    if(prof.day.prog[id]>=c.goal){ prof.day.done.push(id); addPts(c.pts,'desafio'); out.push(`Desafio concluído: +${c.pts} pontos`); }
   }
-  if(!prof.day.bonus&&prof.day.done.length===3){ prof.day.bonus=true; prof.pts+=CH_BONUS; out.push(`Todos os desafios do dia: +${CH_BONUS} pontos`); }
+  if(!prof.day.bonus&&prof.day.done.length===3){ prof.day.bonus=true; addPts(CH_BONUS,'desafio'); out.push(`Todos os desafios do dia: +${CH_BONUS} pontos`); }
   if(out.length){ saveProf(); syncPts(); syncProgress(); }
   return out;
 }
 /* fim de partida contra o computador: experiência, pontos, patente e desafios */
 function finishMatch(w){
+  if(NET.on){
+    const won=w===NET.me, r0=rankIdx(prof.xp), xp=won?40:10; prof.xp+=xp;
+    const r1=rankIdx(prof.xp); let up=null;
+    for(let k=r0+1;k<=r1;k++){ const pz=RANKS[k].prize; if(pz.box) prof.free[pz.box]++; if(pz.pts) addPts(pz.pts,'patente',String(k)); if(pz.cue&&!prof.owned.includes(pz.cue)) prof.owned.push(pz.cue); up=RANKS[k]; }
+    saveProf(); syncPts(); syncProgress();
+    return {won,clean:false,xp,pts:0,up,msgs:[]};
+  }
   if(!CPU.on) return null;
   const won=w===0, clean=won&&gamePots[1]===0;
   const r0=rankIdx(prof.xp);
   const xp=(won?XP_WIN[CPU.level]:XP_LOSS)+(clean?XP_CLEAN:0);
   const pts=won?(WIN_PTS[CPU.level]+(clean?CLEAN_PTS:0)):0;
-  prof.xp+=xp; prof.pts+=pts;
+  prof.xp+=xp; addPts(pts,'cpu');
   const msgs=[];
   msgs.push(...chEvent('play'));
   if(won){ msgs.push(...chEvent('win')); if(CPU.level>=1) msgs.push(...chEvent('winMed')); if(CPU.level===2) msgs.push(...chEvent('winHard')); if(!gameFoul) msgs.push(...chEvent('noFoulWin')); if(clean) msgs.push(...chEvent('cleanWin')); }
   const r1=rankIdx(prof.xp); let up=null;
-  for(let k=r0+1;k<=r1;k++){ const pz=RANKS[k].prize; if(pz.box) prof.free[pz.box]++; if(pz.pts) prof.pts+=pz.pts; if(pz.cue&&!prof.owned.includes(pz.cue)) prof.owned.push(pz.cue); up=RANKS[k]; }
+  for(let k=r0+1;k<=r1;k++){ const pz=RANKS[k].prize; if(pz.box) prof.free[pz.box]++; if(pz.pts) addPts(pz.pts,'patente',String(k)); if(pz.cue&&!prof.owned.includes(pz.cue)) prof.owned.push(pz.cue); up=RANKS[k]; }
   saveProf(); syncPts(); syncProgress();
   return {won,clean,xp,pts,up,msgs};
 }
@@ -1562,6 +2052,9 @@ const LEVELS=[
   {nome:'Médio',noise:0.009,pnoise:0.06,pick:1,spins:[0],sims:8,pos:false},
   {nome:'Difícil',noise:0.0025,pnoise:0.025,pick:1,spins:[0,0.55,-0.6],sims:9,pos:true},
 ];
+const NET={turnS:45,on:false,me:0,send:null,shooter:-1,applying:false,wait:false,pending:null,turnNo:0,t0:0,timedOut:false,lastAim:0,aimKey:'',premio:0,ficha:0,bar:''};
+const netLocked=()=>NET.on&&(NET.wait||cur!==NET.me||state!=='aim');
+const locked=()=>isCpuTurn()||netLocked();
 const isCpuTurn=()=>CPU.on&&cur===1&&!winner&&document.getElementById('menu').hidden&&document.getElementById('confirm').hidden;
 /* pontos de mira dentro da boca de cada caçapa */
 const AIMPTS=[[R*0.7,R*0.7],[500,-3],[TW-R*0.7,R*0.7],[R*0.7,TH-R*0.7],[500,TH+3],[TW-R*0.7,TH-R*0.7]];
@@ -2065,20 +2558,22 @@ function draw(now){
 }
 
 /* ---------- loop ---------- */
-let acc=0, last=performance.now();
+let acc=0, last=performance.now(), movingSince=0;
 function frame(now){
   budget=4;
   let el=Math.min(0.1,(now-last)/1000); last=now;
   if(state==='moving'){
+    if(!movingSince) movingSince=now; else if(now-movingSince>30000){ for(const b of balls){ b.vx=b.vy=0; b.curve=null; } }
     acc+=el;
     while(acc>=1/60&&state==='moving'){
       acc-=1/60; step();
-      if(!balls.some(b=>!b.in&&(b.vx||b.vy))){ state='settle'; acc=0; resolve(); }
+      if(!balls.some(b=>!b.in&&(b.vx||b.vy))){ state='settle'; acc=0; resolve(); if(NET.on) netAfter(); }
     }
-  } else acc=0;
+  } else { acc=0; movingSince=0; }
   let roll=0; if(state==='moving') for(const b of balls) if(!b.in) roll+=Math.hypot(b.vx,b.vy);
   rolling(roll);
   if(spaceCharge){ power=Math.min(1,power+el*0.75); setFill(); }
+  if(NET.on) netTick(now);
   draw(now);
   requestAnimationFrame(frame);
 }
@@ -2112,7 +2607,7 @@ function moveCue(p){
   if(free(x,y,cue)){cue.x=x;cue.y=y}
 }
 cv.addEventListener('pointerdown',e=>{
-  ensureAudio(); if(state!=='aim'||winner||isCpuTurn()) return; hideSpin();
+  ensureAudio(); if(state!=='aim'||winner||locked()) return; hideSpin();
   try{cv.setPointerCapture(e.pointerId)}catch(_){}
   const p=toWorld(e);
   if(ballInHand&&Math.hypot(p.x-cue.x,p.y-cue.y)<R*3){drag='cue';moveCue(p)}
@@ -2145,7 +2640,7 @@ let pull=null;
 function powFrom(e){ const l=local(pw,e), v=cueVertical(); if(!pull) return;
   const d=v?(l.y-pull.s):(pull.s-l.x), len=(v?l.h:l.w)*0.72;
   power=Math.min(1,Math.max(0,d/len)); setFill(); }
-pw.addEventListener('pointerdown',e=>{ ensureAudio(); if(state!=='aim'||winner||isCpuTurn()) return; hideSpin(); try{pw.setPointerCapture(e.pointerId)}catch(_){} charging=true; const l=local(pw,e); pull={s:cueVertical()?l.y:l.x}; power=0; setFill(); });
+pw.addEventListener('pointerdown',e=>{ ensureAudio(); if(state!=='aim'||winner||locked()) return; hideSpin(); try{pw.setPointerCapture(e.pointerId)}catch(_){} charging=true; const l=local(pw,e); pull={s:cueVertical()?l.y:l.x}; power=0; setFill(); });
 pw.addEventListener('pointermove',e=>{ if(charging) powFrom(e); });
 pw.addEventListener('pointerup',()=>{ if(!charging) return; charging=false; pull=null; if(power>0.03) shoot(); else {power=0;setFill()} });
 pw.addEventListener('pointercancel',()=>{ charging=false; pull=null; power=0; setFill(); });
@@ -2154,7 +2649,7 @@ pw.addEventListener('pointercancel',()=>{ charging=false; pull=null; power=0; se
 const fineEl=document.getElementById('fine'), wheelEl=document.getElementById('wheel');
 let fine=null, wheelOff=0;
 fineEl.addEventListener('pointerdown',e=>{
-  if(state!=='aim'||winner||isCpuTurn()) return; hideSpin();
+  if(state!=='aim'||winner||locked()) return; hideSpin();
   try{fineEl.setPointerCapture(e.pointerId)}catch(_){} fineEl.classList.add('active');
   const lf=local(fineEl,e), l0=cueVertical()?lf.y:lf.x; fine={x:l0,last:l0,moved:false};
 });
@@ -2169,10 +2664,10 @@ const fineEnd=e=>{
   fine=null;
 };
 fineEl.addEventListener('pointerup',fineEnd); fineEl.addEventListener('pointercancel',fineEnd);
-fineEl.addEventListener('keydown',e=>{ if(state!=='aim'||isCpuTurn()) return; if(e.key==='ArrowLeft'){aim-=0.0025;e.preventDefault();e.stopPropagation()} if(e.key==='ArrowRight'){aim+=0.0025;e.preventDefault();e.stopPropagation()} });
+fineEl.addEventListener('keydown',e=>{ if(state!=='aim'||locked()) return; if(e.key==='ArrowLeft'){aim-=0.0025;e.preventDefault();e.stopPropagation()} if(e.key==='ArrowRight'){aim+=0.0025;e.preventDefault();e.stopPropagation()} });
 
 window.addEventListener('keydown',e=>{
-  if(state!=='aim'||winner||isCpuTurn()) return;
+  if(state!=='aim'||winner||locked()) return;
   if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ aim-=e.shiftKey?0.02:0.003; e.preventDefault(); }
   if(e.key==='ArrowRight'||e.key==='ArrowDown'){ aim+=e.shiftKey?0.02:0.003; e.preventDefault(); }
   if(e.code==='Space'&&!e.repeat&&document.activeElement?.tagName!=='BUTTON'){ ensureAudio(); spaceCharge=true; power=0; e.preventDefault(); }
@@ -2198,7 +2693,7 @@ const big=document.getElementById('bigcue');
 function spinFrom(e){ const l=local(big,e); setSpin((l.x/l.w)*2-1,-((l.y/l.h)*2-1)); }
 big.addEventListener('pointerdown',e=>{ try{big.setPointerCapture(e.pointerId)}catch(_){} bigDown=true; spinFrom(e); });
 let bigDown=false; big.addEventListener('pointermove',e=>{ if(bigDown) spinFrom(e); }); ['pointerup','pointercancel'].forEach(k=>big.addEventListener(k,()=>bigDown=false));
-sbtn.addEventListener('click',()=>{ if(isCpuTurn()||state!=='aim') return; padEl.hidden=!padEl.hidden; });
+sbtn.addEventListener('click',()=>{ if(locked()||state!=='aim') return; padEl.hidden=!padEl.hidden; });
 document.getElementById('spcenter').addEventListener('click',()=>setSpin(0,0));
 document.getElementById('spok').addEventListener('click',hideSpin);
 function touchTip(){
@@ -2254,12 +2749,95 @@ document.getElementById('playTwo').addEventListener('click',()=>{ ensureAudio();
 const confirmEl=document.getElementById('confirm');
 document.getElementById('xbtn').addEventListener('click',()=>{ hideSpin(); confirmEl.hidden=false; document.getElementById('stay').focus(); });
 document.getElementById('stay').addEventListener('click',()=>{ confirmEl.hidden=true; if(isCpuTurn()) cpuTurn(); });
-function toMenu(){ hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); }
+function toMenu(){ if(NET.on){ const ok=window.__netLeave&&window.__netLeave(); netStop(); if(ok) return; } hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); }
 document.getElementById('leave').addEventListener('click',toMenu);
 document.getElementById('tomenu').addEventListener('click',toMenu);
 window.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!confirmEl.hidden) confirmEl.hidden=true; });
 let toastT=null; function toast(msg,ms){ const el=document.getElementById('toast'); el.textContent=msg; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,ms||1600); }
 document.getElementById('again').addEventListener('click',newGame);
+
+/* ---------- online ---------- */
+const clockEl=document.createElement('div'); clockEl.className='netclock'; clockEl.hidden=true; wrap.appendChild(clockEl);
+function snap(){
+  return {n:NET.turnNo, b:balls.map(b=>[b.n,+b.x.toFixed(2),+b.y.toFixed(2),b.in?1:0]), cur, groups:[...groups], isBreak, ballInHand, kitchenOnly, winner, gp:[...gamePots], st:statusEl.innerHTML, foul:statusEl.classList.contains('foul')};
+}
+function netSendState(){ if(NET.on&&NET.send) NET.send('state',snap()); }
+function applySnap(s){
+  if(s.n<NET.turnNo) return;
+  NET.turnNo=s.n;
+  for(const [n,x,y,i] of s.b){ const b=balls.find(q=>q.n===n); if(!b) continue; const wasIn=b.in; b.x=x; b.y=y; b.vx=b.vy=0; b.in=!!i; b.fall=null; b.top=0; b.side=0; if(!b.in||wasIn) b.anim=null; }
+  cur=s.cur; groups=s.groups; isBreak=s.isBreak; ballInHand=s.ballInHand; kitchenOnly=s.kitchenOnly; gamePots=s.gp;
+  NET.wait=false; NET.timedOut=false; NET.t0=performance.now(); power=0; setFill(); setSpin(0,0);
+  cards(); setStatus(s.st,s.foul);
+  if(s.winner!=null){ if(winner!==s.winner){ NET.applying=true; endGame(s.winner,'',false); NET.applying=false; } else if(window.__netEnd) window.__netEnd(s.winner,''); }
+  else { if(winner!=null){ winner=null; document.getElementById('over').hidden=true; } state='aim'; if(cur===NET.me) toast('Sua vez',1400); }
+}
+function netAfter(){
+  NET.t0=performance.now(); NET.timedOut=false;
+  if(NET.shooter===NET.me){ for(const b of balls){ b.x=+b.x.toFixed(2); b.y=+b.y.toFixed(2); } netSendState(); if(!winner&&cur===NET.me) toast('Sua vez de novo',1400); }
+  else if(NET.pending){ const p=NET.pending; NET.pending=null; applySnap(p); }
+  NET.shooter=-1;
+}
+function netTick(now){
+  if(NET.pending&&state==='moving'&&now-NET.pendingAt>4000){ const p=NET.pending; NET.pending=null; for(const b of balls){ b.vx=b.vy=0; b.curve=null; } state='aim'; NET.shooter=-1; applySnap(p); }
+  if(state==='aim'&&!winner&&!NET.wait){
+    const left=Math.max(0,Math.ceil(NET.turnS-(now-NET.t0)/1000)), mine=cur===NET.me;
+    clockEl.hidden=false; clockEl.innerHTML=`<i></i>${mine?'Sua vez':names[cur]} · ${left}s`;
+    clockEl.classList.toggle('op',!mine); clockEl.classList.toggle('low',left<=10);
+    if(mine&&left<=0&&!NET.timedOut){
+      NET.timedOut=true; charging=false; spaceCharge=false; power=0; setFill(); drag=null; hideSpin();
+      cur=1-cur; ballInHand=false; kitchenOnly=false; NET.turnNo++;
+      setStatus(`Tempo esgotado! Vez de <b>${names[cur]}</b>.`,true); cards(); NET.t0=now; NET.timedOut=false;
+      if(zeOn) narrate('Demorou demais, freguês! O relógio do bar não espera ninguém.');
+      netSendState();
+    }
+    if(mine&&now-NET.lastAim>110){
+      const k=`${aim.toFixed(4)}|${cue.x.toFixed(1)}|${cue.y.toFixed(1)}|${power.toFixed(2)}|${spinX.toFixed(2)}|${spinY.toFixed(2)}`;
+      if(k!==NET.aimKey){ NET.aimKey=k; NET.lastAim=now; NET.send('aim',{a:aim,cx:cue.x,cy:cue.y,p:power,sx:spinX,sy:spinY}); }
+    }
+  } else clockEl.hidden=true;
+}
+function netRecv(type,d){
+  if(!NET.on) return;
+  if(type==='aim'){ if(cur!==NET.me&&state==='aim'&&!NET.wait){ aim=d.a; if(ballInHand&&free(d.cx,d.cy,cue)){cue.x=d.cx;cue.y=d.cy;} power=d.p; spinX=d.sx||0; spinY=d.sy||0; } }
+  else if(type==='shot'){
+    if(state!=='aim'||cur===NET.me){ console.warn('tacada ignorada',state,cur,NET.me,d.n,NET.turnNo); return; }
+    NET.turnNo=Math.max(NET.turnNo,d.n);
+    cue.in=false; cue.x=d.cx; cue.y=d.cy; aim=d.a; spinX=d.s; spinY=d.t;
+    strike(d.a,d.p,d.t,d.s,d.g);
+    shot={firstHit:null,potted:[],wasBreak:isBreak,clearedAtStart:groups[cur]?remaining(groups[cur])===0:false};
+    sCue(d.p,cue.x,cue.y); NET.shooter=cur; state='moving'; power=0; ballInHand=false; setStatus('');
+  }
+  else if(type==='state'){ if(state==='moving'||state==='settle'){ NET.pending=d; NET.pendingAt=performance.now(); } else applySnap(d); }
+  else if(type==='sync'){ if(!NET.wait&&state==='aim') netSendState(); }
+}
+function netStop(){ NET.on=false; NET.wait=false; NET.pending=null; clockEl.hidden=true; }
+function startOnline(o){
+  CPU.on=false; CPU.busy=false;
+  NET.on=true; NET.me=o.me; NET.send=o.send; NET.premio=o.premio; NET.ficha=o.ficha; NET.bar=o.bar||'';
+  NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false;
+  names[0]=o.names[0]; names[1]=o.names[1];
+  document.querySelector('#p0 .pname').textContent=names[0]+(o.me===0?' (você)':'');
+  document.querySelector('#p1 .pname').textContent=names[1]+(o.me===1?' (você)':'');
+  closeSheets(); menuEl.hidden=true; document.documentElement.classList.remove('menu-open'); layoutMode();
+  starter=1; newGame(); NET.t0=performance.now();
+  NET.wait=!o.fresh||o.me!==0;
+  if(NET.wait){ setStatus('Arrumando a mesa…'); NET.send('sync',{}); }
+  else netSendState();
+  touchTip();
+}
+window.SINUCA={
+  startOnline, recv:netRecv, stop:()=>{ netStop(); },
+  startCpu:(lv)=>{ netStop(); closeSheets(); startMode(true,lv==null?selLv:lv); },
+  menu:()=>{ netStop(); hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); },
+  setPts:(v)=>{ prof.pts=v; syncPts(); try{ if(!document.getElementById('shop').hidden) renderShop(); }catch(e){} },
+  pts:()=>prof.pts, toast:(m,ms)=>toast(m,ms), narrate:(t)=>narrate(t),
+  rank:()=>RANKS[rankIdx(prof.xp)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
+  resend:()=>{ if(NET.on&&!NET.wait&&state==='aim') netSendState(); },
+  endNet:(w,why)=>{ if(NET.on&&winner==null){ charging=false; drag=null; endGame(w,why||'',false); } },
+  isOver:()=>winner!=null, waiting:()=>NET.on&&NET.wait, turnNo:()=>NET.turnNo,
+  unwait:()=>{ if(NET.on&&NET.wait&&NET.turnNo===0){ NET.wait=false; NET.t0=performance.now(); setStatus(`<b>${names[cur]}</b> abre a partida. Posicione a branca na meia lua e tacada!`); netSendState(); } },
+};
 
 /* ---------- telas: inventário, caixas e abertura ---------- */
 const coinOld='<svg class="coin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#e8b93c" stroke="#9a7420" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#9a7420" stroke-width="1.2" stroke-dasharray="2 1.6"/></svg>';
@@ -2298,9 +2876,10 @@ function openBox(b){
   const free=(prof.free[b.id]||0)>0;
   if(!free&&prof.pts<b.preco) return;
   ensureAudio();
-  if(free) prof.free[b.id]--; else prof.pts-=b.preco;
+  if(free) prof.free[b.id]--;
   const c=rollBox(b), dup=prof.owned.includes(c.id), r=RAR[c.r];
-  if(dup) prof.pts+=r.back; else prof.owned.push(c.id);
+  if(!dup) prof.owned.push(c.id);
+  addPts((free?0:-b.preco)+(dup?r.back:0),'caixa',free?'gratis':b.id);
   saveProf(); syncPts(); syncProgress();
   const rv=document.getElementById('reveal'), stage=document.getElementById('rvStage');
   rv.hidden=false; rv.className='reveal shaking bx-'+b.id; rv.style.setProperty('--rc',r.cor);
