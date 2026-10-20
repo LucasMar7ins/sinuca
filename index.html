@@ -176,6 +176,21 @@ html.cue-side .power .lbl{inset:auto 0 6px 0;justify-content:center;font-size:12
 .bn-balls{display:flex;gap:4px;margin:2px 0 4px}
 .bn-balls .mini{width:16px;height:16px}
 .bn-text{font-size:18px;font-weight:600;color:var(--fg);text-wrap:balance}
+.tut{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:7;width:min(520px,calc(100% - 24px));background:rgba(35,27,22,.97);border:1px solid #ffd84d;border-radius:14px;padding:10px 14px 12px;box-shadow:0 10px 30px rgba(0,0,0,.55);color:#f5f3ee;font-family:var(--ui)}
+.tut.in{animation:nrin .3s ease-out}
+.tut-top{display:flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#ffd84d}
+.tut-top .zeav{width:30px;height:30px}
+.tut-n{color:#9a968e;font-weight:700;margin-left:auto}
+.tut-skip{background:none;border:0;color:#9a968e;font:600 14px var(--ui);text-decoration:underline;cursor:pointer;padding:4px}
+.tut p{margin:8px 0 0;font-size:18px;line-height:1.35}
+.tut p b{color:#ffd84d}
+.tut-ok{margin-top:10px;background:#ffd84d;color:#1c1a10;border:0;border-radius:10px;font:800 16px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;cursor:pointer}
+html.land .tut{top:6px;width:min(420px,calc(100% - 16px));padding:7px 10px 9px}
+html.land .tut p{font-size:15px;margin-top:5px}
+html.land .tut-ok{padding:6px 14px;font-size:14px;margin-top:6px}
+.tutagain{display:block;width:100%;margin-top:14px;background:none;border:1px solid #3a3a3a;color:#f5f3ee;border-radius:10px;font:700 16px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:12px;cursor:pointer}
+.tut-hl{outline:3px solid #ffd84d!important;outline-offset:3px;animation:tuthl 1.1s ease-in-out infinite;border-radius:12px}
+@keyframes tuthl{50%{outline-color:rgba(255,216,77,.25)}}
 .narr{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:5;pointer-events:none;display:flex;align-items:center;gap:10px;background:rgba(35,27,22,.95);border:1px solid var(--line);border-radius:14px;padding:8px 14px 8px 8px;width:max-content;max-width:min(560px,calc(100% - 24px));box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .narr.in{animation:nrin .3s ease-out}
 @keyframes nrin{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -658,6 +673,7 @@ html.land.cue-side .xbtn{position:fixed;top:6px;left:max(12px,env(safe-area-inse
 #auth .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #3a3a3a;border-radius:10px;background:#f5f3ee;color:#111;font:700 18px var(--ui);letter-spacing:.06em;padding:12px;cursor:pointer;max-width:420px;box-sizing:border-box;width:100%}
 #auth .or{display:flex;align-items:center;gap:12px;color:#5f5c56;font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:16px 0;max-width:420px}
 #auth .or::before,#auth .or::after{content:"";flex:1;height:1px;background:var(--line)}
+#auth .hint a{color:#cfc9bd}
 #auth .link{background:none;border:0;color:var(--mut);font:600 16px var(--ui);text-decoration:underline;cursor:pointer;padding:4px 0;align-self:flex-start}
 #auth .msg{min-height:22px;font-size:17px;font-weight:600;max-width:420px;margin-top:4px}
 #auth .msg.err{color:#ff7a6b}
@@ -689,10 +705,12 @@ html.land.cue-side .xbtn{position:fixed;top:6px;left:max(12px,env(safe-area-inse
     <label id="nickRow" hidden>Apelido na mesa<input id="aNick" autocomplete="nickname" maxlength="16" placeholder="Ex.: Tacada Certa"><span class="hint">De 3 a 16 letras ou números. É o nome que aparece no jogo.</span></label>
     <label>E-mail<input id="aMail" type="email" autocomplete="email" inputmode="email" required></label>
     <label id="passRow">Senha<input id="aPass" type="password" autocomplete="current-password" minlength="6" required><span class="hint" id="passHint" hidden>Mínimo de 6 caracteres.</span></label>
+    <p class="hint" id="aTerms" hidden>Ao criar a conta você concorda com os <a href="privacidade.html#termos" target="_blank" rel="noopener">Termos de uso</a> e a <a href="privacidade.html#privacidade" target="_blank" rel="noopener">Política de privacidade</a>.</p>
     <button class="abtn" type="submit" id="aGo">Entrar</button>
     <button class="link" type="button" id="aForgot">Esqueci minha senha</button>
     <p class="msg" id="aMsg" role="status" aria-live="polite"></p>
    </form>
+   <p class="hint" style="text-align:center;margin:10px 0 0"><a href="privacidade.html" target="_blank" rel="noopener" style="color:inherit">Privacidade e termos de uso</a></p>
    <p class="zeq"><b>Seu Zé:</b> <span id="aZe">Aqui só joga quem tem nome na lousa, freguês.</span></p>
   </div>
  </div>
@@ -729,7 +747,7 @@ function setMode(m){
   document.querySelectorAll('[data-am]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.am===m)));
   $('nickRow').hidden=m!=='up';
   $('passRow').hidden=m==='reset';
-  $('passHint').hidden=m!=='up';
+  $('passHint').hidden=m!=='up'; $('aTerms').hidden=m!=='up';
   $('aPass').autocomplete=m==='up'?'new-password':'current-password';
   go.textContent={in:'Entrar',up:'Criar conta',reset:'Mandar link',newpass:'Salvar senha'}[m];
   $('aForgot').textContent=m==='reset'?'Voltar':'Esqueci minha senha';
@@ -805,6 +823,26 @@ function showAcct(){
     location.replace(location.pathname+location.search);
   };
   const old=document.getElementById('acct'); if(old) old.remove();
+  // ajustes: privacidade, termos e excluir a conta
+  const aj=document.getElementById('ajBody');
+  if(aj&&!document.getElementById('ajConta')){
+    const box=document.createElement('div'); box.id='ajConta'; box.className='ajconta';
+    box.innerHTML='<a href="privacidade.html" target="_blank" rel="noopener">Privacidade e termos de uso</a><button type="button" id="ajDel">Excluir minha conta</button><small id="ajDelMsg"></small>';
+    aj.append(box);
+    const st=document.createElement('style'); st.textContent='.ajconta{display:flex;flex-direction:column;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #2a2a2a}.ajconta a{color:#cfc9bd;font-size:16px}.ajconta button{align-self:flex-start;background:none;border:1px solid #5a2a25;color:#ff8f80;border-radius:10px;font:700 15px var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;cursor:pointer}.ajconta button.sure{background:#5a2a25;color:#fff}.ajconta small{color:#9a968e;font-size:14px}';
+    document.head.append(st);
+    let armed=0;
+    $('ajDel').onclick=async()=>{
+      const b=$('ajDel'), msg=$('ajDelMsg');
+      if(!armed||Date.now()-armed>8000){ armed=Date.now(); b.classList.add('sure'); b.textContent='Toque de novo pra apagar tudo'; msg.textContent='Isso apaga sua conta, pontos, tacos, ranking e histórico. Não tem volta.'; return; }
+      b.disabled=true; b.textContent='Apagando…';
+      try{ const {error}=await sb.rpc('excluir_conta'); if(error) throw error;
+        try{ for(const k of Object.keys(localStorage)) if(k===LOCAL_KEY||/^sb-.*-auth-token/.test(k)) localStorage.removeItem(k); }catch(e){}
+        try{ await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(r=>setTimeout(r,2000))]); }catch(e){}
+        alert('Sua conta foi apagada. Valeu por ter jogado!'); location.replace(location.pathname);
+      }catch(e){ b.disabled=false; b.textContent='Excluir minha conta'; msg.textContent='Não deu pra apagar agora. Tente de novo ou mande e-mail pra sinucadebar.seuze@gmail.com.'; }
+    };
+  }
 }
 
 form.addEventListener('submit',async ev=>{
@@ -1522,6 +1560,11 @@ window.__onlineInit=async()=>{
   sb=window.__sb; uid=window.__uid; nick=window.__nick||'';
   if(!sb||!S()) return;
   patchMenu(); await syncSaldo(); syncIcons(); syncConta(); syncHist(); S().showMiss(true); syncMiss(); setupApp();
+  rpc('cheguei').catch(()=>{});
+  rpc('sou_admin').then(ok=>{ if(!ok||document.getElementById('tmPainel')) return; const pop=document.getElementById('tmPop'), sep=document.getElementById('tmSep'); if(!pop) return;
+    const b=document.createElement('button'); b.type='button'; b.id='tmPainel'; b.setAttribute('role','menuitem');
+    b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Painel do dono';
+    b.onclick=()=>{ window.open('painel.html','_blank'); }; pop.insertBefore(b,sep||null); }).catch(()=>{});
   const w=document.getElementById('wrap'); if(w) w.append($('frBtn'),$('frPop'),$('frSay'));
   const rt=document.getElementById('root'); if(rt) rt.append($('arrive'),$('waitPill'));
   lobCh=sb.channel('lobby',{config:{presence:{key:uid}}});
@@ -1556,6 +1599,11 @@ window.__onlineInit=async()=>{
     <div class="toast" id="toast" hidden></div>
     <div class="banner" id="banner" hidden><div class="bn-label" id="bnLabel"></div><div class="bn-title" id="bnTitle"></div><div class="bn-balls" id="bnBalls"></div><div class="bn-text" id="bnText"></div></div>
     <div class="narr" id="narr" hidden aria-live="polite"><span class="nr-who"><i class="zeav" aria-hidden="true"></i>Seu Zé</span><span id="narrText"></span></div>
+    <div class="tut" id="tut" hidden role="dialog" aria-live="polite">
+      <div class="tut-top"><i class="zeav" aria-hidden="true"></i><b>Seu Zé ensina</b><span class="tut-n" id="tutN"></span><button type="button" class="tut-skip" id="tutSkip">Pular</button></div>
+      <p id="tutText"></p>
+      <button type="button" class="tut-ok" id="tutOk" hidden>Entendi</button>
+    </div>
     <div class="spinpad" id="spinpad" hidden>
       <div class="sp-title">Efeito na branca</div>
       <div class="bigcue" id="bigcue" aria-label="Toque onde o taco vai bater na branca"><i id="bigdot"></i></div>
@@ -2075,10 +2123,10 @@ function pocketPhysics(b){
     if(b.fall.spit){ if(Math.hypot(b.vx,b.vy)<2.5) return pot(b,[h.x,h.y]); }
     else if(d>h.r-R*0.45&&vn>0&&nx*h.ax+ny*h.ay>0.15){
       const torto=Math.acos(Math.max(-1,Math.min(1,b.fall.ex*h.ax+b.fall.ey*h.ay)));
-      const sp=Math.hypot(b.vx,b.vy), chance=Math.min(1,Math.max(0,(sp-16.8)/5))*Math.min(1,Math.max(0,(torto-0.42)/0.22)), spit=b.fall.t<DROP_FRAMES&&Math.random()<chance;
+      const sp=Math.hypot(b.vx,b.vy), chance=Math.min(1,Math.max(0,(sp-16.8)/5))*Math.min(1,Math.max(0,(torto-0.42)/0.22)), spit=b.fall.t<DROP_FRAMES&&phyRand()<chance;
       if(spit){
         // o fundo forrado devolve a bola para a boca, com parte do ângulo de entrada
-        const tx=-h.ay, ty=h.ax, side=(b.vx*tx+b.vy*ty)>0?1:-1, k=sp*(0.42+Math.random()*0.1);
+        const tx=-h.ay, ty=h.ax, side=(b.vx*tx+b.vy*ty)>0?1:-1, k=sp*(0.42+phyRand()*0.1);
         let ox=-h.ax*0.85+tx*side*0.45, oy=-h.ay*0.85+ty*side*0.45; const ol=Math.hypot(ox,oy);
         b.vx=ox/ol*k; b.vy=oy/ol*k;
         b.x=h.x+nx*(h.r-R*0.6); b.y=h.y+ny*(h.r-R*0.6);
@@ -2099,6 +2147,10 @@ function pot(b,p){
 }
 /* atrito entre as bolas: maior em toque lento, menor em tacada forte; limitado pelo quanto a superfície desliza */
 function throwJt(slip,imp){ const mu=0.03+0.08*Math.exp(-imp/8); return Math.sign(slip)*Math.min(mu*imp,Math.abs(slip)*0.2); }
+/* sorteios da física vêm de uma sequência fixa por tacada: a mesma tacada dá o mesmo resultado em qualquer aparelho */
+let PRS=1;
+function phySeed(g,a,p){ let h=2166136261; for(const c of String(g)+'|'+String(a)+'|'+String(p)){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } PRS=h|0; }
+function phyRand(){ PRS=PRS+0x6D2B79F5|0; let t=Math.imul(PRS^PRS>>>15,1|PRS); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }
 function collide(){
   const L=live();
   for(let i=0;i<L.length;i++) for(let j=i+1;j<L.length;j++){
@@ -2111,7 +2163,7 @@ function collide(){
       const c=a.n===0?a:b.n===0?b:null;
       let pdx=0,pdy=0;
       if(c){ const ps=Math.hypot(c.vx,c.vy); if(ps>0){pdx=c.vx/ps;pdy=c.vy/ps;} }
-      const imp=vn*(1+0.945+Math.random()*0.03)/2;
+      const imp=vn*(1+0.945+phyRand()*0.03)/2;
       let jt=0, ttx=0, tty=0, oBall=null;
       if(c){ // throw: o atrito no contato empurra a bola alvo de lado (corte e efeito)
         oBall=c===a?b:a; const sg=c===a?1:-1, ncx=nx*sg, ncy=ny*sg; ttx=-ncy; tty=ncx;
@@ -2154,6 +2206,7 @@ function moving(){ for(const b of balls) if(!b.in&&(b.vx||b.vy)) return true; re
 let spinX=0, spinY=0;
 function strike(ang,pw,top,side,g0){
   const v=Math.max(1,pw*MAXV), g=g0!=null?g0:(Math.random()+Math.random()+Math.random()-1.5)*0.0011*pw;
+  phySeed(g,ang,pw);
   cue.vx=Math.cos(ang+g)*v; cue.vy=Math.sin(ang+g)*v;
   cue.top=top*1.25; cue.side=side; return g;
 }
@@ -2399,7 +2452,7 @@ const BOXES=[
   {id:'ouro',nome:'Caixa de Ouro',preco:500,odds:{comum:0,prata:.70,ouro:.30}},
 ];
 const WIN_PTS=[5,10,15], CLEAN_PTS=5;
-let prof={pts:0,owned:['casa'],eq:'casa',icons:[],ico:'oito',hist:null};
+let prof={pts:0,owned:['casa'],eq:'casa',icons:[],ico:'oito',hist:null,tut:0};
 try{ const p=JSON.parse(localStorage.getItem('sinuca-perfil')||'null'); if(p&&Array.isArray(p.owned)) prof=Object.assign(prof,p); }catch(e){}
 if(!prof.owned.includes('casa')) prof.owned.unshift('casa');
 function addPts(n,motivo,ref){ if(!n) return; prof.pts+=n; if(window.__pts) window.__pts(n,motivo,ref); }
@@ -3285,12 +3338,55 @@ function touchTip(){
   try{ localStorage.setItem('sinuca-dica-mira','1'); }catch(e){}
   setTimeout(()=>toast('Arraste na mesa para girar a mira · toque para mirar direto',4200),600);
 }
+/* ---------- tutorial de 30 s com o Seu Zé (primeiro treino) ---------- */
+const TUT={on:false,k:0,iv:null,aim0:0,moved:0,fine:false,shot:false};
+const isTouch=()=>window.matchMedia('(pointer:coarse)').matches;
+function tutSteps(){ const t=isTouch(); return [
+  {id:'mira',hl:null,txt:t?'Pra mirar, <b>arraste o dedo na mesa</b>: a mira gira em volta da branca. Um <b>toque rápido</b> mira direto naquele ponto.':'Pra mirar, <b>clique e arraste na mesa</b>, ou só clique onde quer mirar. A linha mostra onde a branca vai bater.'},
+  {id:'fino',hl:'fine',ok:true,txt:'Pra acertar no detalhe, use a <b>régua ‹ ›</b>: arrastando nela a mira mexe bem devagarinho.'},
+  {id:'forca',hl:'power',txt:t?'Agora a tacada: <b>puxe o taco na barra</b> e solte. Quanto mais puxar, mais forte. Pode tacar!':'Agora a tacada: <b>arraste o taco na barra de força</b> e solte (ou segure a <b>barra de espaço</b>). Quanto mais puxar, mais forte. Pode tacar!'},
+  {id:'efeito',hl:'spinbtn',ok:true,txt:'Esse botão é o <b>efeito</b>: escolhe onde o taco bate na branca. Embaixo ela <b>volta</b>, em cima ela <b>segue</b>, do lado ela <b>abre</b> na tabela.'},
+  {id:'regra',hl:null,ok:true,last:true,txt:'A primeira bola que você matar define seu grupo: <b>lisas</b> (1 a 7) ou <b>listradas</b> (9 a 15). Mate todas e <b>depois a 8</b>. Matou a 8 antes, perdeu! E bateu primeiro na bola errada, <b>paga uma bola</b>.'},
+]; }
+function tutShow(){
+  const st=tutSteps(), c=st[TUT.k], el=document.getElementById('tut');
+  document.querySelectorAll('.tut-hl').forEach(x=>x.classList.remove('tut-hl'));
+  if(!c){ return tutEnd(); }
+  if(c.hl){ const h=document.getElementById(c.hl); if(h) h.classList.add('tut-hl'); }
+  document.getElementById('tutText').innerHTML=c.txt; document.getElementById('tutN').textContent=`${TUT.k+1}/${st.length}`;
+  const ok=document.getElementById('tutOk'); ok.hidden=!c.ok; ok.textContent=c.last?'Bora jogar!':'Entendi';
+  el.hidden=false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
+  TUT.aim0=aim; TUT.moved=0; TUT.fine=false;
+}
+function tutNext(){ TUT.k++; tutShow(); }
+function tutEnd(){
+  TUT.on=false; clearInterval(TUT.iv); document.getElementById('tut').hidden=true;
+  document.querySelectorAll('.tut-hl').forEach(x=>x.classList.remove('tut-hl'));
+  if(!prof.tut){ prof.tut=1; saveProf(); }
+}
+function tutStart(){
+  TUT.on=true; TUT.k=0; TUT.shot=false; tutShow(); clearInterval(TUT.iv);
+  let last=aim, wait=0;
+  TUT.iv=setInterval(()=>{
+    if(!TUT.on) return;
+    if(menuEl&&!menuEl.hidden){ tutEnd(); return; }
+    const id=tutSteps()[TUT.k].id;
+    if(id==='mira'){ TUT.moved+=Math.abs(wrapA(aim-last)); last=aim; if(TUT.moved>0.35){ if(++wait>3){ wait=0; tutNext(); } } }
+    else if(id==='fino'){ if(TUT.fine){ TUT.fine=false; setTimeout(()=>{ if(TUT.on&&tutSteps()[TUT.k].id==='fino') tutNext(); },900); } }
+    else if(id==='forca'){ if(state==='moving'){ TUT.shot=true; document.getElementById('tut').hidden=true; } else if(TUT.shot&&state!=='moving'){ TUT.shot=false; tutNext(); } }
+    else last=aim;
+  },200);
+}
+document.getElementById('tutOk').addEventListener('click',()=>{ const c=tutSteps()[TUT.k]; if(c&&c.last) tutEnd(); else tutNext(); });
+document.getElementById('tutSkip').addEventListener('click',tutEnd);
+document.getElementById('fine').addEventListener('pointerdown',()=>{ TUT.fine=true; });
 function startMode(cpu,lv){
   CPU.on=cpu; if(cpu) CPU.level=lv; CPU.busy=false;
   names[0]=cpu?(window.__nick||'Você'):(window.__nick||'Jogador 1'); names[1]=cpu?`CPU · ${LEVELS[CPU.level].nome}`:'Jogador 2';
   setAv(0,myIcon()); setAv(1,cpu?'seuze':'giz');
   document.querySelector('#p0 .pname').textContent=names[0]; document.querySelector('#p1 .pname').textContent=names[1];
-  menuEl.hidden=true; document.documentElement.classList.remove('menu-open'); layoutMode(); starter=1; newGame(); touchTip();
+  menuEl.hidden=true; document.documentElement.classList.remove('menu-open'); layoutMode(); starter=1; newGame();
+  if(cpu&&((!prof.tut&&(prof.xp||0)<30)||window.__tutAgain)){ window.__tutAgain=false; setTimeout(tutStart,500); } else touchTip();
 }
 let selLv=1;
 try{ const v=parseInt(localStorage.getItem('sinuca-nivel'),10); if(v>=0&&v<3) selLv=v; }catch(e){}
@@ -3620,6 +3716,7 @@ document.getElementById('pfBody').addEventListener('click',e=>{ const b=e.target
   if(k==='icones') openSheet('icons'); if(k==='patentes') openSheet('rank'); if(k==='inv') openSheet('inv'); if(k==='sair'&&window.__logout) window.__logout(); });
 
 if(!prof.hist||typeof prof.hist!=='object') prof.hist={}; for(const k of ['cpu','net']){ const h=prof.hist[k]=prof.hist[k]||{}; for(const f of ['j','v','b']) h[f]=+h[f]||0; }
+{ const aj=document.getElementById('ajBody'); if(aj){ const b=document.createElement('button'); b.type='button'; b.className='tutagain'; b.textContent='Ver o tutorial de novo'; b.onclick=()=>{ closeSheets(); window.__tutAgain=true; startMode(true,0); }; aj.append(b); } }
 if(!Array.isArray(prof.icons)) prof.icons=[]; if(!prof.ico) prof.ico='oito';
 syncPts(); applyCue(); syncProgress(); syncMenuIcon(); setAv(0,myIcon());
 

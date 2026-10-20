@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel · Sinuca de Bar</title>
+<meta name="theme-color" content="#0f0f0f">
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{color-scheme:dark;--bg:#0f0f0f;--card:#171717;--line:#2a2a2a;--txt:#f1ede4;--dim:#a39e93;--mute:#6f6a62;--acc:#ffd84d;--ok:#57d68d;--bar:#e8b93c;--grid:#262626}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  header img{width:46px;height:46px;border-radius:12px}
+  h1{margin:0;font:400 30px/1.1 Georgia,serif}
+  h1 span{color:var(--acc)}
+  .meta{color:var(--dim);font-size:14px;margin-left:auto;display:flex;gap:10px;align-items:center}
+  button{background:var(--acc);color:#1c1a10;border:0;border-radius:10px;font:700 14px system-ui,sans-serif;letter-spacing:.04em;padding:8px 14px;cursor:pointer}
+  a.back{color:var(--dim)}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+  .tile .lbl{color:var(--dim);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .tile .big{font-size:36px;font-weight:800;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+  .tile .sub{color:var(--dim);font-size:14px;margin-top:2px}
+  .tile .sub b{color:var(--txt)}
+  .tile.hero .big{color:var(--acc)}
+  h2{font:700 13px system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:28px 0 10px}
+  .charts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .chart{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 8px;position:relative;min-width:0}
+  .chart h3{margin:0;font-size:16px}
+  .chart .tot{color:var(--dim);font-size:13px;margin:2px 0 6px}
+  .chart svg{width:100%;height:150px;display:block;overflow:visible}
+  .chart .ax{fill:var(--mute);font-size:10px}
+  .tip{position:absolute;pointer-events:none;background:#0b0b0b;border:1px solid #3a3a3a;border-radius:8px;padding:5px 8px;font-size:13px;white-space:nowrap;transform:translate(-50%,-110%);z-index:3}
+  .tip[hidden]{display:none}
+  .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .funnel .row{display:grid;grid-template-columns:200px 1fr 64px;align-items:center;gap:10px;margin:8px 0}
+  .funnel .lbl{font-size:15px}
+  .funnel .track{height:18px;background:#222;border-radius:4px;overflow:hidden}
+  .funnel .track i{display:block;height:100%;background:var(--bar);border-radius:0 4px 4px 0}
+  .funnel .n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{color:var(--dim);font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-align:left;font-weight:700;padding:6px 6px}
+  td{padding:7px 6px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+  td.r,th.r{text-align:right}
+  .note{color:var(--mute);font-size:13px;margin-top:22px}
+  .msg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center;font-size:18px}
+  @media (max-width:900px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} .charts,.two{grid-template-columns:1fr} .funnel .row{grid-template-columns:130px 1fr 52px} }
+</style>
+</head>
+<body>
+<main>
+  <header><img src="icon-192.png" alt=""><h1>Painel do <span>dono do bar</span></h1>
+    <div class="meta"><span id="upd">Carregando…</span><button type="button" id="refresh">Atualizar</button><a class="back" href="./">Voltar pro jogo</a></div></header>
+  <div id="out"></div>
+  <p class="note">Contas: só a conta do dono vê este painel. "Ativo" = entrou no jogo naquele dia (registro começou em 19/10/2026; antes disso conta o dia do cadastro e as partidas online). "Voltou no dia seguinte" = entre quem se cadastrou até ontem, quantos entraram de novo no dia seguinte ao cadastro.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(()=>{
+const sb=window.supabase.createClient('https://glocaglnqshjrcndeaom.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2NhZ2xucXNoanJjbmRlYW9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNDY3NzMsImV4cCI6MjEwNzkyMjc3M30.9Lbp6MIKnsw20LYMPWrsll1aJT75xrO-Hr3Q-5A8aWU',{auth:{persistSession:true,autoRefreshToken:true}});
+const out=document.getElementById('out'), upd=document.getElementById('upd');
+const fmt=n=>Number(n||0).toLocaleString('pt-BR');
+const pct=(a,b)=>b?Math.round(a/b*100)+'%':'–';
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dm=s=>{ const [y,m,d]=String(s).slice(0,10).split('-'); return `${d}/${m}`; };
+const BAR_NOMES={calcada:'Mesa da Calçada',boteco:'Boteco do Seu Zé',esquina:'Bar da Esquina',centro:'Bar do Centro'};
+
+function chart(title,key,rows){
+  const vals=rows.map(r=>r[key]||0), max=Math.max(1,...vals), tot=vals.reduce((a,b)=>a+b,0);
+  const W=300,H=130,pad=2,bw=W/rows.length;
+  const nice=max<=4?max:Math.ceil(max/4)*4;
+  let g='';
+  for(let k=0;k<=2;k++){ const y=H-(H*k/2); g+=`<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--grid)" stroke-width="1"/><text class="ax" x="${W+4}" y="${y+3}">${Math.round(nice*k/2)}</text>`; }
+  const bars=rows.map((r,i)=>{ const v=r[key]||0, h=v?Math.max(2,H*v/nice):0, x=i*bw+pad/2, w=Math.max(1,bw-pad);
+    return `<g data-i="${i}"><rect x="${i*bw}" y="0" width="${bw}" height="${H}" fill="transparent"/>${h?`<path d="M${x},${H} V${H-h+Math.min(3,h/2)} q0,-${Math.min(3,h/2)} ${Math.min(3,w/2)},-${Math.min(3,h/2)} H${x+w-Math.min(3,w/2)} q${Math.min(3,w/2)},0 ${Math.min(3,w/2)},${Math.min(3,h/2)} V${H} Z" fill="var(--bar)"/>`:''}</g>`; }).join('');
+  const lab=`<text class="ax" x="0" y="${H+14}">${dm(rows[0].dia)}</text><text class="ax" x="${W}" y="${H+14}" text-anchor="end">hoje</text>`;
+  return `<div class="chart" data-key="${key}"><h3>${title}</h3><div class="tot">${key==='ativos'?`pico de ${fmt(max)} num dia`:`${fmt(tot)} nos últimos 30 dias`}</div><svg viewBox="0 0 ${W+18} ${H+18}" preserveAspectRatio="none" role="img" aria-label="${title} por dia">${g}${bars}${lab}</svg><div class="tip" hidden></div></div>`;
+}
+function tile(lbl,big,sub,hero){ return `<div class="tile${hero?' hero':''}"><div class="lbl">${lbl}</div><div class="big">${big}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`; }
+
+function render(d){
+  const r=d.retorno||{}, rows=d.por_dia||[];
+  const funil=[['Cadastros',d.cadastros],['Jogaram (treino ou online)',d.jogaram],['Jogaram online',d.jogaram_online],['Voltaram no dia seguinte',r.volta1]];
+  const fmax=Math.max(1,d.cadastros);
+  out.innerHTML=`
+  <div class="grid">
+    ${tile('Cadastros',fmt(d.cadastros),`<b>+${fmt(d.cadastros_hoje)}</b> hoje · <b>+${fmt(d.cadastros_7d)}</b> em 7 dias`,true)}
+    ${tile('Jogaram',fmt(d.jogaram),`${pct(d.jogaram,d.cadastros)} de quem se cadastrou`)}
+    ${tile('Voltaram no dia seguinte',pct(r.volta1,r.base1),`${fmt(r.volta1)} de ${fmt(r.base1)} cadastrados até ontem`)}
+    ${tile('Voltaram na 1ª semana',pct(r.volta_semana,r.base7),r.base7?`${fmt(r.volta_semana)} de ${fmt(r.base7)} com mais de 7 dias de conta`:'Ainda não tem conta com 7 dias')}
+    ${tile('Ativos hoje',fmt(d.ativos_hoje),`<b>${fmt(d.ativos_7d)}</b> em 7 dias · <b>${fmt(d.ativos_30d)}</b> em 30`)}
+    ${tile('Partidas online',fmt(d.partidas_online),`<b>${fmt(d.partidas_online_7d)}</b> nos últimos 7 dias`)}
+    ${tile('Treinos com o Seu Zé',fmt(d.treinos),'somando todas as contas')}
+    ${tile('Agora nas mesas',fmt(d.jogando_agora),`partidas rolando · <b>${fmt(d.esperando_agora)}</b> mesa${d.esperando_agora==1?'':'s'} esperando`)}
+  </div>
+  <h2>Últimos 30 dias</h2>
+  <div class="charts">${chart('Cadastros por dia','cadastros',rows)}${chart('Jogadores ativos por dia','ativos',rows)}${chart('Partidas online por dia','partidas',rows)}</div>
+  <h2>Funil</h2>
+  <div class="tile funnel">${funil.map(([l,n])=>`<div class="row"><span class="lbl">${l}</span><span class="track"><i style="width:${(100*(n||0)/fmax).toFixed(1)}%"></i></span><span class="n">${fmt(n)}</span></div>`).join('')}</div>
+  <div class="two">
+    <div><h2>Quem mais joga</h2><div class="tile"><table><tr><th>Apelido</th><th class="r">Treinos</th><th class="r">Online</th><th class="r">XP</th></tr>
+      ${(d.top||[]).map(x=>`<tr><td>${esc(x.apelido)}</td><td class="r">${fmt(x.treinos)}</td><td class="r">${fmt(x.online)}</td><td class="r">${fmt(x.xp)}</td></tr>`).join('')||'<tr><td colspan="4">Ninguém ainda</td></tr>'}</table></div></div>
+    <div><h2>Últimos cadastros</h2><div class="tile"><table><tr><th>Apelido</th><th>Quando</th><th class="r">Partidas</th></tr>
+      ${(d.ultimos||[]).map(x=>`<tr><td>${esc(x.apelido)}</td><td>${new Date(x.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td class="r">${fmt(x.jogos)}</td></tr>`).join('')||'<tr><td colspan="3">Ninguém ainda</td></tr>'}</table></div></div>
+  </div>
+  <h2>Partidas por bar</h2>
+  <div class="tile"><table><tr><th>Bar</th><th class="r">Partidas</th></tr>${Object.keys(BAR_NOMES).map(k=>`<tr><td>${BAR_NOMES[k]}</td><td class="r">${fmt((d.bares||{})[k])}</td></tr>`).join('')}</table></div>`;
+  // tooltip das barras
+  out.querySelectorAll('.chart').forEach(ch=>{ const tip=ch.querySelector('.tip'), key=ch.dataset.key, svg=ch.querySelector('svg');
+    svg.addEventListener('pointermove',e=>{ const g=e.target.closest('g[data-i]'); if(!g){ tip.hidden=true; return; } const row=rows[+g.dataset.i];
+      const bx=ch.getBoundingClientRect(); tip.style.left=(e.clientX-bx.left)+'px'; tip.style.top=(e.clientY-bx.top)+'px';
+      tip.innerHTML=`<b>${fmt(row[key])}</b> · ${dm(row.dia)}`; tip.hidden=false; });
+    svg.addEventListener('pointerleave',()=>tip.hidden=true); });
+  upd.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+async function load(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){ out.innerHTML='<div class="msg">Entre no jogo com a sua conta primeiro e depois volte aqui.<br><br><a href="./" style="color:var(--acc)">Ir pro jogo</a></div>'; upd.textContent=''; return; }
+  const {data,error}=await sb.rpc('painel');
+  if(error){ out.innerHTML=`<div class="msg">${/dono/.test(error.message)?'Este painel é só do dono do bar.':'Não deu pra carregar: '+esc(error.message)}</div>`; upd.textContent=''; return; }
+  render(data);
+}
+document.getElementById('refresh').onclick=load;
+load(); setInterval(()=>{ if(document.visibilityState==='visible') load(); },60000);
+})();
+</script>
+</body>
+</html>
