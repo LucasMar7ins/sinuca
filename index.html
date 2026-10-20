@@ -857,6 +857,8 @@ form.addEventListener('submit',async ev=>{
       const {data,error}=await sb.auth.signInWithPassword({email:mail,password:pass}); if(error) throw error;
       user=data.user; await enter();
     }else if(mode==='up'){
+      const ok=await sb.rpc('apelido_permitido',{nome:ap});
+      if(!ok.error&&ok.data===false){ go.disabled=false; return say('Esse apelido não pode aqui no bar. Escolhe outro, freguês.'); }
       const free=await sb.rpc('apelido_livre',{nome:ap});
       if(free.error) throw free.error;
       if(!free.data){ go.disabled=false; return say('Esse apelido já tem dono. Tenta outro.'); }
@@ -2215,7 +2217,7 @@ function shoot(){
   if(NET.on&&netLocked()) return;
   const sx={a:aim,p:power,t:spinY,s:spinX,cx:cue.x,cy:cue.y};
   sx.g=strike(aim,power,spinY,spinX);
-  if(NET.on){ NET.shooter=NET.me; NET.turnNo++; sx.n=NET.turnNo; NET.send('shot',sx); }
+  if(NET.on){ NET.shooter=NET.me; NET.turnNo++; sx.n=NET.turnNo; if(NET.to) NET.to[NET.me]=0; NET.send('shot',sx); }
   shot={firstHit:null,potted:[],wasBreak:isBreak,clearedAtStart:groups[cur]?remaining(groups[cur])===0:false};
   sCue(power,cue.x,cue.y);
   state='moving'; power=0; ballInHand=false; setFill();
@@ -3440,7 +3442,7 @@ document.getElementById('again').addEventListener('click',newGame);
 const clockEl=document.createElement('div'); clockEl.className='netclock'; clockEl.hidden=true; wrap.appendChild(clockEl);
 function snap(){
   for(const b of balls){ b.x=+b.x.toFixed(2); b.y=+b.y.toFixed(2); }
-  return {n:NET.turnNo, b:balls.map(b=>[b.n,b.x,b.y,b.in?1:0]), cur, groups:[...groups], isBreak, ballInHand, kitchenOnly, winner, gp:[...gamePots], st:statusEl.innerHTML, foul:statusEl.classList.contains('foul')};
+  return {n:NET.turnNo, to:[...(NET.to||[0,0])], why:winner!=null?document.getElementById('winWhy').textContent:'', b:balls.map(b=>[b.n,b.x,b.y,b.in?1:0]), cur, groups:[...groups], isBreak, ballInHand, kitchenOnly, winner, gp:[...gamePots], st:statusEl.innerHTML, foul:statusEl.classList.contains('foul')};
 }
 function flashClock(){ clockEl.classList.remove('flash'); void clockEl.offsetWidth; clockEl.classList.add('flash'); }
 function netSendState(){ if(NET.on&&NET.send) NET.send('state',snap()); }
@@ -3458,10 +3460,11 @@ function applySnap(s){
   audit(s);
   NET.turnNo=s.n;
   for(const [n,x,y,i] of s.b){ const b=balls.find(q=>q.n===n); if(!b) continue; const wasIn=b.in; b.x=x; b.y=y; b.vx=b.vy=0; b.in=!!i; b.fall=null; b.top=0; b.side=0; if(!b.in||wasIn) b.anim=null; }
+  if(Array.isArray(s.to)) NET.to=[...s.to];
   cur=s.cur; groups=s.groups; isBreak=s.isBreak; ballInHand=s.ballInHand; kitchenOnly=s.kitchenOnly; gamePots=s.gp;
   NET.wait=false; NET.timedOut=false; NET.t0=performance.now(); power=0; setFill(); setSpin(0,0);
   cards(); setStatus(s.st,s.foul);
-  if(s.winner!=null){ if(winner!==s.winner){ NET.applying=true; endGame(s.winner,'',false); NET.applying=false; } else if(window.__netEnd) window.__netEnd(s.winner,''); }
+  if(s.winner!=null){ if(winner!==s.winner){ NET.applying=true; endGame(s.winner,(s.why||'').replace(/^Você perdeu a vez/,`${names[1-s.winner]} perdeu a vez`).replace(new RegExp('^'+(names[NET.me]||'@@')+' perdeu a vez'),'Você perdeu a vez'),false); NET.applying=false; } else if(window.__netEnd) window.__netEnd(s.winner,''); }
   else { if(winner!=null){ winner=null; document.getElementById('over').hidden=true; } state='aim'; if(cur===NET.me) flashClock(); }
 }
 function netAfter(){
@@ -3477,11 +3480,20 @@ function netTick(now){
     clockEl.hidden=false; clockEl.innerHTML=`<i></i>${mine?'Sua vez':names[cur]} · ${left}s`;
     clockEl.classList.toggle('op',!mine); clockEl.classList.toggle('low',left<=10);
     const pc=document.getElementById('p'+cur); if(pc){ pc.style.setProperty('--t',Math.max(0,(NET.turnS-(now-NET.t0)/1000)/NET.turnS).toFixed(3)); pc.classList.toggle('low',left<=10); }
-    if(mine&&left<=0&&!NET.timedOut){
+    const over=(now-NET.t0)/1000-NET.turnS;
+    if(((mine&&left<=0)||(!mine&&over>=8))&&!NET.timedOut){
       NET.timedOut=true; charging=false; spaceCharge=false; power=0; setFill(); drag=null; hideSpin();
+      const who=cur; NET.to=NET.to||[0,0]; NET.to[who]=(NET.to[who]||0)+1;
+      if(NET.to[who]>=3){
+        // três vezes seguidas sem jogar: entregou a partida
+        NET.turnNo++; NET.shooter=NET.me;
+        endGame(1-who, who===NET.me?'Você perdeu a vez 3 vezes seguidas e entregou a partida.':`${names[who]} perdeu a vez 3 vezes seguidas e entregou a partida.`, false);
+        NET.shooter=-1; netSendState(); return;
+      }
       cur=1-cur; ballInHand=false; kitchenOnly=false; NET.turnNo++;
-      setStatus(`Tempo esgotado! Vez de <b>${names[cur]}</b>.`,true); cards(); NET.t0=now; NET.timedOut=false;
-      if(zeOn) narrate('Demorou demais, freguês! O relógio do bar não espera ninguém.');
+      const aviso=NET.to[who]===2?(who===NET.me?' Mais uma e você perde a partida!':` Mais uma e ${names[who]} perde a partida.`):'';
+      setStatus(`Tempo esgotado! Vez de <b>${names[cur]}</b>.${aviso}`,true); cards(); NET.t0=now; NET.timedOut=false;
+      if(zeOn) narrate(NET.to[who]===2?'Acorda, freguês! Mais uma dessa e a mesa é do outro.':'Demorou demais, freguês! O relógio do bar não espera ninguém.');
       netSendState();
     }
     if(mine&&now-NET.lastAim>110){
@@ -3498,6 +3510,7 @@ function netRecv(type,d){
     NET.turnNo=Math.max(NET.turnNo,d.n);
     cue.in=false; cue.x=d.cx; cue.y=d.cy; aim=d.a; spinX=d.s; spinY=d.t;
     NET.replayBrk=isBreak; NET.replay=null;
+    if(NET.to) NET.to[cur]=0;
     strike(d.a,d.p,d.t,d.s,d.g);
     shot={firstHit:null,potted:[],wasBreak:isBreak,clearedAtStart:groups[cur]?remaining(groups[cur])===0:false};
     sCue(d.p,cue.x,cue.y); NET.shooter=cur; state='moving'; power=0; ballInHand=false; setStatus('');
@@ -3509,7 +3522,7 @@ function netStop(){ NET.on=false; NET.wait=false; NET.pending=null; clockEl.hidd
 function startOnline(o){
   CPU.on=false; CPU.busy=false;
   NET.on=true; NET.me=o.me; NET.send=o.send; NET.premio=o.premio; NET.ficha=o.ficha; NET.bar=o.bar||'';
-  NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false; NET.mism=0; NET.audN=0; NET.flagged=false; NET.replay=null;
+  NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false; NET.mism=0; NET.audN=0; NET.flagged=false; NET.replay=null; NET.to=[0,0];
   names[0]=o.names[0]; names[1]=o.names[1];
   setAv(o.me,myIcon()); setAv(1-o.me,o.oppIcon||'oito');
   document.querySelector('#p0 .pname').textContent=names[0]+(o.me===0?' (você)':'');

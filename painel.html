@@ -45,6 +45,10 @@
   th{color:var(--dim);font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-align:left;font-weight:700;padding:6px 6px}
   td{padding:7px 6px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
   td.r,th.r{text-align:right}
+  .troca{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .troca input{flex:1;min-width:120px;background:#0f0f0f;border:1px solid #3a3a3a;color:var(--txt);border-radius:10px;padding:9px 10px;font:15px system-ui,sans-serif}
+  .rv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+  .rv button{padding:4px 10px;font-size:13px}
   .note{color:var(--mute);font-size:13px;margin-top:22px}
   .msg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center;font-size:18px}
   @media (max-width:900px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} .charts,.two{grid-template-columns:1fr} .funnel .row{grid-template-columns:130px 1fr 52px} }
@@ -106,6 +110,13 @@ function render(d){
     <div><h2>Últimos cadastros</h2><div class="tile"><table><tr><th>Apelido</th><th>Quando</th><th class="r">Partidas</th></tr>
       ${(d.ultimos||[]).map(x=>`<tr><td>${esc(x.apelido)}</td><td>${new Date(x.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td class="r">${fmt(x.jogos)}</td></tr>`).join('')||'<tr><td colspan="3">Ninguém ainda</td></tr>'}</table></div></div>
   </div>
+  <h2>Apelidos</h2>
+  <div class="two">
+    <div class="tile"><b>Pra revisar</b><div class="sub" style="color:var(--dim);font-size:14px;margin:2px 0 8px">Apelidos antigos que caem no filtro de palavras proibidas.</div><div id="revisar">Carregando…</div></div>
+    <div class="tile"><b>Trocar o apelido de alguém</b>
+      <form id="troca" class="troca"><input name="atual" placeholder="Apelido atual" required maxlength="16"><input name="novo" placeholder="Novo apelido" required maxlength="16"><button type="submit">Trocar</button></form>
+      <div id="trocaMsg" class="sub" style="font-size:14px;margin-top:6px"></div></div>
+  </div>
   <h2>Partidas por bar</h2>
   <div class="tile"><table><tr><th>Bar</th><th class="r">Partidas</th></tr>${Object.keys(BAR_NOMES).map(k=>`<tr><td>${BAR_NOMES[k]}</td><td class="r">${fmt((d.bares||{})[k])}</td></tr>`).join('')}</table></div>`;
   // tooltip das barras
@@ -114,6 +125,13 @@ function render(d){
       const bx=ch.getBoundingClientRect(); tip.style.left=(e.clientX-bx.left)+'px'; tip.style.top=(e.clientY-bx.top)+'px';
       tip.innerHTML=`<b>${fmt(row[key])}</b> · ${dm(row.dia)}`; tip.hidden=false; });
     svg.addEventListener('pointerleave',()=>tip.hidden=true); });
+  sb.rpc('apelidos_revisar').then(({data})=>{ const el=document.getElementById('revisar'); if(!el) return;
+    el.innerHTML=(data&&data.length)?data.map(x=>`<div class="rv"><span>${esc(x.apelido)}</span><button type="button" data-fix="${esc(x.apelido)}">Trocar</button></div>`).join(''):'<span style="color:var(--dim)">Nenhum. Tudo limpo.</span>';
+    el.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>{ const f=document.getElementById('troca'); f.atual.value=b.dataset.fix; f.novo.focus(); }); });
+  const f=document.getElementById('troca');
+  f.onsubmit=async e=>{ e.preventDefault(); const m=document.getElementById('trocaMsg'); m.textContent='Trocando…';
+    const {data,error}=await sb.rpc('trocar_apelido',{atual:f.atual.value,novo:f.novo.value});
+    if(error){ m.style.color='#ff8f80'; m.textContent=error.message; } else { await load(); const m2=document.getElementById('trocaMsg'); m2.style.color='var(--ok)'; m2.textContent=`Pronto: agora é ${data}.`; } };
   upd.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 }
 async function load(){
@@ -124,7 +142,7 @@ async function load(){
   render(data);
 }
 document.getElementById('refresh').onclick=load;
-load(); setInterval(()=>{ if(document.visibilityState==='visible') load(); },60000);
+load(); setInterval(()=>{ const a=document.activeElement; if(document.visibilityState==='visible'&&!(a&&a.closest&&a.closest('#troca'))) load(); },60000);
 })();
 </script>
 </body>
