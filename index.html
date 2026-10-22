@@ -372,6 +372,23 @@ html.land .bn-text{font-size:15px}
 .s2x{margin-left:auto;width:40px;height:40px;border-radius:50%;border:1px solid #3a3a3a;background:#1d1d1d;color:#f5f3ee;font-size:24px;line-height:1;cursor:pointer;flex:none}
 .s2sub,.s2foot{margin:0;color:#9a968e;font-size:16px;line-height:1.35}
 .s2foot{font-size:14px}
+.sw .swmore{background:#1d1d1d!important;color:#ffd84d;font:700 20px var(--ui);display:grid;place-items:center}
+#swPanos{flex-wrap:wrap;justify-content:flex-end;max-width:260px}
+.lojagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:58vh;overflow:auto;padding:2px}
+.lj{background:#0f0f0f;border:1px solid #2a2a2a;border-left:4px solid var(--r);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.lj .stk{height:9px;border-radius:5px;margin:6px 0;clip-path:polygon(0 0,100% 30%,100% 70%,0 100%)}
+.lj .swp{height:56px;border-radius:8px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 4px rgba(0,0,0,.3)}
+.lj .ic{width:56px;height:56px;margin:0 auto}
+.lj b{font-size:17px;line-height:1.1}
+.lj .rr{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--r)}
+.lj button{background:#ffd84d;color:#1c1a10;border:0;border-radius:9px;font:800 15px var(--ui);padding:8px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;margin-top:auto}
+.lj button .coin{width:16px;height:16px}
+.lj button:disabled{background:#262626;color:#8a857c;cursor:default}
+.lj button.use{background:none;border:1px solid #3a3a3a;color:#f5f3ee}
+.lj .own{color:#7ad38a;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.06em;text-align:center;padding:8px;margin-top:auto}
+.lj .ex{color:#9a968e;font-size:13px;text-align:center;padding:6px;border:1px dashed #3a3a3a;border-radius:9px;margin-top:auto;line-height:1.15}
+.lj.on{box-shadow:0 0 0 2px #ffd84d}
+@media (max-width:820px){ .lojagrid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none} }
 .shopgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .boxcard{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:14px;padding:16px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .boxcard.bx-prata{border-color:#5d656e}
@@ -566,6 +583,37 @@ html.land .bn-text{font-size:15px}
 .shine::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.95) 48%,rgba(160,240,255,.7) 52%,transparent 70%);background-size:250% 100%;animation:shine 2.2s linear infinite;mix-blend-mode:screen}
 @keyframes shine{from{background-position:130% 0}to{background-position:-130% 0}}
 @media (prefers-reduced-motion:reduce){.shine::after{animation:none}}
+.tempbadge{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 40% 35%,#ffe58a,#c9930f);color:#2a1d00;font:400 15px var(--display);box-shadow:0 0 0 2px #3a2c08}
+.tp-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tp-top .ends{color:#9a968e;font-size:16px}
+.tp-lvl{background:radial-gradient(circle at 40% 35%,#ffe58a,#c9930f);color:#2a1d00;width:64px;height:64px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;box-shadow:0 0 0 3px #3a2c08}
+.tp-lvl b{font:400 28px/1 var(--display)} .tp-lvl span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.tp-giz{margin:12px 0 10px} .tp-giz .gt{display:flex;justify-content:space-between;font-size:15px;color:#cfc9bd;margin-bottom:6px}
+.tp-giz .gt i{display:inline-block;width:11px;height:11px;background:#4b8fd0;border-radius:2px;transform:rotate(45deg);margin-right:5px}
+.tp-giz .gb{height:10px;background:#262626;border-radius:6px;overflow:hidden} .tp-giz .gb i{display:block;height:100%;background:linear-gradient(90deg,#4b8fd0,#8fd0ff)}
+.tp-ganha{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.tp-ganha div{background:#0f0f0f;border:1px solid #262626;border-radius:10px;padding:5px 8px;display:flex;flex-direction:column}
+.tp-ganha b{color:#8fd0ff;font-size:17px} .tp-ganha span{color:#9a968e;font-size:13px;line-height:1.1}
+.tp-rows{display:flex;gap:6px;align-items:stretch}
+.tp-lbl{display:flex;flex-direction:column;justify-content:flex-end;gap:6px;flex:none;width:44px;padding-bottom:8px}
+.tp-lbl span{height:78px;display:flex;align-items:center;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a968e;writing-mode:vertical-rl;transform:rotate(180deg);justify-content:center}
+.tp-lbl span.pp{color:#ffd84d}
+.tp-track{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;flex:1;min-width:0;scroll-behavior:smooth}
+.tp-col{flex:none;width:80px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.tp-col .n{font-weight:800;font-size:15px;color:#9a968e} .tp-col.now .n{color:#ffd84d}
+.tp-cell{width:80px;height:78px;border-radius:12px;background:#0f0f0f;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;font-size:12px;text-align:center;line-height:1.1;padding:4px;color:#cfc9bd}
+.tp-cell.got{border-color:#3d6b45} .tp-cell.got::after{content:'✓';position:absolute;top:3px;right:6px;color:#7ad38a;font-weight:800}
+.tp-cell.pay{background:linear-gradient(160deg,#2a2206,#141414);border-color:#6a5418} .tp-cell.pay::before{content:'';position:absolute;inset:0;border-radius:12px;background:rgba(0,0,0,.35)}
+.tp-cell.next{box-shadow:0 0 0 2px #ffd84d}
+.tp-cell .stk{width:62px;height:7px;border-radius:4px} .tp-cell .swp{width:44px;height:28px;border-radius:6px;background-size:cover;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25)}
+.tp-cell .ic{width:36px;height:36px} .tp-cell .cn{display:flex;align-items:center;gap:3px;font-weight:800;color:#ffd84d;font-size:15px} .tp-cell .cn .coin{width:14px;height:14px}
+.tp-final{display:flex;align-items:center;gap:14px;margin-top:10px;padding:12px;border-radius:14px;background:linear-gradient(135deg,#3a2c08,#141414 70%);border:1px solid #8a6a18}
+.tp-final .fs{width:110px;height:10px;border-radius:6px;flex:none}
+.tp-final small{color:#ffd84d;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px} .tp-final b{display:block;font-size:19px} .tp-final span{color:#c9c4b8;font-size:14px;line-height:1.25;display:block}
+.tp-passe{display:flex;gap:12px;align-items:center;margin-top:10px;padding:12px;border:1px dashed #6a5418;border-radius:14px}
+.tp-passe b{color:#ffd84d;font-size:17px;display:block} .tp-passe span{color:#c9c4b8;font-size:14px;line-height:1.25}
+.tp-passe button{flex:none;background:#3a2c08;color:#c9a24a;border:0;border-radius:10px;font:800 15px var(--ui);text-transform:uppercase;letter-spacing:.06em;padding:10px 12px}
+@media (max-width:820px){ .tp-ganha{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .dailylist small{color:#9a968e;font-size:13px;font-weight:600}
 .dailylist li.ok small{color:#7ad38a}
 .bx-buy.free{background:#7ad38a;color:#0f2414}
@@ -718,6 +766,7 @@ html.land.cue-side .xbtn{position:fixed;top:6px;left:max(12px,env(safe-area-inse
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
+window.__site=true;
 /* app instalável: guarda o convite de instalação do navegador e liga o service worker */
 window.__bip=null;
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); window.__bip=e; });
@@ -1138,16 +1187,35 @@ async function syncSaldo(){ try{ const v=await rpc('meu_saldo'); if(typeof v==='
 /* pontos ganhos e gastos fora do online passam pelo servidor */
 window.__pts=(n,motivo,ref)=>{
   if(motivo==='patente'){ setTimeout(syncConta,1500); return; }   // o prêmio de patente o servidor entrega sozinho
-  rpc('pontos',{motivo,valor:n,ref:ref||null}).then(v=>{ if(S()) S().setPts(v); }).catch(e=>{ syncSaldo(); if(motivo==='icone') syncIcons(); if(S()) S().toast(motivo==='icone'?'A compra do ícone não foi aceita':'Esses pontos não foram aceitos pelo servidor',2600); });
+  rpc('pontos',{motivo,valor:n,ref:ref||null}).then(v=>{ if(S()) S().setPts(v); if(motivo==='desafio') setTimeout(syncTemp,500); }).catch(e=>{ syncSaldo(); if(motivo==='icone') syncIcons(); if(S()) S().toast(/^(icone|taco|pano)$/.test(motivo)?'A compra não foi aceita pelo servidor':'Esses pontos não foram aceitos pelo servidor',2600); });
 };
 async function syncConta(){ try{ const c=await rpc('minha_conta'); if(c&&S()){ S().setXp(c.xp); S().setCampeao(c.campeao); if(typeof c.saldo==='number') S().setPts(c.saldo); } }catch(e){} }
-window.__xp=(nivel,venceu,limpa,bolas)=>{ rpc('xp_treino',{nivel,venceu:!!venceu,limpa:!!limpa,bolas:bolas|0}).then(x=>{ if(S()) S().setXp(x); syncHist(); syncMiss(); }).catch(()=>{}); };
+window.__xp=(nivel,venceu,limpa,bolas)=>{ rpc('xp_treino',{nivel,venceu:!!venceu,limpa:!!limpa,bolas:bolas|0}).then(x=>{ if(S()) S().setXp(x); syncHist(); syncMiss(); syncTemp(); syncItems(); }).catch(()=>{}); };
 window.__hist=()=>rpc('meu_historico');
 async function syncHist(){ try{ const h=await rpc('meu_historico'); if(h&&S()) S().setHist(h); }catch(e){} }
 function sendBolas(){ if(!M||!M.row||M.ballsSent) return; M.ballsSent=true; rpc('bolas',{pid:M.row.id,n:S().myBalls()}).then(()=>setTimeout(syncHist,800)).catch(()=>{}); }
 window.__ranking=()=>rpc('ranking_semana');
 window.__missoes=()=>rpc('missoes');
-window.__resgatar=(id)=>rpc('resgatar_missao',{missao:id});
+/* temporada, itens do servidor e caixas antigas */
+window.__temporada=()=>rpc('temporada');
+async function syncItems(){ try{ const it=await rpc('meus_itens'); if(it&&S()){ S().addItems(it); if(Array.isArray(it.icones)) S().setIcons(it.icones); } }catch(e){} }
+let tpBusy=false;
+async function syncTemp(){
+  if(tpBusy) return; tpBusy=true;
+  try{ const d=await rpc('temporada'); if(!d||!S()) return; S().showTemp(d); if(!d.ativa) return;
+    const key='sinuca-tp-'+uid+'-'+d.id; let last=null; try{ last=localStorage.getItem(key); }catch(e){}
+    if(last!=null&&d.nivel>+last){
+      const ganhos=d.trilha.filter(t=>t.n>+last&&t.n<=d.nivel).map(t=>S().tpName(t.g)).filter(Boolean);
+      S().toast(`Temporada: nível ${d.nivel}! Ganhou ${ganhos.join(', ')}.`,4200);
+      syncItems(); syncSaldo();
+    }
+    try{ localStorage.setItem(key,d.nivel); }catch(e){}
+  }catch(e){} finally{ tpBusy=false; }
+}
+async function syncCaixas(){ try{ const f=S().boxes(); if(!f||!((f.boteco|0)+(f.prata|0)+(f.ouro|0))) return;
+  const r=await rpc('converter_caixas',{boteco:f.boteco|0,prata:f.prata|0,ouro:f.ouro|0}); S().clearBoxes();
+  if(r&&typeof r.saldo==='number'){ S().setPts(r.saldo); if(r.valor) S().toast(`As caixas viraram loja! Suas caixas guardadas viraram ${r.valor} pontos.`,4500); } }catch(e){} }
+window.__resgatar=(id)=>rpc('resgatar_missao',{missao:id}).then(r=>{ setTimeout(syncTemp,600); return r; });
 async function syncMiss(){ try{ const d=await rpc('missoes'); const el=document.getElementById('missCount'); if(!d||!el) return;
   const prontas=d.lista.filter(m=>m.prog>=m.meta&&!m.resgatada).length, res=d.lista.filter(m=>m.resgatada).length;
   el.textContent=prontas?`${prontas} pronta${prontas>1?'s':''} pra resgatar!`:`${res}/3 resgatadas · renovam segunda`; el.classList.toggle('hot',!!prontas); }catch(e){} }
@@ -1478,7 +1546,7 @@ function finished(r){
     if(r.status==='cancelada'){ S().endNet(M.me,'A partida foi cancelada e as fichas voltaram.'); }
     else { M.lastWhy='saiu'; S().endNet(r.vencedor, r.vencedor===M.me?'O adversário saiu da mesa. Você leva o pote.':'Você saiu da mesa e entregou a partida.'); }
   }
-  M.phase='over'; syncSaldo(); setTimeout(syncMiss,2500); showMoral(r); if(r.status==='fim'&&r.ranqueada==null) setTimeout(checkMoral,2000);
+  M.phase='over'; syncSaldo(); setTimeout(syncMiss,2500); setTimeout(syncTemp,2500); setTimeout(syncItems,3000); showMoral(r); if(r.status==='fim'&&r.ranqueada==null) setTimeout(checkMoral,2000);
   if(r.status==='fim'&&!M.opGone&&!/saiu/.test(String(M.lastWhy||''))) showRev(r.vencedor!==M.me||true);
 }
 function showRev(){ const b=$('revBtn'); if(!b||!M) return; b.hidden=false; b.disabled=false; b.classList.remove('ask'); b.textContent=M.row.ficha?`Mais uma ficha? (${M.row.ficha})`:'Revanche?'; M.revAsked=false; }
@@ -1561,7 +1629,7 @@ function patchMenu(){
 window.__onlineInit=async()=>{
   sb=window.__sb; uid=window.__uid; nick=window.__nick||'';
   if(!sb||!S()) return;
-  patchMenu(); await syncSaldo(); syncIcons(); syncConta(); syncHist(); S().showMiss(true); syncMiss(); setupApp();
+  patchMenu(); await syncSaldo(); await syncCaixas(); syncIcons(); syncItems(); syncConta(); syncHist(); S().showMiss(true); syncMiss(); setupApp(); syncTemp();
   rpc('cheguei').catch(()=>{});
   rpc('sou_admin').then(ok=>{ if(!ok||document.getElementById('tmPainel')) return; const pop=document.getElementById('tmPop'), sep=document.getElementById('tmSep'); if(!pop) return;
     const b=document.createElement('button'); b.type='button'; b.id='tmPainel'; b.setAttribute('role','menuitem');
@@ -1664,9 +1732,10 @@ window.__onlineInit=async()=>{
       <button class="primary" type="button" id="playCpu">Jogar</button>
       <div class="sect">Seu progresso</div>
       <button class="row" type="button" id="openDaily"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/></svg><span class="t"><b>Desafios do dia</b><small id="dailyCount">0/3 feitos</small></span><span class="chev">›</span></button>
+      <button class="row" type="button" id="openTemp" hidden><span class="tempbadge" id="tempLvl">0</span><span class="t"><b>Temporada 1</b><small id="tempSub">Abertura do Bar</small></span><span class="chev">›</span></button>
       <button class="row" type="button" id="openMiss" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span class="t"><b>Missões da semana</b><small id="missCount">Prêmios maiores, renovam segunda</small></span><span class="chev">›</span></button>
       <button class="row approw" type="button" id="openApp" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/></svg><span class="t"><b>Instalar o app</b><small>Ganhe o Taco Diamante, que brilha</small></span><span class="chev">›</span></button>
-      <button class="row" type="button" id="openShop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3.5 8.5 12 4l8.5 4.5v8L12 21l-8.5-4.5z"/><path d="M3.5 8.5 12 13l8.5-4.5M12 13v8"/></svg><span class="t"><b>Caixas</b><small id="shopSub">Troque pontos por tacos</small></span><span class="chev">›</span></button>
+      <button class="row" type="button" id="openShop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3.5 8.5 12 4l8.5 4.5v8L12 21l-8.5-4.5z"/><path d="M3.5 8.5 12 13l8.5-4.5M12 13v8"/></svg><span class="t"><b>Loja do Seu Zé</b><small id="shopSub">Tacos, panos e ícones, sem sorteio</small></span><span class="chev">›</span></button>
       <button class="row" type="button" id="openInv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20 18 6"/><path d="M16.5 4.5l3 3"/><circle cx="5" cy="19" r="1.4"/></svg><span class="t"><b>Inventário</b><small>Escolha o taco da partida</small></span><span class="chev">›</span></button>
       <button class="row" type="button" id="openIcons" hidden><span class="mrow-ic" id="menuIc"></span><span class="t"><b>Ícones</b><small>Seu rosto na mesa</small></span><span class="chev">›</span></button>
       <div class="sect">Outros modos</div>
@@ -1674,10 +1743,7 @@ window.__onlineInit=async()=>{
       <div class="row soon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.2 3.3 4.9 3.3 8s-1.1 5.8-3.3 8c-2.2-2.2-3.3-4.9-3.3-8S9.8 6.2 12 4z"/></svg><span class="t"><b>Online</b><small>Desafio pelo WhatsApp</small></span><span class="chip">Em breve</span></div>
       <button class="row" type="button" id="cfgBtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/></svg><span class="t"><b>Ajustes</b><small>Pano e som</small></span><span class="chev" id="cfgChev">›</span></button>
       <div class="drawer" id="cfgDrawer" hidden>
-        <div class="opt"><span>Cor do pano</span><div class="sw" role="group" aria-label="Cor do pano">
-          <button type="button" data-f="0" aria-label="Verde" style="background:#136c48"></button>
-          <button type="button" data-f="1" aria-label="Azul" style="background:#1b5896"></button>
-          <button type="button" data-f="2" aria-label="Vinho" style="background:#761e2a"></button></div></div>
+        <div class="opt"><span>Pano da mesa</span><div class="sw" id="swPanos" role="group" aria-label="Pano da mesa"></div></div>
         <div class="opt"><span>Som da mesa</span><button class="tog" type="button" id="sndTog" aria-pressed="true" aria-label="Som da mesa"></button></div>
         <div class="opt"><span>Taco no celular</span><div class="seg2" role="group" aria-label="Posição do taco de força no celular">
           <button type="button" data-cue="side">Lateral</button><button type="button" data-cue="bottom">Embaixo</button></div></div>
@@ -1718,11 +1784,11 @@ window.__onlineInit=async()=>{
 </section>
 <section class="sheet2" id="shop" hidden>
   <div class="s2box">
-    <div class="s2head"><h2>Caixas</h2><div class="ptspill"><svg class="coin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#e8b93c" stroke="#9a7420" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#9a7420" stroke-width="1.2" stroke-dasharray="2 1.6"/></svg><b class="ptsval">0</b><span>pontos</span></div><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
-    <p class="s2sub">Vença o computador para ganhar pontos: Fácil 5, Médio 10, Difícil 15, e +5 se vencer com a mesa limpa.</p>
-    <div class="shopgrid" id="shopGrid"></div>
-    <p class="pity" id="pityTxt"></p>
-    <p class="s2foot">Os tacos só mudam o visual. Todos jogam igual. Taco repetido devolve pontos: comum 5, prata 15, ouro 40.</p>
+    <div class="s2head"><h2>Loja do Seu Zé</h2><div class="ptspill"><svg class="coin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#e8b93c" stroke="#9a7420" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#9a7420" stroke-width="1.2" stroke-dasharray="2 1.6"/></svg><b class="ptsval">0</b><span>pontos</span></div><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
+    <p class="s2sub">Sem sorteio: você vê, escolhe e leva. Tudo aqui só muda o visual, todo mundo joga igual.</p>
+    <div class="invtabs" id="shopTabs"><button type="button" data-st="tacos">Tacos</button><button type="button" data-st="panos">Panos</button><button type="button" data-st="icones">Ícones</button></div>
+    <div class="lojagrid" id="shopGrid"></div>
+    <p class="s2foot">Ganhe pontos jogando, nos desafios e nas missões. Os exclusivos (patente, ranking, app e temporada) não estão à venda.</p>
   </div>
 </section>
 <section class="sheet2" id="rank" hidden>
@@ -1738,6 +1804,12 @@ window.__onlineInit=async()=>{
     <p class="s2sub">Valem nas partidas contra o computador.</p>
     <ul class="dailylist" id="dailyList"></ul>
     <p class="s2foot" id="dailyBonus"></p>
+  </div>
+</section>
+<section class="sheet2" id="temporada" hidden>
+  <div class="s2box">
+    <div class="s2head"><h2 id="tpNome">Temporada</h2><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
+    <div id="tpBody"><p class="hs-note">Carregando…</p></div>
   </div>
 </section>
 <section class="sheet2" id="missoes" hidden>
@@ -2439,6 +2511,8 @@ const CUES=[
   {id:'carnaval',nome:'Carnaval',r:'ouro',shaft:['#f6e7b0','#eccd6a'],ring:'#f2c14e',butt:['#5b1f8a','#2e0d4a'],bands:[[.66,.685,'#ff4fa0'],[.69,.715,'#ffd23f'],[.72,.745,'#3fd07a'],[.75,.775,'#3fa8ff'],[.86,.88,'#f2c14e']]},
   {id:'jabuticaba',nome:'Jabuticaba',r:'ouro',shaft:['#3a1d33','#22101e'],ring:'#f2c14e',butt:['#2a0f24','#0f040c'],bands:[[.72,.73,'#f2c14e'],[.82,.83,'#f2c14e'],[.92,.93,'#f2c14e']],cap:'#f2c14e'},
   {id:'macico',nome:'Ouro Maciço',r:'ouro',ferrule:'#fff3c4',shaft:['#ffe58a','#d9a52b'],ring:'#fff3c4',butt:['#e8b93c','#9a6d12'],bands:[[.78,.79,'#fff3c4'],[.9,.91,'#fff3c4']],cap:'#fff3c4'},
+  // exclusivo do Passe da Temporada 1
+  {id:'abertura',nome:'Taco Abertura',r:'ouro',excl:true,temp:1,shine:true,ferrule:'#fff3c4',shaft:['#2b1b10','#1a0f08'],ring:'#ffd75e',butt:['#ffd75e','#c9930f'],bands:[[.66,.69,'#1a8056'],[.72,.73,'#fff3c4'],[.8,.83,'#1a8056'],[.9,.92,'#fff3c4']],cap:'#1a8056'},
   // exclusivo de quem instala o app: brilha
   {id:'diamante',nome:'Taco Diamante',r:'ouro',excl:true,app:true,shine:true,ferrule:'#ffffff',shaft:['#f4fbff','#cfe9f5'],ring:'#9fe6ff',butt:['#bfe9ff','#4aa9d6'],bands:[[.64,.66,'#ffffff'],[.68,.69,'#9fe6ff'],[.72,.74,'#ffffff'],[.8,.81,'#e3f7ff'],[.87,.89,'#ffffff'],[.93,.94,'#9fe6ff']],cap:'#ffffff'},
   // exclusivo do campeão do ranking semanal (só um jogador tem por vez)
@@ -2496,20 +2570,20 @@ const ZE_BOX={
 /* ---------- patentes, desafios do dia e garantia ---------- */
 const RANKS=[
   {nome:'Freguês',xp:0},
-  {nome:'Curioso do Balcão',xp:100,prize:{box:'boteco'},txt:'Caixa do Boteco grátis'},
+  {nome:'Curioso do Balcão',xp:100,prize:{cue:'madeira'},txt:'Taco Madeira de Lei'},
   {nome:'Cliente da Casa',xp:250,prize:{pts:20},txt:'20 pontos'},
-  {nome:'Pendura no Caderno',xp:450,prize:{box:'boteco'},txt:'Caixa do Boteco grátis'},
+  {nome:'Pendura no Caderno',xp:450,prize:{cue:'garrafa'},txt:'Taco Verde Garrafa'},
   {nome:'Parceiro de Mesa',xp:700,prize:{pts:50},txt:'50 pontos'},
-  {nome:'Dono do Giz',xp:1000,prize:{box:'prata'},txt:'Caixa Prata grátis'},
-  {nome:'Matador de Bola',xp:1400,prize:{box:'boteco'},txt:'Caixa do Boteco grátis'},
-  {nome:'Tubarão',xp:1900,prize:{box:'prata'},txt:'Caixa Prata grátis'},
+  {nome:'Dono do Giz',xp:1000,prize:{cue:'azulejo'},txt:'Taco Azulejo Português'},
+  {nome:'Matador de Bola',xp:1400,prize:{cue:'couro'},txt:'Taco Couro Curtido'},
+  {nome:'Tubarão',xp:1900,prize:{cue:'cobre'},txt:'Taco Cobre Polido'},
   {nome:'Professor de Tabela',xp:2500,prize:{pts:100},txt:'100 pontos'},
   {nome:'Rei da Mesa',xp:3200,prize:{cue:'seuze'},txt:'Taco do Seu Zé (exclusivo)'},
-  {nome:'Mestre da Sinuca de Bico',xp:4000,prize:{box:'prata'},txt:'Caixa Prata grátis'},
-  {nome:'Patrão do Salão',xp:5000,prize:{box:'ouro'},txt:'Caixa de Ouro grátis'},
-  {nome:'Lenda do Boteco',xp:6500,prize:{box:'ouro'},txt:'Caixa de Ouro grátis'},
-  {nome:'Imortal da Sinuca',xp:8500,prize:{box:'ouro',pts:200},txt:'Caixa de Ouro + 200 pontos'},
-  {nome:'Dono do Bar',xp:11000,prize:{box:'ouro',pts:300,cue:'donodobar'},txt:'Taco do Dono do Bar (exclusivo) + Caixa de Ouro + 300 pontos'},
+  {nome:'Mestre da Sinuca de Bico',xp:4000,prize:{cue:'ebano'},txt:'Taco Ébano e Marfim'},
+  {nome:'Patrão do Salão',xp:5000,prize:{cue:'carnaval'},txt:'Taco Carnaval'},
+  {nome:'Lenda do Boteco',xp:6500,prize:{cue:'jabuticaba'},txt:'Taco Jabuticaba'},
+  {nome:'Imortal da Sinuca',xp:8500,prize:{cue:'macico',pts:200},txt:'Taco Ouro Maciço + 200 pontos'},
+  {nome:'Dono do Bar',xp:11000,prize:{pts:300,cue:'donodobar'},txt:'Taco do Dono do Bar (exclusivo) + 300 pontos'},
 ];
 /* ---------- ícones dos jogadores (animados, tema de bar) ---------- */
 const ICBG=(a,b)=>`<defs><radialGradient id="g" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></radialGradient></defs><rect width="64" height="64" fill="url(#g)"/>`;
@@ -2623,8 +2697,7 @@ function syncProgress(){
   set('rkBadge',i+1); set('rkName',r.nome); set('rkXp',nx?`${prof.xp} / ${nx.xp} XP`:`${prof.xp} XP · patente máxima`);
   const f=document.getElementById('rkFill'); if(f) f.style.width=(a*100).toFixed(1)+'%';
   set('dailyCount',`${prof.day.done.length}/3 feitos`);
-  const freeN=prof.free.boteco+prof.free.prata+prof.free.ouro;
-  set('shopSub',freeN?`Você tem ${freeN} caixa${freeN>1?'s':''} grátis`:'Troque pontos por tacos');
+  set('shopSub','Tacos, panos e ícones, sem sorteio');
 }
 function renderRanks(){
   const i=rankIdx(prof.xp);
@@ -2647,17 +2720,50 @@ function renderMissoes(d){
     return `<li class="${m.resgatada?'ok got':ok?'ok':''}"><div class="dl-t"><b>${m.txt}</b><span class="dl-r">${coin}+${m.premio}</span></div>
       <div class="dl-bar"><i style="width:${(m.prog/m.meta*100).toFixed(0)}%"></i></div>
       <div class="dl-act"><small>${m.resgatada?'Resgatada':`${m.prog} de ${m.meta}`}</small>${ok&&!m.resgatada?`<button class="resg" type="button" data-resg="${m.id}">Resgatar</button>`:''}</div></li>`; }).join('');
-  document.getElementById('missBonus').textContent=d.bonus?'Bônus da semana recebido: Caixa Prata grátis':'Resgate as 3 e ganhe uma Caixa Prata grátis.';
+  document.getElementById('missBonus').textContent=d.bonus?'Bônus da semana recebido: +150 pontos':'Resgate as 3 e ganhe mais 150 pontos. Cada missão também dá 100 de giz na Temporada.';
 }
 document.getElementById('missList').addEventListener('click',e=>{ const b=e.target.closest('[data-resg]'); if(!b||!window.__resgatar) return; b.disabled=true;
   window.__resgatar(b.dataset.resg).then(r=>{ if(r&&typeof r.saldo==='number'){ prof.pts=r.saldo; syncPts(); }
-      if(r&&r.caixa){ prof.free[r.caixa]=(prof.free[r.caixa]||0)+1; saveProf(); syncProgress(); toast(`Missão cumprida: +${r.premio} pontos e uma Caixa Prata grátis!`,3200); }
+      if(r&&r.bonus){ toast(`Missão cumprida: +${r.premio} pontos, e mais ${r.bonus} pelas 3 da semana!`,3200); }
       else toast(`Missão cumprida: +${r.premio} pontos`,2200);
       openMissoes(); })
     .catch(()=>{ b.disabled=false; toast('Não deu pra resgatar agora',2200); }); });
 document.getElementById('openMiss').addEventListener('click',openMissoes);
 function giveCue(id,msg){ if(!CUES.some(c=>c.id===id)||prof.owned.includes(id)) return false; prof.owned.push(id); saveProf(); if(msg) toast(msg,3600); return true; }
 function openApp(html){ openSheet('appinst'); document.getElementById('appStick').style.background=cueCSS(CUES.find(c=>c.id==='diamante'),'90deg'); document.getElementById('appSteps').innerHTML=html||''; }
+function tpReward(x){ if(!x) return '';
+  if(x.tipo==='pts') return `<span class="cn">${coin}${x.val}</span><span>pontos</span>`;
+  if(x.tipo==='taco'){ const c=cueById(x.ref); return c?`<span class="stk${c.shine?' shine':''}" style="background:${cueCSS(c,'270deg')}"></span><span>${c.nome}</span>`:''; }
+  if(x.tipo==='pano'){ const P=panoById(x.ref); return P?`<span class="swp" style="background-image:url(${panoThumb(P.id)})"></span><span>${P.nome}</span>`:''; }
+  if(x.tipo==='icone'){ const ic=icById(x.ref); return ic?`${icHtml(ic.id)}<span>${ic.nome}</span>`:''; }
+  return ''; }
+function tpName(x){ if(!x) return ''; if(x.tipo==='pts') return `${x.val} pontos`; if(x.tipo==='taco') return (cueById(x.ref)||{}).nome; if(x.tipo==='pano') return 'pano '+((panoById(x.ref)||{}).nome||''); if(x.tipo==='icone') return 'ícone '+((icById(x.ref)||{}).nome||''); return ''; }
+let tpData=null;
+function openTemporada(){ openSheet('temporada'); if(tpData) renderTemporada(tpData); if(window.__temporada) window.__temporada().then(d=>{ if(d) renderTemporada(d); }).catch(()=>{}); }
+function renderTemporada(d){
+  tpData=d; const el=document.getElementById('tpBody'); if(!el) return;
+  if(!d.ativa){ document.getElementById('tpNome').textContent='Temporada'; el.innerHTML='<p class="hs-note">A próxima temporada começa em breve. Fica de olho!</p>'; return; }
+  document.getElementById('tpNome').textContent=d.nome;
+  const ms=Math.max(0,new Date(d.fim)-new Date(d.agora)), dd=Math.ceil(ms/864e5);
+  const lvl=d.nivel, maxed=lvl>=30, into=maxed?d.por_nivel:d.giz-lvl*d.por_nivel;
+  const cols=d.trilha.map(t=>{ const got=t.n<=lvl, nx=t.n===lvl+1;
+    return `<div class="tp-col${nx?' now':''}" data-n="${t.n}"><span class="n">${t.n}</span><div class="tp-cell${got?' got':''}${nx?' next':''}">${tpReward(t.g)}</div><div class="tp-cell pay${got&&d.passe?' got':''}">${tpReward(t.p)}</div></div>`; }).join('');
+  const fin=d.trilha[29], ab=cueById('abertura');
+  el.innerHTML=`<div class="tp-top"><span class="ends">Temporada ${d.id} · termina em ${dd} dia${dd===1?'':'s'}</span><div class="tp-lvl"><b>${lvl}</b><span>nível</span></div></div>
+    <div class="tp-giz"><div class="gt"><span><i></i>${maxed?'Trilha completa!':`${into} / ${d.por_nivel} de giz`}</span><span>${maxed?`${d.giz} de giz`:`faltam ${d.por_nivel-into} pro nível ${lvl+1}`}</span></div><div class="gb"><i style="width:${(into/d.por_nivel*100).toFixed(1)}%"></i></div></div>
+    <div class="tp-ganha"><div><b>+30</b><span>vitória online</span></div><div><b>+15</b><span>derrota online</span></div><div><b>+15</b><span>vitória no treino</span></div><div><b>+8</b><span>derrota no treino</span></div><div><b>+25</b><span>desafio do dia</span></div><div><b>+100</b><span>missão da semana</span></div></div>
+    <div class="tp-rows"><div class="tp-lbl"><span>Grátis</span><span class="pp">Passe</span></div><div class="tp-track" id="tpTrack">${cols}</div></div>
+    <div class="tp-final"><span class="fs shine" style="background:${cueCSS(ab,'90deg')}"></span><div><small>Nível 30 · Passe do Bar</small><b>${ab.nome}</b><span>Exclusivo da Temporada ${d.id}. Depois que ela acabar, nunca mais volta. Na trilha grátis, o nível 30 dá o ${tpName(fin.g)}.</span></div></div>
+    <div class="tp-passe"><div><b>Passe do Bar</b><span>Prêmios dourados em todos os níveis, que você pega na hora quando o passe chegar. Só visual: ninguém joga melhor por ter pago.</span></div><button type="button" disabled>Em breve</button></div>`;
+  const tr=document.getElementById('tpTrack'), cur=tr&&tr.querySelector(`[data-n="${Math.max(1,lvl)}"]`); if(tr&&cur){ tr.style.scrollBehavior='auto'; tr.scrollLeft=Math.max(0,cur.offsetLeft-tr.offsetLeft-90); tr.style.scrollBehavior=''; }
+  const lv=document.getElementById('tempLvl'); if(lv) lv.textContent=lvl;
+  const sb=document.getElementById('tempSub'); if(sb) sb.textContent=maxed?`${d.nome} · trilha completa!`:`${d.nome} · nível ${lvl}, faltam ${d.por_nivel-into} de giz`;
+}
+document.getElementById('openTemp').addEventListener('click',openTemporada);
+function addItems(it){ if(!it) return; let ch=false;
+  (it.tacos||[]).forEach(id=>{ if(cueById(id)&&!prof.owned.includes(id)){ prof.owned.push(id); ch=true; } });
+  (it.panos||[]).forEach(id=>{ if(panoById(id)&&!prof.panos.includes(id)){ prof.panos.push(id); ch=true; } });
+  if(ch){ saveProf(); syncSw(); } }
 function renderDaily(){
   ensureDay();
   document.getElementById('dailyList').innerHTML=prof.day.ids.map(id=>{ const c=chDef(id), p=prof.day.prog[id]||0, ok=prof.day.done.includes(id);
@@ -2837,19 +2943,92 @@ function cpuTurn(){
 }
 
 /* ---------- desenho ---------- */
-const FELTS=[
-  {nome:'Verde',base:[26,128,86],cush:'#11694a'},
-  {nome:'Azul',base:[34,104,172],cush:'#1b5a94'},
-  {nome:'Vinho',base:[138,40,54],cush:'#6e1d2a'},
+/* panos da mesa: 3 de graça, o resto na Loja do Seu Zé ou na Temporada.
+   Estampas e torcidas usam tons fechados e as bolas ganham contorno, pra nenhuma bola sumir no pano */
+const PANOS=[
+  {id:'verde',nome:'Verde clássico',r:'comum',base:[26,128,86],cush:'#11694a',free:1},
+  {id:'azul',nome:'Azul',r:'comum',base:[34,104,172],cush:'#1b5a94',free:1},
+  {id:'vinho',nome:'Vinho',r:'comum',base:[138,40,54],cush:'#6e1d2a',free:1},
+  {id:'laranja',nome:'Laranja Boteco',r:'comum',base:[166,84,30],cush:'#7a3c12'},
+  {id:'grafite',nome:'Grafite',r:'comum',base:[62,66,72],cush:'#2c2f33'},
+  {id:'petroleo',nome:'Azul Petróleo',r:'comum',base:[18,92,100],cush:'#0c4b52'},
+  {id:'mostarda',nome:'Mostarda',r:'comum',base:[150,118,30],cush:'#6a5210',ring:1},
+  {id:'roxo',nome:'Roxo Neon',r:'prata',base:[86,40,140],cush:'#45207a'},
+  {id:'rosa',nome:'Rosa Choque',r:'prata',base:[160,42,100],cush:'#741c48'},
+  {id:'noite',nome:'Noite Estrelada',r:'prata',base:[20,28,62],cush:'#0c1230',paint:'estrelas'},
+  {id:'xadrez',nome:'Toalha Xadrez',r:'prata',base:[146,40,40],cush:'#6a1616',paint:'xadrez',ring:1},
+  {id:'chita',nome:'Chita',r:'ouro',base:[160,36,34],cush:'#661414',paint:'chita',ring:1},
+  {id:'dourado',nome:'Ouro Velho',r:'ouro',base:[126,96,30],cush:'#57400e',paint:'dourado',ring:1},
+  {id:'t_br',nome:'Torcida Brasil',r:'torcida',flag:'br',cush:'#0f4a28'},
+  {id:'t_ar',nome:'Torcida Argentina',r:'torcida',flag:'ar',cush:'#2c5578'},
+  {id:'t_pt',nome:'Torcida Portugal',r:'torcida',flag:'pt',cush:'#5e1418'},
+  {id:'t_it',nome:'Torcida Itália',r:'torcida',flag:'it',cush:'#14462a'},
+  {id:'t_es',nome:'Torcida Espanha',r:'torcida',flag:'es',cush:'#5e1414'},
+  {id:'t_jp',nome:'Torcida Japão',r:'torcida',flag:'jp',cush:'#5e161a'},
+  {id:'t_de',nome:'Torcida Alemanha',r:'torcida',flag:'de',cush:'#1c1c1c'},
+  {id:'t_fr',nome:'Torcida França',r:'torcida',flag:'fr',cush:'#18284e'},
+  {id:'t_us',nome:'Torcida EUA',r:'torcida',flag:'us',cush:'#18284e'},
+  {id:'t_mx',nome:'Torcida México',r:'torcida',flag:'mx',cush:'#14462a'},
+  {id:'t_uy',nome:'Torcida Uruguai',r:'torcida',flag:'uy',cush:'#2c4a70'},
+  {id:'t_co',nome:'Torcida Colômbia',r:'torcida',flag:'co',cush:'#1a2e5e'},
 ];
+PANOS.forEach(p=>{ if(p.flag) p.ring=1; });
+const PANO_PRECO={comum:100,prata:250,ouro:500,torcida:250};
+const panoById=id=>PANOS.find(p=>p.id===id);
+const curFelt=()=>panoById(prof.pano)||PANOS[0];
+/* desenha o pano inteiro (1000 x 500) num contexto */
+function paintPano(g,P){
+  const W=TW, H=TH, col=(c)=>`rgb(${c.join(',')})`, R2=rng(5);
+  const rect=(x,y,w,h,c)=>{ g.fillStyle=col(c); g.fillRect(x,y,w,h); };
+  if(!P.flag){
+    rect(0,0,W,H,P.base);
+    if(P.paint==='estrelas'){ for(let i=0;i<140;i++){ g.fillStyle=`rgba(255,250,220,${.15+R2()*.35})`; g.beginPath(); g.arc(R2()*W,R2()*H,.6+R2()*1.4,0,7); g.fill(); } }
+    if(P.paint==='xadrez'){ const q=50; for(let y=0;y<H;y+=q) for(let x=0;x<W;x+=q) if(((x+y)/q)%2===0) rect(x,y,q,q,[186,176,160]); }
+    if(P.paint==='dourado'){ for(let i=-6;i<14;i++){ const gr=g.createLinearGradient(i*90,0,i*90+120,H); gr.addColorStop(0,'rgba(255,220,120,0)'); gr.addColorStop(.5,'rgba(255,220,120,.10)'); gr.addColorStop(1,'rgba(255,220,120,0)'); g.fillStyle=gr; g.fillRect(i*90-60,0,180,H); } }
+    if(P.paint==='chita'){
+      g.globalAlpha=.62; for(let i=0;i<32;i++){ const x=R2()*W, y=R2()*H, r=11+R2()*10, pc=[[196,150,40],[40,88,150],[200,190,170],[40,110,60]][Math.floor(R2()*4)];
+        g.fillStyle='rgba(30,90,50,.75)'; for(let k=0;k<2;k++){ const a=R2()*6.28; g.beginPath(); g.ellipse(x+Math.cos(a)*r*1.3,y+Math.sin(a)*r*1.3,r*.7,r*.32,a,0,7); g.fill(); }
+        g.fillStyle=col(pc); for(let k=0;k<6;k++){ const a=k*1.047; g.beginPath(); g.arc(x+Math.cos(a)*r*.62,y+Math.sin(a)*r*.62,r*.48,0,7); g.fill(); }
+        g.fillStyle='rgb(206,170,50)'; g.beginPath(); g.arc(x,y,r*.32,0,7); g.fill(); }
+      g.globalAlpha=1;
+    }
+    return;
+  }
+  const G=[24,94,54], Y=[168,136,30], B=[30,52,112], Wt=[178,174,164], Rd=[140,32,38], Bk=[38,38,38], Cel=[72,118,160];
+  const hs=(cs)=>{ const h=H/cs.length; cs.forEach((c,i)=>rect(0,i*h,W,h+1,c)); }, vs=(cs)=>{ const w=W/cs.length; cs.forEach((c,i)=>rect(i*w,0,w+1,H,c)); };
+  const disc=(x,y,r,c)=>{ g.fillStyle=col(c); g.beginPath(); g.arc(x,y,r,0,7); g.fill(); };
+  switch(P.flag){
+    case 'br': rect(0,0,W,H,G); g.fillStyle=col(Y); g.beginPath(); g.moveTo(70,H/2); g.lineTo(W/2,34); g.lineTo(W-70,H/2); g.lineTo(W/2,H-34); g.closePath(); g.fill(); disc(W/2,H/2,112,B); break;
+    case 'ar': hs([Cel,Wt,Cel]); disc(W/2,H/2,36,Y); break;
+    case 'pt': rect(0,0,W*.4,H,[30,84,48]); rect(W*.4,0,W*.6,H,Rd); disc(W*.4,H/2,58,Y); disc(W*.4,H/2,40,Rd); break;
+    case 'it': vs([[30,96,58],Wt,Rd]); break;
+    case 'es': rect(0,0,W,H,Rd); rect(0,H*.25,W,H*.5,Y); break;
+    case 'jp': rect(0,0,W,H,Wt); disc(W/2,H/2,120,[150,34,40]); break;
+    case 'de': hs([Bk,Rd,[168,128,30]]); break;
+    case 'fr': vs([B,Wt,Rd]); break;
+    case 'us': { const h=H/13; for(let i=0;i<13;i++) rect(0,i*h,W,h+1,i%2?Wt:Rd); rect(0,0,W*.4,h*7,B); g.fillStyle=col(Wt); for(let y=0;y<9;y++) for(let x=0;x<(y%2?5:6);x++){ g.beginPath(); g.arc(30+x*64+(y%2?32:0),22+y*28,5,0,7); g.fill(); } break; }
+    case 'mx': vs([[24,96,56],Wt,Rd]); disc(W/2,H/2,48,[120,84,40]); disc(W/2,H/2,30,[60,110,60]); break;
+    case 'uy': { const h=H/9; for(let i=0;i<9;i++) rect(0,i*h,W,h+1,i%2?[60,96,150]:Wt); rect(0,0,W*.36,h*5,Wt); disc(W*.18,h*2.5,52,Y); break; }
+    case 'co': rect(0,0,W,H/2,Y); rect(0,H/2,W,H/4,[30,60,120]); rect(0,H*.75,W,H/4,Rd); break;
+  }
+}
+const panoThumbs={};
+function panoThumb(id){
+  if(panoThumbs[id]) return panoThumbs[id];
+  const P=panoById(id); if(!P) return '';
+  const c=document.createElement('canvas'); c.width=200; c.height=100; const g=c.getContext('2d'); g.scale(.2,.2); paintPano(g,P);
+  const gr=g.createRadialGradient(500,250,60,500,250,620); gr.addColorStop(0,'rgba(0,0,0,0)'); gr.addColorStop(1,'rgba(0,0,0,.35)'); g.fillStyle=gr; g.fillRect(0,0,1000,500);
+  return panoThumbs[id]=c.toDataURL();
+}
 let feltIdx=0, feltTex=null, floorPat=null;
-try{ const v=parseInt(localStorage.getItem('sinuca-pano'),10); if(v>=0&&v<FELTS.length) feltIdx=v; }catch(e){}
+try{ const v=parseInt(localStorage.getItem('sinuca-pano'),10); if(v>=0&&v<3) feltIdx=v; }catch(e){}
+if(!Array.isArray(prof.panos)) prof.panos=[]; if(!prof.pano||!panoById(prof.pano)) prof.pano=['verde','azul','vinho'][feltIdx]||'verde';
 function rng(seed){ return ()=>{ seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 /* pano limpo: cor uniforme, textura leve de feltro e uma luz suave no meio */
 function makeFelt(){
-  const F=FELTS[feltIdx], S=2, c=document.createElement('canvas'); c.width=TW*S; c.height=TH*S;
+  const F=curFelt(), S=2, c=document.createElement('canvas'); c.width=TW*S; c.height=TH*S;
   const g=c.getContext('2d'); g.scale(S,S);
-  g.fillStyle=`rgb(${F.base.join(',')})`; g.fillRect(0,0,TW,TH);
+  paintPano(g,F);
   const wear=(x,y,rx,ry,a)=>{ g.save(); g.translate(x,y); g.scale(rx/ry,1); const gr=g.createRadialGradient(0,0,0,0,0,ry);
     gr.addColorStop(0,`rgba(255,250,225,${a})`); gr.addColorStop(1,'rgba(255,250,225,0)'); g.fillStyle=gr; g.beginPath(); g.arc(0,0,ry,0,7); g.fill(); g.restore(); };
   wear(500,250,460,170,.035);
@@ -2969,7 +3148,7 @@ function cushPath(c,closed){
   return P;
 }
 function drawTable(){
-  const RD=railD, F=FELTS[feltIdx], rm=-(CB+RD)/2, rw=RD-CB;
+  const RD=railD, F=curFelt(), rm=-(CB+RD)/2, rw=RD-CB;
   // madeira escura envernizada, com sombra no chão
   ctx.save(); ctx.shadowColor='rgba(0,0,0,.75)'; ctx.shadowBlur=36*dpr; ctx.shadowOffsetY=12*dpr;
   const wood=ctx.createLinearGradient(0,-RD,0,TH+RD);
@@ -3102,7 +3281,9 @@ function drawBall(b,x,y,sc,dark){
   sh.addColorStop(0,'rgba(255,255,255,.75)'); sh.addColorStop(.18,'rgba(255,255,255,.12)'); sh.addColorStop(.7,'rgba(0,0,0,0)'); sh.addColorStop(1,'rgba(0,0,0,.38)');
   ctx.fillStyle=sh; ctx.fillRect(-R,-R,2*R,2*R);
   if(dark){ ctx.fillStyle=`rgba(0,0,0,${dark})`; ctx.fillRect(-R,-R,2*R,2*R); }
-  ctx.restore(); ctx.restore();
+  ctx.restore();
+  if(curFelt().ring&&!dark){ ctx.strokeStyle='rgba(0,0,0,.7)'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(0,0,R-.6,0,7); ctx.stroke(); }
+  ctx.restore();
 }
 /* bola caindo: escorrega para o fundo da caçapa, encolhe e some na sombra */
 function drawSinking(now){
@@ -3396,9 +3577,11 @@ const segBtns=[...menuEl.querySelectorAll('.seg button')];
 const syncSeg=()=>segBtns.forEach(b=>b.setAttribute('aria-pressed',+b.dataset.lv===selLv));
 segBtns.forEach(b=>b.addEventListener('click',()=>{ selLv=+b.dataset.lv; try{localStorage.setItem('sinuca-nivel',selLv)}catch(e){} syncSeg(); }));
 syncSeg();
-const swBtns=[...menuEl.querySelectorAll('.sw button')];
-const syncSw=()=>swBtns.forEach(b=>b.setAttribute('aria-pressed',+b.dataset.f===feltIdx));
-swBtns.forEach(b=>b.addEventListener('click',()=>{ feltIdx=+b.dataset.f; try{localStorage.setItem('sinuca-pano',feltIdx)}catch(e){} makeFelt(); syncSw(); }));
+const ownsPano=id=>{ const p=panoById(id); return !!p&&(p.free||prof.panos.includes(id)); };
+function usePano(id){ if(!ownsPano(id)) return; prof.pano=id; saveProf(); makeFelt(); syncSw(); }
+function syncSw(){ const el=document.getElementById('swPanos'); if(!el) return;
+  el.innerHTML=PANOS.filter(p=>ownsPano(p.id)).map(p=>`<button type="button" data-pano="${p.id}" aria-label="${p.nome}" title="${p.nome}" aria-pressed="${prof.pano===p.id}" style="background:url(${panoThumb(p.id)}) center/cover"></button>`).join('')+'<button type="button" class="swmore" data-pano="+" aria-label="Mais panos na loja">+</button>'; }
+document.getElementById('swPanos').addEventListener('click',e=>{ const b=e.target.closest('[data-pano]'); if(!b) return; if(b.dataset.pano==='+'){ shopTab='panos'; openSheet('shop'); return; } usePano(b.dataset.pano); });
 syncSw();
 const tog=document.getElementById('sndTog');
 function syncSound(){ const on=soundMode!==2; tog.setAttribute('aria-pressed',on); sb.textContent=on?'Som':'Mudo'; }
@@ -3543,7 +3726,9 @@ window.SINUCA={
   rank:()=>RANKS[rankIdx(prof.xp)].nome, icon:()=>myIcon(), icHtml:(id)=>icHtml(id), setOppIcon:(id)=>{ if(NET.on&&ICONS.some(i=>i.id===id)) setAv(1-NET.me,id); }, openIcons:()=>openSheet('icons'), openPerfil:()=>openSheet('perfil'), setIcons:(l)=>setIcons(l), rankOf:(xp)=>RANKS[rankIdx(xp||0)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
   resend:()=>{ if(NET.on&&!NET.wait&&state==='aim') netSendState(); },
   endNet:(w,why)=>{ if(NET.on&&winner==null){ NET.noStat=/cancelada/.test(why||''); charging=false; drag=null; endGame(w,why||'',false); } },
-  setXp:(x)=>setXp(x), owns:(id)=>prof.owned.includes(id), giveCue:(id,msg)=>giveCue(id,msg), openApp:(h)=>openApp(h), showMiss:(on)=>{ document.getElementById('openMiss').hidden=!on; }, setHist:(h)=>setHist(h), myBalls:()=>myBalls, setCampeao:(on)=>setCampeao(!!on), openRanking:()=>openRanking(),
+  setXp:(x)=>setXp(x), addItems:(it)=>addItems(it), showTemp:(d)=>{ const r=document.getElementById('openTemp'); r.hidden=!d||!d.ativa; if(d&&d.ativa){ tpData=d; const lv=document.getElementById('tempLvl'); lv.textContent=d.nivel; const into=d.nivel>=30?0:d.giz-d.nivel*d.por_nivel; document.getElementById('tempSub').textContent=d.nivel>=30?`${d.nome} · trilha completa!`:`${d.nome} · nível ${d.nivel}, faltam ${d.por_nivel-into} de giz`; if(!document.getElementById('temporada').hidden) renderTemporada(d); } },
+  tpName:(x)=>tpName(x), openTemp:()=>openTemporada(), boxes:()=>({...prof.free}), clearBoxes:()=>{ prof.free={boteco:0,prata:0,ouro:0}; saveProf(); syncProgress(); },
+  owns:(id)=>prof.owned.includes(id), giveCue:(id,msg)=>giveCue(id,msg), openApp:(h)=>openApp(h), showMiss:(on)=>{ document.getElementById('openMiss').hidden=!on; }, setHist:(h)=>setHist(h), myBalls:()=>myBalls, setCampeao:(on)=>setCampeao(!!on), openRanking:()=>openRanking(),
   isOver:()=>winner!=null, waiting:()=>NET.on&&NET.wait, turnNo:()=>NET.turnNo,
   unwait:()=>{ if(NET.on&&NET.wait&&NET.turnNo===0){ NET.wait=false; NET.t0=performance.now(); setStatus(`<b>${names[cur]}</b> abre a partida. Posicione a branca na meia lua e tacada!`); netSendState(); } },
 };
@@ -3552,9 +3737,13 @@ window.SINUCA={
 const coinOld='<svg class="coin" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#e8b93c" stroke="#9a7420" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#9a7420" stroke-width="1.2" stroke-dasharray="2 1.6"/></svg>';
 const ICON_OK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
 const ICON_LOCK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="7" width="10" height="7.5" rx="1.6"/><path d="M5.3 7V5a2.7 2.7 0 0 1 5.4 0v2"/></svg>';
+function cueHow(c){
+  if(c.app) return 'Instale o<br>app'; if(c.champ) return 'Campeão do<br>ranking semanal'; if(c.temp) return 'Passe da<br>Temporada '+c.temp;
+  const rk=RANKS.find(k=>k.prize&&k.prize.cue===c.id); if(c.excl) return `Patente<br>${rk?rk.nome:''}`;
+  return `Loja · ${CUE_PRECO[c.r]}<br>pontos`; }
 function cueCard(c,owned){
   const r=RAR[c.r], eq=prof.eq===c.id;
-  const how=c.app?'Instale o<br>app':c.champ?'Campeão do<br>ranking semanal':c.excl?`Patente<br>${(RANKS.find(k=>k.prize&&k.prize.cue===c.id)||{}).nome||''}`:(c.r==='ouro'?'Caixa Prata<br>ou de Ouro':c.r==='prata'?'Qualquer<br>caixa':'Qualquer<br>caixa');
+  const how=cueHow(c);
   return `<div class="cuecard ${owned?'':'locked'} r-${c.r}">
     <div class="cc-stick${c.shine?' shine':''}" style="background:${cueCSS(c,'270deg')}"></div>
     <div class="cc-info"><b>${c.nome}</b><span class="rar" style="color:${r.cor}">${r.nome}</span>${owned?`<span class="cc-st ok">${ICON_OK}Liberado</span>`:`<span class="cc-st no">${ICON_LOCK}Bloqueado</span>`}</div>
@@ -3578,7 +3767,47 @@ function renderInv(){
   document.querySelectorAll('[data-use]').forEach(b=>b.addEventListener('click',()=>{ prof.eq=b.dataset.use; saveProf(); applyCue(); renderInv(); }));
 }
 document.getElementById('invTabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; invTab=b.dataset.tab; renderInv(); document.getElementById('invGrid').scrollTop=0; });
-function renderShop(){
+let shopTab='tacos';
+const CUE_PRECO={comum:100,prata:250,ouro:500};
+const RAR_COR=r=>r==='torcida'?'#7fd3a8':RAR[r].cor;
+const RAR_NOME=r=>r==='torcida'?'Torcida':RAR[r].nome;
+function renderLoja(){
+  document.querySelectorAll('#shopTabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.st===shopTab));
+  const el=document.getElementById('shopGrid'), btn=(p,attr)=>`<button type="button" ${attr}${prof.pts<p?' disabled':''}>${coin}${p}</button>`;
+  let html='';
+  if(shopTab==='tacos'){
+    const order={comum:0,prata:1,ouro:2};
+    html=CUES.filter(c=>c.id!=='casa').sort((a,b)=>((a.excl?1:0)-(b.excl?1:0))||(order[a.r]-order[b.r])).map(c=>{
+      const own=prof.owned.includes(c.id), eq=prof.eq===c.id, p=CUE_PRECO[c.r];
+      const act=own?(eq?'<span class="own">Em uso</span>':`<button type="button" class="use" data-cuse="${c.id}">Usar</button>`):c.excl?`<span class="ex">${cueHow(c).replace('<br>',' ')}</span>`:btn(p,`data-cbuy="${c.id}"`);
+      return `<div class="lj${eq?' on':''}" style="--r:${RAR[c.r].cor}"><span class="stk${c.shine?' shine':''}" style="background:${cueCSS(c,'270deg')}"></span><b>${c.nome}</b><span class="rr">${RAR[c.r].nome}</span>${act}</div>`; }).join('');
+  }else if(shopTab==='panos'){
+    html=PANOS.map(P=>{ const own=ownsPano(P.id), on=prof.pano===P.id, p=PANO_PRECO[P.r];
+      const act=own?(on?'<span class="own">Em uso</span>':`<button type="button" class="use" data-puse="${P.id}">Usar</button>`):btn(p,`data-pbuy="${P.id}"`);
+      return `<div class="lj${on?' on':''}" style="--r:${RAR_COR(P.r)}"><span class="swp" style="background-image:url(${panoThumb(P.id)})"></span><b>${P.nome}</b><span class="rr">${P.free?'Grátis':RAR_NOME(P.r)}</span>${act}</div>`; }).join('');
+  }else{
+    const cur=myIcon();
+    html=ICONS.map(ic=>{ const ok=icOwned(ic.id), on=cur===ic.id;
+      const act=on?'<span class="own">Em uso</span>':ok?`<button type="button" class="use" data-icuse="${ic.id}">Usar</button>`:ic.get.pts?btn(ic.get.pts,`data-icbuy="${ic.id}"`):`<span class="ex">Patente ${RANKS[ic.get.rank].nome}</span>`;
+      return `<div class="lj${on?' on':''}" style="--r:#c9c4b8">${icHtml(ic.id)}<b>${ic.nome}</b><span class="rr">Ícone</span>${act}</div>`; }).join('');
+  }
+  el.innerHTML=html;
+}
+function buyCue(id){ const c=cueById(id), p=CUE_PRECO[c.r]; if(!c||c.excl||prof.owned.includes(id)||prof.pts<p) return;
+  prof.owned.push(id); prof.eq=id; addPts(-p,'taco',id); saveProf(); syncPts(); applyCue(); renderLoja(); toast(`${c.nome} é seu!`,2000); }
+function buyPano(id){ const P=panoById(id), p=P&&PANO_PRECO[P.r]; if(!P||ownsPano(id)||prof.pts<p) return;
+  prof.panos.push(id); addPts(-p,'pano',id); usePano(id); syncPts(); renderLoja(); toast(`Pano ${P.nome} é seu!`,2000); }
+document.getElementById('shopTabs').addEventListener('click',e=>{ const b=e.target.closest('[data-st]'); if(!b) return; shopTab=b.dataset.st; renderLoja(); document.getElementById('shopGrid').scrollTop=0; });
+document.getElementById('shopGrid').addEventListener('click',e=>{
+  const t=e.target.closest('button'); if(!t||t.disabled) return; const d=t.dataset;
+  if(d.cbuy) buyCue(d.cbuy); if(d.cuse){ prof.eq=d.cuse; saveProf(); applyCue(); renderLoja(); }
+  if(d.pbuy) buyPano(d.pbuy); if(d.puse){ usePano(d.puse); renderLoja(); }
+  if(d.icuse){ prof.ico=d.icuse; saveProf(); setAv(NET.on?NET.me:0,myIcon()); syncMenuIcon(); renderLoja(); }
+  if(d.icbuy){ const ic=icById(d.icbuy); if(!ic||prof.pts<ic.get.pts||icOwned(ic.id)) return;
+    prof.icons=(prof.icons||[]).concat(ic.id); prof.ico=ic.id; addPts(-ic.get.pts,'icone',ic.id); saveProf(); syncPts(); syncMenuIcon(); renderLoja(); toast(`Ícone ${ic.nome} liberado!`,2200); }
+});
+function renderShop(){ return renderLoja(); }
+function renderBoxesOld(){
   document.getElementById('shopGrid').innerHTML=BOXES.map(b=>{
     const free=prof.free[b.id]||0, can=free>0||prof.pts>=b.preco, pct=v=>Math.round(v*100)+'%';
     return `<div class="boxcard bx-${b.id}">
@@ -3617,8 +3846,8 @@ document.getElementById('icGrid').addEventListener('click',e=>{
 });
 document.getElementById('openIcons').addEventListener('click',()=>openSheet('icons'));
 
-function openSheet(id){ ['inv','shop','rank','daily','icons','perfil','ajustes','hist','ranking','missoes','appinst'].forEach(s=>document.getElementById(s).hidden=s!==id); if(id==='inv') renderInv(); if(id==='icons') renderIcons(); if(id==='perfil') renderPerfil(); if(id==='hist') renderHist(); if(id==='shop') renderShop(); if(id==='rank'){ renderRanks(); requestAnimationFrame(scrollRank); } if(id==='daily') renderDaily(); }
-function closeSheets(){ ['inv','shop','reveal','rank','daily','icons','perfil','ajustes','hist','ranking','missoes','appinst'].forEach(s=>document.getElementById(s).hidden=true); }
+function openSheet(id){ ['inv','shop','rank','daily','icons','perfil','ajustes','hist','ranking','missoes','appinst','temporada'].forEach(s=>document.getElementById(s).hidden=s!==id); if(id==='inv') renderInv(); if(id==='icons') renderIcons(); if(id==='perfil') renderPerfil(); if(id==='hist') renderHist(); if(id==='shop') renderShop(); if(id==='rank'){ renderRanks(); requestAnimationFrame(scrollRank); } if(id==='daily') renderDaily(); }
+function closeSheets(){ ['inv','shop','reveal','rank','daily','icons','perfil','ajustes','hist','ranking','missoes','appinst','temporada'].forEach(s=>document.getElementById(s).hidden=true); }
 function openBox(b){
   const free=(prof.free[b.id]||0)>0;
   if(!free&&prof.pts<b.preco) return;
@@ -3731,7 +3960,9 @@ document.getElementById('pfBody').addEventListener('click',e=>{ const b=e.target
 if(!prof.hist||typeof prof.hist!=='object') prof.hist={}; for(const k of ['cpu','net']){ const h=prof.hist[k]=prof.hist[k]||{}; for(const f of ['j','v','b']) h[f]=+h[f]||0; }
 { const aj=document.getElementById('ajBody'); if(aj){ const b=document.createElement('button'); b.type='button'; b.className='tutagain'; b.textContent='Ver o tutorial de novo'; b.onclick=()=>{ closeSheets(); window.__tutAgain=true; startMode(true,0); }; aj.append(b); } }
 if(!Array.isArray(prof.icons)) prof.icons=[]; if(!prof.ico) prof.ico='oito';
-syncPts(); applyCue(); syncProgress(); syncMenuIcon(); setAv(0,myIcon());
+{ const f=prof.free||{}, v=(f.boteco||0)*100+(f.prata||0)*250+(f.ouro||0)*500;
+  if(v&&!window.__site){ prof.pts+=v; prof.free={boteco:0,prata:0,ouro:0}; saveProf(); setTimeout(()=>toast(`As caixas viraram loja! Suas caixas guardadas viraram ${v} pontos.`,4200),1500); } }
+syncPts(); applyCue(); syncProgress(); syncMenuIcon(); setAv(0,myIcon()); syncSw();
 
 new ResizeObserver(resize).observe(wrap);
 document.documentElement.classList.add('menu-open');
