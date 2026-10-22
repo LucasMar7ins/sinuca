@@ -260,7 +260,7 @@ html.land .bn-text{font-size:15px}
 /* computador: placar à esquerda, mesa deitada grande e controles numa faixa embaixo da mesa */
 @media (min-width:900px){
   html:not(.land) .app{display:grid;grid-template-columns:minmax(220px,280px) 1fr;grid-template-rows:auto auto 1fr auto;
-    grid-template-areas:"head table" "status table" ". table" ". ctrl";column-gap:24px;row-gap:12px;max-width:none}
+    grid-template-areas:"head table" "status table" ". table" ". ctrl";column-gap:14px;row-gap:10px;max-width:none}
   html:not(.land) header{grid-area:head;flex-direction:column;align-items:stretch;gap:14px}
   html:not(.land) .brand{font-size:30px}
   html:not(.land) .players{grid-template-columns:1fr;gap:10px}
@@ -272,8 +272,8 @@ html.land .bn-text{font-size:15px}
   html:not(.land) .fine{height:56px;min-width:0}
   html:not(.land) .controls .btn{min-height:56px}
   html:not(.land) .controls .btn.icon{width:auto}
-  html:not(.land) .app{grid-template-columns:280px 1fr}
-  html:not(.land) .xbtn{top:12px;right:auto;left:calc(max(16px, env(safe-area-inset-left, 0px)) + 280px - 42px)}
+  html:not(.land) .app{grid-template-columns:236px 1fr}
+  html:not(.land) .xbtn{top:12px;right:auto;left:calc(max(16px, env(safe-area-inset-left, 0px)) + 236px - 42px)}
 }
 /* menu principal: menu lateral limpo + lousa com as regras da casa sobre a foto do bar */
 .mscreen{position:fixed;inset:0;z-index:20;overflow-y:auto;background:#0f0f0f;color:#f5f3ee;--macc:#ffd84d;--mline:#2a2a2a;--mmuted:#9a968e;
@@ -1921,7 +1921,8 @@ const colorOf=n=>n===0?'#f4efe2':COLORS[n>8?n-8:n];
 const typeOf=n=>n<8?'lisas':n>8?'listradas':'oito';
 const other=g=>g==='lisas'?'listradas':'lisas';
 
-const cv=document.getElementById('cv'), ctx=cv.getContext('2d'), wrap=document.getElementById('wrap');
+const cv=document.getElementById('cv'), wrap=document.getElementById('wrap');
+let ctx=cv.getContext('2d');
 const statusEl=document.getElementById('status'), fillEl=document.getElementById('fill'), pw=document.getElementById('power');
 const names=['Jogador 1','Jogador 2'];
 
@@ -1937,7 +1938,7 @@ let ac=null, master=null, wet=null, noiseBuf=null, rollG=null, ambG=null, budget
 const BUF={};
 /* síntese modal: cada som é a soma das frequências em que o objeto vibra, cada uma morrendo no seu tempo */
 function modal(modes,len,click,clickDur,clickLP){
-  const sr=ac.sampleRate, n=Math.floor(sr*len), buf=ac.createBuffer(1,n,sr), d=buf.getChannelData(0);
+  const sr=SR, n=Math.floor(sr*len), buf=mkBuf(1,n), d=buf.getChannelData(0);
   const ph=modes.map(()=>Math.random()*6.28); let pk=0, lp=0;
   for(let i=0;i<n;i++){
     const t=i/sr; let v=0;
@@ -1949,39 +1950,65 @@ function modal(modes,len,click,clickDur,clickLP){
   return buf;
 }
 const vary=(m,s)=>m.map(([f,a,d])=>[f*(1-(s||.06)+Math.random()*2*(s||.06)),a*(0.8+Math.random()*0.4),d*(0.85+Math.random()*0.3)]);
+/* os sons são gerados aos poucos depois que o jogo abre, pra o primeiro toque não travar */
+const SR=44100;
+let irBuf=null;
+function mkBuf(c,n){ return ac?ac.createBuffer(c,n,SR):new AudioBuffer({numberOfChannels:c,length:n,sampleRate:SR}); }
+const AJ=[];
+AJ.push(()=>{
+      const sr=SR, len=Math.floor(sr*1.2); noiseBuf=mkBuf(1,len);
+      const d=noiseBuf.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+      // sala de boteco: azulejo e piso duro, então reflexões rápidas e um rabo curto
+      irBuf=mkBuf(2,Math.floor(sr*0.7)); const ir=irBuf;
+      for(let c=0;c<2;c++){ const x=ir.getChannelData(c); let lp=0;
+        for(let i=0;i<x.length;i++){ lp=lp*0.55+(Math.random()*2-1)*0.45; x[i]=lp*Math.exp(-i/(sr*0.13)); }
+        [0.007,0.013,0.021,0.034].forEach((e,k)=>{ const p=Math.floor(sr*(e+c*0.002)); x[p]+=0.6-k*0.12; }); }
+
+});
+AJ.push(()=>{
+      // bola com bola: estalo de resina, quase sem corpo grave, morre em ~15 ms
+      const CLACK=[[2950,1,.009],[4300,.7,.0065],[6150,.45,.0045],[8200,.25,.003],[1750,.18,.012]];
+      BUF.clack=Array.from({length:8},()=>modal(vary(CLACK,.08),.06,.9,.0009));
+});
+AJ.push(()=>{
+      BUF.soft=Array.from({length:4},()=>modal(vary([[2400,1,.007],[3600,.5,.005],[1500,.3,.01]],.08),.05,.4,.0015,.5));
+});
+AJ.push(()=>{
+      // tabela: borracha empurrando o pano e a madeira por trás
+      BUF.cush=Array.from({length:4},()=>modal(vary([[140,1,.05],[235,.6,.035],[410,.3,.02],[820,.12,.008]]),.16,.5,.006,.7));
+});
+AJ.push(()=>{
+      // sola de couro do taco
+      BUF.tip=Array.from({length:4},()=>modal(vary([[780,1,.009],[1650,.5,.006],[2900,.3,.005]]),.05,1,.003,.35));
+});
+AJ.push(()=>{
+      // bola caindo no fundo da caçapa
+      BUF.drop=Array.from({length:3},()=>modal(vary([[78,1,.11],[132,.6,.07],[205,.3,.04],[420,.15,.015]]),.32,.5,.01,.8));
+});
+AJ.push(()=>{
+      // crack: o estalo seco e agudo que só aparece quando resina bate forte em resina
+      BUF.crack=Array.from({length:6},()=>modal(vary([[5400,1,.0035],[7900,.7,.0022],[10800,.4,.0014],[3600,.35,.006]],.07),.03,1.4,.0006));
+});
+AJ.push(()=>{
+      // giz: grãos minúsculos estalando entre a sola de couro e a bola
+      BUF.chalk=Array.from({length:4},()=>{ const n=Math.floor(SR*0.016), b=mkBuf(1,n), d=b.getChannelData(0);
+        for(let g=0;g<14;g++){ const at=Math.floor(Math.random()*n*0.8), len=Math.floor(SR*(0.0002+Math.random()*0.0005)), a=0.3+Math.random()*0.7;
+          for(let i=0;i<len&&at+i<n;i++) d[at+i]+=a*(Math.random()*2-1)*(1-i/len); }
+        let pk=0; for(let i=0;i<n;i++) pk=Math.max(pk,Math.abs(d[i])); for(let i=0;i<n;i++) d[i]*=0.9/(pk||1); return b; });
+});
+function runAudioJobs(all){ while(AJ.length){ try{ AJ[0](); AJ.shift(); }catch(e){ if(!ac) return; AJ.shift(); } if(!all) return; } }
+function idleAudio(){ if(!AJ.length) return; runAudioJobs(false); setTimeout(idleAudio,80); }
+setTimeout(idleAudio,1200);
 function ensureAudio(){
   if(!ac){
     try{
       ac=new (window.AudioContext||window.webkitAudioContext)();
       const comp=ac.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=4; comp.attack.value=0.002; comp.release.value=0.12;
       master=ac.createGain(); master.gain.value=soundMode===2?0:0.95; master.connect(comp).connect(ac.destination);
-      const sr=ac.sampleRate, len=Math.floor(sr*1.2); noiseBuf=ac.createBuffer(1,len,sr);
-      const d=noiseBuf.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
-      // sala de boteco: azulejo e piso duro, então reflexões rápidas e um rabo curto
-      const ir=ac.createBuffer(2,Math.floor(sr*0.7),sr);
-      for(let c=0;c<2;c++){ const x=ir.getChannelData(c); let lp=0;
-        for(let i=0;i<x.length;i++){ lp=lp*0.55+(Math.random()*2-1)*0.45; x[i]=lp*Math.exp(-i/(sr*0.13)); }
-        [0.007,0.013,0.021,0.034].forEach((e,k)=>{ const p=Math.floor(sr*(e+c*0.002)); x[p]+=0.6-k*0.12; }); }
-      const conv=ac.createConvolver(); conv.buffer=ir; wet=ac.createGain(); wet.gain.value=0.26;
+      runAudioJobs(true);
+      const conv=ac.createConvolver(); conv.buffer=irBuf; wet=ac.createGain(); wet.gain.value=0.26;
       const wf=ac.createBiquadFilter(); wf.type='lowpass'; wf.frequency.value=5000;
       wet.connect(conv).connect(wf).connect(master);
-      // bola com bola: estalo de resina, quase sem corpo grave, morre em ~15 ms
-      const CLACK=[[2950,1,.009],[4300,.7,.0065],[6150,.45,.0045],[8200,.25,.003],[1750,.18,.012]];
-      BUF.clack=Array.from({length:8},()=>modal(vary(CLACK,.08),.06,.9,.0009));
-      BUF.soft=Array.from({length:4},()=>modal(vary([[2400,1,.007],[3600,.5,.005],[1500,.3,.01]],.08),.05,.4,.0015,.5));
-      // tabela: borracha empurrando o pano e a madeira por trás
-      BUF.cush=Array.from({length:4},()=>modal(vary([[140,1,.05],[235,.6,.035],[410,.3,.02],[820,.12,.008]]),.16,.5,.006,.7));
-      // sola de couro do taco
-      BUF.tip=Array.from({length:4},()=>modal(vary([[780,1,.009],[1650,.5,.006],[2900,.3,.005]]),.05,1,.003,.35));
-      // bola caindo no fundo da caçapa
-      BUF.drop=Array.from({length:3},()=>modal(vary([[78,1,.11],[132,.6,.07],[205,.3,.04],[420,.15,.015]]),.32,.5,.01,.8));
-      // crack: o estalo seco e agudo que só aparece quando resina bate forte em resina
-      BUF.crack=Array.from({length:6},()=>modal(vary([[5400,1,.0035],[7900,.7,.0022],[10800,.4,.0014],[3600,.35,.006]],.07),.03,1.4,.0006));
-      // giz: grãos minúsculos estalando entre a sola de couro e a bola
-      BUF.chalk=Array.from({length:4},()=>{ const n=Math.floor(ac.sampleRate*0.016), b=ac.createBuffer(1,n,ac.sampleRate), d=b.getChannelData(0);
-        for(let g=0;g<14;g++){ const at=Math.floor(Math.random()*n*0.8), len=Math.floor(ac.sampleRate*(0.0002+Math.random()*0.0005)), a=0.3+Math.random()*0.7;
-          for(let i=0;i<len&&at+i<n;i++) d[at+i]+=a*(Math.random()*2-1)*(1-i/len); }
-        let pk=0; for(let i=0;i<n;i++) pk=Math.max(pk,Math.abs(d[i])); for(let i=0;i<n;i++) d[i]*=0.9/(pk||1); return b; });
       // rolamento contínuo das bolas no pano
       const rs=ac.createBufferSource(); rs.buffer=noiseBuf; rs.loop=true;
       const rf=ac.createBiquadFilter(); rf.type='bandpass'; rf.frequency.value=190; rf.Q.value=0.9;
@@ -3035,7 +3062,7 @@ function makeFelt(){
   const id=g.getImageData(0,0,c.width,c.height), d=id.data, R1=rng(7);
   for(let i=0;i<d.length;i+=4){ const n=(R1()-.5)*6; d[i]+=n; d[i+1]+=n; d[i+2]+=n; }
   g.putImageData(id,0,0);
-  feltTex=c;
+  feltTex=c; feltVer++;
 }
 /* pisos do salão. Cada um é pintado uma vez no tamanho da tela e reaproveitado a cada quadro */
 const FLOORS=[
@@ -3102,7 +3129,7 @@ function makeFloor(){
   const v=g.createRadialGradient(cx,cy,rad*.2,cx,cy,rad);
   v.addColorStop(0,floorIdx===4?'rgba(255,210,140,.10)':'rgba(255,205,140,.06)'); v.addColorStop(1,'rgba(0,0,0,.55)');
   g.fillStyle=v; g.fillRect(0,0,w,h);
-  floorCv=c;
+  floorCv=c; tableKey="";
 }
 function drawFloor(){
   ctx.setTransform(1,0,0,1,0,0);
@@ -3115,7 +3142,7 @@ function resize(){
   cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
   const portrait=H>W*1.1, small=Math.min(W,H)<560;
   railD=portrait||small?36:50;
-  const pad=portrait||small?2:12;
+  const pad=portrait||small?2:4;
   const FW=TW+2*railD+pad, FH=TH+2*railD+pad;
   rot=portrait?-90:0;
   const s=portrait?Math.min(W/FH,H/FW):Math.min(W/FW,H/FH);
@@ -3147,7 +3174,27 @@ function cushPath(c,closed){
   if(closed) P.closePath();
   return P;
 }
+let tableCv=null, tableKey='', feltVer=0;
 function drawTable(){
+  const key=[cv.width,cv.height,railD,rot,feltVer,M.a.toFixed(4),M.e.toFixed(1),M.f.toFixed(1)].join('|');
+  if(!tableCv||tableKey!==key){
+    tableCv=tableCv||document.createElement('canvas'); tableCv.width=cv.width; tableCv.height=cv.height; tableKey=key;
+    const real=ctx; ctx=tableCv.getContext('2d');
+    ctx.setTransform(1,0,0,1,0,0);
+    if(floorCv&&floorCv.width===cv.width&&floorCv.height===cv.height) ctx.drawImage(floorCv,0,0); else { ctx.fillStyle='#0d0b0a'; ctx.fillRect(0,0,cv.width,cv.height); }
+    ctx.setTransform(new DOMMatrix().scaleSelf(dpr).multiplySelf(M));
+    drawTableStatic(false);
+    ctx=real;
+  }
+  ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(tableCv,0,0); ctx.restore();
+  if(kitchenOnly&&ballInHand&&state==='aim'){
+    ctx.beginPath(); ctx.moveTo(HEAD,TH/2-DR); ctx.arc(HEAD,TH/2,DR,-Math.PI/2,-Math.PI*1.5,true); ctx.closePath();
+    ctx.fillStyle='rgba(147,195,240,.10)'; ctx.fill();
+    ctx.strokeStyle='rgba(147,195,240,.8)'; ctx.lineWidth=2; ctx.setLineDash([7,6]);
+    ctx.beginPath(); ctx.arc(HEAD,TH/2,DR,-Math.PI/2,-Math.PI*1.5,true); ctx.stroke(); ctx.setLineDash([]);
+  }
+}
+function drawTableStatic(dOnArg){
   const RD=railD, F=curFelt(), rm=-(CB+RD)/2, rw=RD-CB;
   // madeira escura envernizada, com sombra no chão
   ctx.save(); ctx.shadowColor='rgba(0,0,0,.75)'; ctx.shadowBlur=36*dpr; ctx.shadowOffsetY=12*dpr;
@@ -3207,7 +3254,7 @@ function drawTable(){
     const a=Math.atan2(uy,ux);
     ctx.strokeStyle='rgba(255,236,210,.18)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(v.x,v.y,v.r-0.8,a-1.1,a+1.1); ctx.stroke();
   }
-  const dOn=kitchenOnly&&ballInHand&&state==='aim';
+  const dOn=dOnArg;
   ctx.strokeStyle='rgba(255,255,255,.13)'; ctx.lineWidth=1.2;
   ctx.beginPath(); ctx.moveTo(HEAD,0); ctx.lineTo(HEAD,TH); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(HEAD,TH/2-DR); ctx.arc(HEAD,TH/2,DR,-Math.PI/2,-Math.PI*1.5,true); ctx.closePath();
@@ -3263,19 +3310,16 @@ function drawGlass(x,y,rw){
   ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(0,0,r-.6,3.6,4.9); ctx.stroke();
   ctx.restore();
 }
-function drawBall(b,x,y,sc,dark){
-  sc=sc||1; dark=dark||0;
-  ctx.save(); ctx.translate(x??b.x,y??b.y);
-  if(!dark){ const px=x??b.x, py=y??b.y; ctx.fillStyle='rgba(0,0,0,.34)'; ctx.beginPath(); ctx.ellipse(1.5+(px-500)*.012,2+(py-250)*.016,R*1.02,R*.94,0,0,7); ctx.fill(); }
-  ctx.rotate(-rot*Math.PI/180); ctx.scale(sc,sc);
+/* desenha a bola parada na origem, em pé */
+function ballBody(n,dark){
   ctx.beginPath(); ctx.arc(0,0,R,0,7); ctx.save(); ctx.clip();
-  const c=colorOf(b.n);
-  if(b.n>8){ ctx.fillStyle='#f4efe2'; ctx.fillRect(-R,-R,2*R,2*R); ctx.fillStyle=c; ctx.fillRect(-R,-R*.56,2*R,R*1.12); }
+  const c=colorOf(n);
+  if(n>8){ ctx.fillStyle='#f4efe2'; ctx.fillRect(-R,-R,2*R,2*R); ctx.fillStyle=c; ctx.fillRect(-R,-R*.56,2*R,R*1.12); }
   else { ctx.fillStyle=c; ctx.fillRect(-R,-R,2*R,2*R); }
-  if(b.n!==0){
+  if(n!==0){
     ctx.fillStyle='#f7f2e6'; ctx.beginPath(); ctx.arc(0,0,R*.48,0,7); ctx.fill();
     ctx.fillStyle='#16110d'; ctx.font=`700 ${R*.66}px "Barlow Condensed", sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(b.n,0,R*.04);
+    ctx.fillText(n,0,R*.04);
   }
   const sh=ctx.createRadialGradient(-R*.38,-R*.42,R*.05,0,0,R*1.05);
   sh.addColorStop(0,'rgba(255,255,255,.75)'); sh.addColorStop(.18,'rgba(255,255,255,.12)'); sh.addColorStop(.7,'rgba(0,0,0,0)'); sh.addColorStop(1,'rgba(0,0,0,.38)');
@@ -3283,6 +3327,25 @@ function drawBall(b,x,y,sc,dark){
   if(dark){ ctx.fillStyle=`rgba(0,0,0,${dark})`; ctx.fillRect(-R,-R,2*R,2*R); }
   ctx.restore();
   if(curFelt().ring&&!dark){ ctx.strokeStyle='rgba(0,0,0,.7)'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(0,0,R-.6,0,7); ctx.stroke(); }
+}
+/* cada bola vira uma figurinha no tamanho da tela; refaz quando muda o tamanho, o pano ou a fonte */
+const SPR={}; let sprKey='';
+function ballSprite(n){
+  const k=Math.hypot(M.a,M.b)*dpr, key=k.toFixed(3)+'|'+(curFelt().ring?1:0);
+  if(key!==sprKey){ for(const q in SPR) delete SPR[q]; sprKey=key; }
+  if(SPR[n]) return SPR[n];
+  const px=Math.ceil((2*R+2)*k), c=document.createElement('canvas'); c.width=c.height=px;
+  const real=ctx; ctx=c.getContext('2d'); ctx.translate(px/2,px/2); ctx.scale(k,k); ballBody(n,0); ctx=real;
+  return SPR[n]={c,half:(px/2)/k};
+}
+if(document.fonts&&document.fonts.addEventListener) document.fonts.addEventListener('loadingdone',()=>{ for(const q in SPR) delete SPR[q]; });
+function drawBall(b,x,y,sc,dark){
+  sc=sc||1; dark=dark||0;
+  ctx.save(); ctx.translate(x??b.x,y??b.y);
+  if(!dark){ const px=x??b.x, py=y??b.y; ctx.fillStyle='rgba(0,0,0,.34)'; ctx.beginPath(); ctx.ellipse(1.5+(px-500)*.012,2+(py-250)*.016,R*1.02,R*.94,0,0,7); ctx.fill(); }
+  ctx.rotate(-rot*Math.PI/180); ctx.scale(sc,sc);
+  if(!dark){ const sp=ballSprite(b.n); ctx.drawImage(sp.c,-sp.half,-sp.half,sp.half*2,sp.half*2); }
+  else ballBody(b.n,dark);
   ctx.restore();
 }
 /* bola caindo: escorrega para o fundo da caçapa, encolhe e some na sombra */
@@ -3356,7 +3419,6 @@ function drawStick(){
 }
 let t0=0;
 function draw(now){
-  drawFloor();
   ctx.setTransform(new DOMMatrix().scaleSelf(dpr).multiplySelf(M));
   drawTable();
   drawSinking(now);
@@ -3657,6 +3719,12 @@ function netAfter(){
   NET.shooter=-1;
 }
 function netTick(now){
+  const dt=Math.min(.1,(now-(NET.lastTick||now))/1000); NET.lastTick=now;
+  if(NET.aimT&&cur!==NET.me&&state==='aim'&&!NET.wait){
+    const t=NET.aimT, k=1-Math.exp(-dt*14);
+    aim=wrapA(aim+wrapA(t.a-aim)*k); power+=(t.p-power)*k; setFill();
+    if(ballInHand&&t.cx!=null){ const nx=cue.x+(t.cx-cue.x)*k, ny=cue.y+(t.cy-cue.y)*k; if(free(nx,ny,cue)){ cue.x=nx; cue.y=ny; } }
+  } else if(cur===NET.me) NET.aimT=null;
   if(NET.pending&&state==='moving'&&now-NET.pendingAt>4000){ const p=NET.pending; NET.pending=null; for(const b of balls){ b.vx=b.vy=0; b.curve=null; } state='aim'; NET.shooter=-1; NET.replay=null; applySnap(p); }
   if(state==='aim'&&!winner&&!NET.wait){
     const left=Math.max(0,Math.ceil(NET.turnS-(now-NET.t0)/1000)), mine=cur===NET.me;
@@ -3679,7 +3747,7 @@ function netTick(now){
       if(zeOn) narrate(NET.to[who]===2?'Acorda, freguês! Mais uma dessa e a mesa é do outro.':'Demorou demais, freguês! O relógio do bar não espera ninguém.');
       netSendState();
     }
-    if(mine&&now-NET.lastAim>110){
+    if(mine&&now-NET.lastAim>150){
       const k=`${aim.toFixed(4)}|${cue.x.toFixed(1)}|${cue.y.toFixed(1)}|${power.toFixed(2)}|${spinX.toFixed(2)}|${spinY.toFixed(2)}`;
       if(k!==NET.aimKey){ NET.aimKey=k; NET.lastAim=now; NET.send('aim',{a:aim,cx:cue.x,cy:cue.y,p:power,sx:spinX,sy:spinY}); }
     }
@@ -3687,11 +3755,11 @@ function netTick(now){
 }
 function netRecv(type,d){
   if(!NET.on) return;
-  if(type==='aim'){ if(cur!==NET.me&&state==='aim'&&!NET.wait){ aim=d.a; if(ballInHand&&free(d.cx,d.cy,cue)){cue.x=d.cx;cue.y=d.cy;} power=d.p; spinX=d.sx||0; spinY=d.sy||0; } }
+  if(type==='aim'){ if(cur!==NET.me&&state==='aim'&&!NET.wait){ NET.aimT={a:d.a,cx:d.cx,cy:d.cy,p:d.p}; spinX=d.sx||0; spinY=d.sy||0; } }
   else if(type==='shot'){
     if(state!=='aim'||cur===NET.me){ console.warn('tacada ignorada',state,cur,NET.me,d.n,NET.turnNo); return; }
     NET.turnNo=Math.max(NET.turnNo,d.n);
-    cue.in=false; cue.x=d.cx; cue.y=d.cy; aim=d.a; spinX=d.s; spinY=d.t;
+    NET.aimT=null; cue.in=false; cue.x=d.cx; cue.y=d.cy; aim=d.a; spinX=d.s; spinY=d.t;
     NET.replayBrk=isBreak; NET.replay=null;
     if(NET.to) NET.to[cur]=0;
     strike(d.a,d.p,d.t,d.s,d.g);
