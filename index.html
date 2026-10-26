@@ -716,7 +716,7 @@ html.land.cue-side .xbtn{position:fixed;top:6px;left:max(12px,env(safe-area-inse
 
 
 /* =================== celular deitado: mesa do tamanho da tela =================== */
-html.land.cue-side #root{padding:4px max(6px,env(safe-area-inset-right,0px)) 4px max(6px,env(safe-area-inset-left,0px))}
+html.land.cue-side #root{padding:max(4px,env(safe-area-inset-top,0px)) max(6px,env(safe-area-inset-right,0px)) max(4px,env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
 html.land.cue-side .app{grid-template-columns:60px minmax(0,1fr) 60px;grid-template-rows:minmax(0,1fr);grid-template-areas:"pow table fine";gap:6px;height:100%}
 html.land.cue-side header{position:absolute;inset:0;padding:0;display:block;pointer-events:none;z-index:3;width:auto}
 html.land.cue-side .players{display:block}
@@ -736,6 +736,9 @@ html.land.cue-side .status{position:absolute;top:6px;left:50%;right:auto;transfo
 html.land.cue-side .status:empty{display:none}
 html.land.cue-side .xbtn{position:fixed;top:4px;left:max(6px,env(safe-area-inset-left,0px));width:60px;height:38px;border-radius:10px}
 html.land.cue-side .narr{max-width:52%}
+/* celular em pé com a partida girada: a câmera e a hora ficam à esquerda da tela girada, a barrinha do iPhone à direita */
+html.rot.land.cue-side #root{padding:max(4px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px)) max(8px,env(safe-area-inset-top,0px))}
+html.rot.land.cue-side .xbtn{left:max(8px,env(safe-area-inset-top,0px));top:max(4px,env(safe-area-inset-right,0px))}
 /* =================== estilo boteco raiz (menu e janelas) =================== */
 #menu{--parede:#e6dcc6;--papel:#f7efd9;--pauta:#b9cfe3;--margem:#cf5a4b;--caneta:#1d3a8c;--tinta:#b0261d;--tx:#2a1d14;--tx2:#6a5743;
   --mad:#6b3b1f;--mad-esc:#3d2112;--mad-luz:#9a5d32;--ficha:#e2b23a;
@@ -3877,7 +3880,14 @@ let rotUI=false;
 function local(el,e){ const r=el.getBoundingClientRect(); return rotUI?{x:e.clientY-r.top,y:r.right-e.clientX,w:r.height,h:r.width}:{x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height}; }
 function toWorld(e){ const l=local(cv,e); return MI.transformPoint(new DOMPoint(l.x,l.y)); }
 function layoutMode(){
-  const vw=window.innerWidth, vh=window.innerHeight, root=document.getElementById('root');
+  const root=document.getElementById('root');
+  // tamanho real da tela: no app instalado do iPhone a altura às vezes vem sem a faixa da hora
+  let vw=window.innerWidth, vh=window.innerHeight;
+  const ios=/iP(hone|od|ad)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(ios&&(navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches)){
+    const sw=Math.min(screen.width,screen.height), sh=Math.max(screen.width,screen.height);
+    if(vh>vw) { vw=Math.max(vw,sw); vh=Math.max(vh,sh); } else { vw=Math.max(vw,sh); vh=Math.max(vh,sw); }
+  }
   const phone=window.matchMedia('(pointer:coarse)').matches&&Math.min(vw,vh)<600;
   const menuOpen=document.documentElement.classList.contains('menu-open'), upright=vh>vw;
   // menu fica em pé no celular; só a partida gira para a pessoa deitar o aparelho
