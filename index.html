@@ -533,6 +533,25 @@ html.land .bn-text{font-size:15px}
 .rk-list .ic{width:34px;height:34px}
 .rk-list .nm{min-width:0}.rk-list .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:17px}
 .rk-list .nm small{color:#9a968e;font-size:13px}
+.rk-list .rk-cue{display:block;width:min(150px,80%);height:6px;border-radius:3px;margin-top:5px}
+#vsCard{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(10,7,4,.62);padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));cursor:pointer;animation:vsIn .25s ease-out}
+#vsCard[hidden]{display:none}
+@keyframes vsIn{from{opacity:0}to{opacity:1}}
+#vsCard .vs-in{display:flex;align-items:center;gap:10px;width:min(560px,100%)}
+#vsCard .vs-s{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:#f7efd9;color:#2a1d14;border-radius:6px;padding:14px 10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.45);animation:vsL .35s ease-out}
+#vsCard .vs-s:last-child{animation-name:vsR}
+@keyframes vsL{from{transform:translateX(-30px);opacity:0}} @keyframes vsR{from{transform:translateX(30px);opacity:0}}
+#vsCard .vs-s.me{outline:3px solid #1d3a8c}
+#vsCard .vs-ic .ic{width:56px;height:56px}
+#vsCard .vs-s b{font-size:18px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#vsCard .vs-s small{color:#6a5743;font-size:13px}
+#vsCard .vs-cue{display:block;width:90%;height:9px;border-radius:5px;margin-top:8px}
+#vsCard .vs-cue.vs-wait{background:repeating-linear-gradient(90deg,#d9cdb3 0 8px,#eadfc6 8px 16px)}
+#vsCard .vs-cn{font-family:var(--hand);font-size:20px;color:#1d3a8c;line-height:1}
+#vsCard .vs-x{flex:none;font-family:var(--display);font-size:30px;color:#ffd23f;text-shadow:2px 2px 0 #c9302a}
+#vsCard .vs-pano{margin-top:12px;display:flex;align-items:center;gap:8px;color:#f7e6c2;font-size:15px;font-weight:600}
+#vsCard .vs-pano .swp{width:34px;height:20px;border-radius:3px;background-size:cover;border:2px solid #6b3b1f}
+@media (prefers-reduced-motion:reduce){ #vsCard,#vsCard .vs-s{animation:none} }
 .rk-list .mo{text-align:right;font-weight:800;font-size:19px}.rk-list .mo small{display:block;color:#9a968e;font-size:12px;font-weight:600}
 .hs-note{color:#9a968e;font-size:14px;margin:0}
 .pf-act{display:flex;gap:10px;flex-wrap:wrap}
@@ -1436,6 +1455,7 @@ const S=()=>window.SINUCA;
 const saldo=()=>S()?S().pts():0;
 
 /* ---------- servidor ---------- */
+const euData=()=>({ico:S().icon(),cue:S().cue?S().cue():null,pano:S().pano?S().pano():null});
 async function rpc(fn,args){ const {data,error}=await sb.rpc(fn,args||{}); if(error) throw error; return data; }
 const msgErr=e=>{ const m=(e&&e.message)||String(e);
   if(/saldo insuficiente/.test(m)) return 'Pontos insuficientes pra essa ficha.';
@@ -1517,7 +1537,7 @@ function showMoral(r){
   else if(r.ranqueada===false) setTimeout(()=>S().toast('Essa partida não contou pro ranking',2400),1400);
 }
 async function syncIcons(){ try{ const l=await rpc('meus_icones'); if(Array.isArray(l)&&S()) S().setIcons(l); }catch(e){} }
-window.__icon=()=>{ track(); if(!lob.hidden&&view!=='wait') render(); if(M&&M.ch) send('eu',{ico:S().icon()});
+window.__icon=()=>{ track(); if(!lob.hidden&&view!=='wait') render(); if(M&&M.ch) send('eu',euData());
 };
 
 /* ---------- presença: quantos estão online e em qual bar ---------- */
@@ -1728,7 +1748,7 @@ function chanFor(row){
   const ch=sb.channel('mesa:'+row.id,{config:{broadcast:{self:false},presence:{key:uid}}});
   ch.on('broadcast',{event:'g'},({payload})=>onMsg(payload));
   ch.on('presence',{event:'sync'},()=>onPresence());
-  ch.subscribe(st=>{ if(st==='SUBSCRIBED'){ try{ ch.track({nick,t:Date.now()}); ch.send({type:'broadcast',event:'g',payload:{t:'eu',d:{ico:S().icon()}}}); }catch(e){} if(M&&M.ch===ch&&M.onSub){ const f=M.onSub; M.onSub=null; f(); } } });
+  ch.subscribe(st=>{ if(st==='SUBSCRIBED'){ try{ ch.track({nick,t:Date.now()}); ch.send({type:'broadcast',event:'g',payload:{t:'eu',d:euData()}}); }catch(e){} if(M&&M.ch===ch&&M.onSub){ const f=M.onSub; M.onSub=null; f(); } } });
   return ch;
 }
 const send=(t,d)=>{ if(M&&M.ch) try{ M.ch.send({type:'broadcast',event:'g',payload:{t,d}}); }catch(e){} };
@@ -1763,8 +1783,8 @@ function play(fresh){
   M.phase='play'; M.me=me; M.opGone=null; M.reported=false; M.opNick=me===0?r.apelido2:r.apelido1;
   closeLobby(); setPill(false); $('arrive').hidden=true;
   const spn=SPON[r.bar]||null; if(S().setSpon) S().setSpon(spn); if(spn) setTimeout(()=>S().toast('Mesa oferecida por '+spn.nome,2600),1200);
-  S().startOnline({me,names:[r.apelido1,r.apelido2||'?'],send,premio:premio(f),ficha:f,bar:r.bar,fresh,oppIcon:M.oppIcon});
-  send('eu',{ico:S().icon()});
+  S().startOnline({me,ranks:[r.patente1,r.patente2],names:[r.apelido1,r.apelido2||'?'],send,premio:premio(f),ficha:f,bar:r.bar,fresh,oppIcon:M.oppIcon,opp:M.oppEu});
+  send('eu',euData());
   $('frBtn').hidden=false;
   setConfirm(true); track();
   clearInterval(M.syncT); M.syncT=setInterval(()=>{ if(!M||M.phase!=='play') return clearInterval(M&&M.syncT);
@@ -1777,7 +1797,7 @@ function onMsg(p){
   if(p.t==='revno'){ const b=$('revBtn'); if(b){ b.textContent='Revanche não rolou'; b.disabled=true; } if(p.d&&p.d.why) S().toast(p.d.why,2800); return; }
   if(p.t==='sai'){ const b=$('revBtn'); if(b&&!b.hidden){ b.textContent=`${M.opNick||'O adversário'} saiu da mesa`; b.disabled=true; b.classList.remove('ask'); } return; }
   if(p.t==='join'){ if(M.phase==='wait') rpc('minha_partida').then(r=>{ if(r&&r.status==='jogando'){ M.row=r; arrived(); } }); return; }
-  if(p.t==='eu'){ const id=p.d&&p.d.ico; if(id){ M.oppIcon=id; S().setOppIcon(id); } if(!M.euBack){ M.euBack=true; send('eu',{ico:S().icon()}); } return; }
+  if(p.t==='eu'){ const id=p.d&&p.d.ico; if(id){ M.oppIcon=id; S().setOppIcon(id); } if(p.d){ M.oppEu={ico:p.d.ico,cue:p.d.cue,pano:p.d.pano}; if(S().setOpp) S().setOpp(M.oppEu); } if(!M.euBack){ M.euBack=true; send('eu',euData()); } return; }
   if(p.t==='frase'){ showFrase(p.d.nick,FRASES[p.d.i]); return; }
   if(p.t==='bye'){ checkEnd(); setTimeout(checkEnd,2500); return; }
   if(M.phase==='play') S().recv(p.t,p.d);
@@ -2170,6 +2190,7 @@ window.__onlineInit=async()=>{
     <div id="appSteps"></div>
   </div>
 </section>
+<div id="vsCard" hidden role="dialog" aria-label="Quem joga"></div>
 <section class="sheet2" id="extra" hidden>
   <div class="s2box s2narrow">
     <div class="s2head"><h2 id="exTit"></h2><button class="s2x" type="button" data-close aria-label="Fechar">×</button></div>
@@ -3366,7 +3387,7 @@ const PANOS=[
 PANOS.forEach(p=>{ if(p.flag) p.ring=1; });
 const PANO_PRECO={comum:100,prata:250,ouro:500,torcida:250};
 const panoById=id=>PANOS.find(p=>p.id===id);
-const curFelt=()=>panoById(prof.pano)||PANOS[0];
+const curFelt=()=>(NET.on&&NET.tablePano&&panoById(NET.tablePano))||panoById(prof.pano)||PANOS[0];
 /* desenha o pano inteiro (1000 x 500) num contexto */
 function paintPano(g,P){
   const W=TW, H=TH, col=(c)=>`rgb(${c.join(',')})`, R2=rng(5);
@@ -3765,13 +3786,14 @@ function drawAim(){
 function drawStick(){
   const dx=Math.cos(aim), dy=Math.sin(aim), gap=R+5+power*80, L=440;
   const off=spinX*R*0.55, tx=cue.x-dx*gap-dy*off, ty=cue.y-dy*gap+dx*off, bx=tx-dx*L, by=ty-dy*L, nx=-dy, ny=dx;
+  const SC=(NET.on&&cur!==NET.me&&NET.oppCue)?cueById(NET.oppCue):curCue();
   const g=ctx.createLinearGradient(tx,ty,bx,by);
-  for(const [p,c] of curCue().stops) g.addColorStop(p,c);
+  for(const [p,c] of SC.stops) g.addColorStop(p,c);
   ctx.save(); ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=8*dpr; ctx.shadowOffsetX=3*dpr; ctx.shadowOffsetY=4*dpr;
   ctx.fillStyle=g; ctx.beginPath();
   ctx.moveTo(tx+nx*2.6,ty+ny*2.6); ctx.lineTo(bx+nx*6.8,by+ny*6.8); ctx.lineTo(bx-nx*6.8,by-ny*6.8); ctx.lineTo(tx-nx*2.6,ty-ny*2.6);
   ctx.closePath(); ctx.fill(); ctx.restore();
-  if(curCue().shine){
+  if(SC.shine){
     const ph=(performance.now()%1800)/1800, c0=ph*1.4-0.2, gs=ctx.createLinearGradient(tx,ty,bx,by);
     const st=(p,a)=>gs.addColorStop(Math.min(1,Math.max(0,p)),`rgba(255,255,255,${a})`);
     gs.addColorStop(0,'rgba(255,255,255,0)'); st(c0-0.12,0); st(c0,0.85); st(c0+0.12,0); gs.addColorStop(1,'rgba(255,255,255,0)');
@@ -4136,13 +4158,35 @@ function netRecv(type,d){
   else if(type==='state'){ if(state==='moving'||state==='settle'){ NET.pending=d; NET.pendingAt=performance.now(); } else applySnap(d); }
   else if(type==='sync'){ if(!NET.wait&&state==='aim') netSendState(); }
 }
-function netStop(){ NET.on=false; NET.wait=false; NET.pending=null; clockEl.hidden=true; }
+function netStop(){ const hadPano=NET.tablePano&&NET.tablePano!==prof.pano; NET.on=false; NET.wait=false; NET.pending=null; NET.oppCue=null; NET.tablePano=null; NET.opp=null; clockEl.hidden=true; vsHide(); if(hadPano) makeFelt(); }
+/* cartão de apresentação dos dois jogadores no começo da partida online */
+let vsT=0;
+function vsSide(nm,rk,ico,cueId,me){ const c=cueId&&CUES.some(x=>x.id===cueId)?cueById(cueId):null;
+  return `<div class="vs-s${me?' me':''}"><div class="vs-ic">${icHtml(ICONS.some(i=>i.id===ico)?ico:'oito')}</div><b>${escH(nm)}</b><small>${escH(rk||'')}</small>${c?`<i class="vs-cue${c.shine?' shine':''}" style="background:${cueCSS(c,'90deg')}"></i><span class="vs-cn">${c.nome}</span>`:'<i class="vs-cue vs-wait"></i><span class="vs-cn">…</span>'}</div>`; }
+function vsRender(){
+  const el=document.getElementById('vsCard'); if(!el||el.hidden||!NET.on) return;
+  const me=NET.me, o=NET.opp||{}, rk=NET.ranks||[];
+  const mine=vsSide(names[me],rk[me]||RANKS[rankIdx(prof.xp)].nome,myIcon(),prof.eq,true), his=vsSide(names[1-me],rk[1-me],o.ico||AV[1-me],o.cue,false);
+  const P=curFelt(), dono=me===0?'Mesa com o seu pano':'Mesa com o pano de '+escH(names[0]);
+  el.innerHTML=`<div class="vs-in">${me===0?mine+'<span class="vs-x">VS</span>'+his:his+'<span class="vs-x">VS</span>'+mine}</div><div class="vs-pano"><span class="swp" style="background-image:url(${panoThumb(P.id)})"></span>${dono}: ${P.nome}</div>`;
+}
+function vsShow(){ const el=document.getElementById('vsCard'); if(!el) return; el.hidden=false; vsRender(); clearTimeout(vsT); vsT=setTimeout(vsHide,3600); }
+function vsHide(){ const el=document.getElementById('vsCard'); if(el) el.hidden=true; clearTimeout(vsT); }
+function escH(t){ return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function setOpp(d){
+  if(!NET.on||!d) return; const dd={}; for(const k of ['ico','cue','pano']) if(typeof d[k]==='string') dd[k]=d[k]; NET.opp=Object.assign(NET.opp||{},dd); d=dd;
+  if(d.ico&&ICONS.some(i=>i.id===d.ico)) setAv(1-NET.me,d.ico);
+  if(d.cue&&CUES.some(c=>c.id===d.cue)) NET.oppCue=d.cue;
+  if(NET.me===1&&d.pano&&panoById(d.pano)&&NET.tablePano!==d.pano){ NET.tablePano=d.pano; makeFelt(); }
+  vsRender();
+}
 function startOnline(o){
   CPU.on=false; CPU.busy=false;
   NET.on=true; NET.me=o.me; NET.send=o.send; NET.premio=o.premio; NET.ficha=o.ficha; NET.bar=o.bar||'';
   NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false; NET.mism=0; NET.audN=0; NET.flagged=false; NET.replay=null; NET.to=[0,0];
   names[0]=o.names[0]; names[1]=o.names[1];
   setAv(o.me,myIcon()); setAv(1-o.me,o.oppIcon||'oito');
+  NET.ranks=o.ranks||[]; NET.opp=null; NET.oppCue=null; { const tp=o.me===0?prof.pano:null; if(NET.tablePano!==tp){ NET.tablePano=tp; makeFelt(); } }
   document.querySelector('#p0 .pname').textContent=names[0]+(o.me===0?' (você)':'');
   document.querySelector('#p1 .pname').textContent=names[1]+(o.me===1?' (você)':'');
   closeSheets(); menuEl.hidden=true; document.documentElement.classList.remove('menu-open'); layoutMode();
@@ -4150,10 +4194,11 @@ function startOnline(o){
   NET.wait=!o.fresh||o.me!==0;
   if(NET.wait){ setStatus('Arrumando a mesa…'); NET.send('sync',{}); }
   else netSendState();
-  touchTip();
+  touchTip(); vsShow(); if(o.opp) setOpp(o.opp);
 }
 window.SINUCA={
   setSpon:(s)=>setSpon(s),
+  setOpp:(d)=>setOpp(d), cue:()=>prof.eq, pano:()=>prof.pano,
   cueCss:(id)=>{ const c=cueById(id); return c?cueCSS(c,'90deg'):''; },
   sheet:(t,html)=>{ document.getElementById('exTit').textContent=t; const b=document.getElementById('exBody'); b.innerHTML=html; openSheet('extra'); return b; },
   reTemp:()=>{ if(tpData) renderTemporada(tpData); },
@@ -4319,6 +4364,7 @@ document.getElementById('openShop').addEventListener('click',()=>openSheet('shop
 document.getElementById('openRank').addEventListener('click',()=>openSheet('rank'));
 document.getElementById('openDaily').addEventListener('click',()=>openSheet('daily'));
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeSheets));
+document.getElementById('vsCard').addEventListener('click',vsHide);
 document.getElementById('rvUse').addEventListener('click',e=>{ prof.eq=e.currentTarget.dataset.id; saveProf(); applyCue(); document.getElementById('reveal').hidden=true; renderShop(); });
 document.getElementById('rvMore').addEventListener('click',()=>{ document.getElementById('reveal').hidden=true; renderShop(); });
 
@@ -4344,7 +4390,7 @@ function renderRanking(d){
   const falta=dd?`${dd}d ${hh}h`:hh?`${hh}h ${mm}min`:`${mm}min`;
   const coroa=CUES.find(c=>c.id==='coroa'), me=window.__uid;
   const lista=d.lista||[];
-  const row=r=>`<li class="${r.id===me?'me':''}${r.j<5?' few':''}"><span class="ps">${r.pos}</span>${icHtml(ICONS.some(i=>i.id===r.ico)?r.ico:'oito')}<span class="nm"><b>${esc(r.apelido)}</b><small>${RANKS[rankIdx(r.xp||0)].nome} · ${r.v}V ${r.j-r.v}D</small></span><span class="mo">${r.moral}<small>moral</small></span></li>`;
+  const row=r=>`<li class="${r.id===me?'me':''}${r.j<5?' few':''}"><span class="ps">${r.pos}</span>${icHtml(ICONS.some(i=>i.id===r.ico)?r.ico:'oito')}<span class="nm"><b>${esc(r.apelido)}</b><small>${RANKS[rankIdx(r.xp||0)].nome} · ${r.v}V ${r.j-r.v}D</small>${r.taco&&CUES.some(c=>c.id===r.taco)?`<i class="rk-cue${cueById(r.taco).shine?' shine':''}" title="${cueById(r.taco).nome}" style="background:${cueCSS(cueById(r.taco),'90deg')}"></i>`:''}</span><span class="mo">${r.moral}<small>moral</small></span></li>`;
   el.innerHTML=`
     <div class="rk-prize"><span class="cstick" style="background:${cueCSS(coroa,'90deg')}"></span><div><b>Prêmio: Taco da Coroa</b><span>Exclusivo do campeão. Ele usa a semana seguinte inteira, até alguém tomar a coroa.</span></div></div>
     ${d.campeao?`<div class="rk-champ">${icHtml(ICONS.some(i=>i.id===d.campeao.ico)?d.campeao.ico:'oito')}<span>Campeão da semana passada: <b>${esc(d.campeao.apelido)}</b></span></div>`:''}
