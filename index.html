@@ -714,6 +714,28 @@ html.land.cue-side #sound{position:absolute;top:0;right:0;width:50px;height:40px
 html.land.cue-side .xbtn{position:fixed;top:6px;left:max(12px,env(safe-area-inset-left,0px));right:auto}
 @media (prefers-reduced-motion:reduce){.pcard,.tog i,.tog i::after{transition:none}}
 
+
+/* =================== celular deitado: mesa do tamanho da tela =================== */
+html.land.cue-side #root{padding:4px max(6px,env(safe-area-inset-right,0px)) 4px max(6px,env(safe-area-inset-left,0px))}
+html.land.cue-side .app{grid-template-columns:60px minmax(0,1fr) 60px;grid-template-rows:minmax(0,1fr);grid-template-areas:"pow table fine";gap:6px;height:100%}
+html.land.cue-side header{position:absolute;inset:0;padding:0;display:block;pointer-events:none;z-index:3;width:auto}
+html.land.cue-side .players{display:block}
+html.land.cue-side .pcard{position:absolute;width:60px;height:auto!important;min-height:0;flex-direction:column!important;align-items:center;padding:6px 3px 7px!important;gap:5px!important;border-radius:10px;box-sizing:border-box}
+html.land.cue-side #p0{left:0;top:44px}
+html.land.cue-side #p1{right:0;top:0}
+html.land.cue-side .pav{width:34px;height:34px}
+html.land.cue-side .pbody{align-items:center;gap:0;flex:none}
+html.land.cue-side .prow{display:none}
+html.land.cue-side .minis{flex-wrap:wrap;justify-content:center;width:50px;row-gap:3px}
+html.land.cue-side .mini{width:9px;height:9px}
+html.land.cue-side .power{margin-top:122px}
+html.land.cue-side .fine{margin:80px 0 84px}
+html.land.cue-side #spinbtn{position:absolute;top:auto;bottom:40px;right:0;width:60px;height:38px;min-height:0}
+html.land.cue-side #sound{position:absolute;top:auto;bottom:0;right:0;width:60px;height:34px;min-height:0;font-size:11px;padding:0}
+html.land.cue-side .status{position:absolute;top:6px;left:50%;right:auto;transform:translateX(-50%);width:auto;max-width:58%;height:auto;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(15,11,8,.74);border-radius:999px;padding:3px 12px;font-size:12px;line-height:1.35;z-index:4;-webkit-line-clamp:unset}
+html.land.cue-side .status:empty{display:none}
+html.land.cue-side .xbtn{position:fixed;top:4px;left:max(6px,env(safe-area-inset-left,0px));width:60px;height:38px;border-radius:10px}
+html.land.cue-side .narr{max-width:52%}
 /* =================== estilo boteco raiz (menu e janelas) =================== */
 #menu{--parede:#e6dcc6;--papel:#f7efd9;--pauta:#b9cfe3;--margem:#cf5a4b;--caneta:#1d3a8c;--tinta:#b0261d;--tx:#2a1d14;--tx2:#6a5743;
   --mad:#6b3b1f;--mad-esc:#3d2112;--mad-luz:#9a5d32;--ficha:#e2b23a;
@@ -1681,6 +1703,7 @@ lob.addEventListener('click',async e=>{
   if(act==='icones'){ S().openIcons(); return; }
   if(act==='amigos'){ view='amigos'; errMsg=''; render(); track(); return loadFriends(); }
   if(act==='particular'){ const bar=view==='bar'?curBar:invBar; return sentar(()=>rpc('abrir_particular',{bar,patente:S().rank()})); }
+  if((t.dataset.bar||t.dataset.join!=null||act==='agora'||act==='nova'||t.dataset.mesa)&&S().goFull) S().goFull();
   if(t.dataset.spon){ sponClick(t.dataset.spon); return; }
   if(t.dataset.invbar){ invBar=t.dataset.invbar; return render(); }
   if(t.dataset.invite){ const f=friends.find(x=>x.id===t.dataset.invite); if(!f) return; return sentar(()=>rpc('abrir_particular',{bar:invBar,patente:S().rank()}),row=>{ if(M&&row.codigo){ M.invited=f.apelido; render(); sendTo(f.id,{t:'inv',from:nick,fromId:uid,code:row.codigo,bar:row.bar,ficha:row.ficha}); } }); }
@@ -2111,6 +2134,8 @@ window.__onlineInit=async()=>{
         <div class="opt"><span>Taco no celular</span><div class="seg2" role="group" aria-label="Posição do taco de força no celular">
           <button type="button" data-cue="side">Lateral</button><button type="button" data-cue="bottom">Embaixo</button></div></div>
         
+        <div class="opt"><span>Tela cheia deitada na partida</span><button class="tog" type="button" id="fullTog" aria-pressed="true" aria-label="Tela cheia deitada na partida"></button></div>
+        <div class="opt"><span>Vibrar nas tacadas</span><button class="tog" type="button" id="vibTog" aria-pressed="true" aria-label="Vibrar nas tacadas"></button></div>
         <div class="opt"><span>Comentários do Seu Zé</span><button class="tog" type="button" id="zeTog" aria-pressed="true" aria-label="Comentários do Seu Zé"></button></div>
       </div>
     </nav>
@@ -2474,6 +2499,7 @@ function sCushion(v,x,y){
 }
 /* bola caindo: baque no fundo da caçapa, esbarrão nas outras e o rolar pela calha até a gaveta da mesa de ficha */
 function sPocket(sp,x,y){
+  buzz(35);
   if(!ac||soundMode===2) return;
   try{
     const vol=0.5+Math.min(0.45,(sp||0)/35), pan=panAt(x,y), t=ac.currentTime;
@@ -2498,6 +2524,7 @@ function sPocket(sp,x,y){
 }
 /* sola de couro do taco batendo na branca */
 function sCue(p,x,y){
+  buzz(Math.round(10+22*p));
   if(!ac||soundMode===2) return;
   try{ const vol=0.3+0.65*p, pan=panAt(x,y);
     play(BUF.chalk,0.22+0.25*p,{lp:7000,pan,wet:0.25});
@@ -2523,6 +2550,8 @@ function rack(){
     if(i===4) n=8; else if(i===10) n=corners[0]; else if(i===14) n=corners[1]; else n=rest.pop();
     balls.push({n,x:p[0],y:p[1],vx:0,vy:0,in:false});
   });
+  // ordem fixa por número: a física resolve os choques na mesma ordem nos dois aparelhos
+  balls.sort((a,b)=>a.n-b.n);
 }
 const live=()=>balls.filter(b=>!b.in);
 const remaining=g=>balls.filter(b=>!b.in&&b.n!==0&&typeOf(b.n)===g).length;
@@ -3529,7 +3558,7 @@ function resize(){
   dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
   const portrait=H>W*1.1, small=Math.min(W,H)<560;
-  railD=portrait||small?36:50;
+  railD=small?30:portrait?36:50;
   const pad=portrait||small?2:4;
   const FW=TW+2*railD+pad, FH=TH+2*railD+pad;
   rot=portrait?-90:0;
@@ -4015,6 +4044,7 @@ document.getElementById('tutOk').addEventListener('click',()=>{ const c=tutSteps
 document.getElementById('tutSkip').addEventListener('click',tutEnd);
 document.getElementById('fine').addEventListener('pointerdown',()=>{ TUT.fine=true; });
 function startMode(cpu,lv){
+  goFull();
   CPU.on=cpu; if(cpu) CPU.level=lv; CPU.busy=false;
   names[0]=cpu?(window.__nick||'Você'):(window.__nick||'Jogador 1'); names[1]=cpu?`CPU · ${LEVELS[CPU.level].nome}`:'Jogador 2';
   setAv(0,myIcon()); setAv(1,cpu?'seuze':'giz');
@@ -4042,6 +4072,25 @@ const cueBtns=[...document.querySelectorAll('[data-cue]')];
 const syncCue=()=>cueBtns.forEach(b=>b.setAttribute('aria-pressed',b.dataset.cue===cuePref));
 cueBtns.forEach(b=>b.addEventListener('click',()=>{ cuePref=b.dataset.cue; try{localStorage.setItem('sinuca-taco',cuePref)}catch(e){} syncCue(); layoutMode(); }));
 syncCue();
+/* celular: tela cheia deitada na partida e vibração nas batidas */
+let vibOn=true, fullOn=true;
+try{ vibOn=localStorage.getItem('sinuca-vib')!=='0'; fullOn=localStorage.getItem('sinuca-full')!=='0'; }catch(e){}
+function buzz(ms){ if(vibOn&&navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
+const isPhone=()=>window.matchMedia('(pointer:coarse)').matches&&Math.min(window.innerWidth,window.innerHeight)<600;
+const isStandalone=()=>window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches||navigator.standalone===true;
+async function goFull(){
+  if(!fullOn||!isPhone()) return;
+  try{ const de=document.documentElement; if(!isStandalone()&&!document.fullscreenElement&&de.requestFullscreen) await de.requestFullscreen({navigationUI:'hide'}); }catch(e){}
+  try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){}
+}
+function leaveFull(){
+  try{ if(screen.orientation&&screen.orientation.unlock) screen.orientation.unlock(); }catch(e){}
+  try{ if(document.fullscreenElement&&document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }catch(e){}
+}
+const vibTog=document.getElementById('vibTog'), fullTog=document.getElementById('fullTog');
+vibTog.setAttribute('aria-pressed',vibOn); fullTog.setAttribute('aria-pressed',fullOn);
+vibTog.addEventListener('click',()=>{ vibOn=!vibOn; vibTog.setAttribute('aria-pressed',vibOn); try{localStorage.setItem('sinuca-vib',vibOn?'1':'0')}catch(e){} if(vibOn) buzz(20); });
+fullTog.addEventListener('click',()=>{ fullOn=!fullOn; fullTog.setAttribute('aria-pressed',fullOn); try{localStorage.setItem('sinuca-full',fullOn?'1':'0')}catch(e){} });
 const zeTog=document.getElementById('zeTog');
 try{ zeOn=localStorage.getItem('sinuca-ze')!=='0'; }catch(e){}
 zeTog.setAttribute('aria-pressed',zeOn);
@@ -4065,7 +4114,7 @@ document.getElementById('playTwo').addEventListener('click',()=>{ ensureAudio();
 const confirmEl=document.getElementById('confirm');
 document.getElementById('xbtn').addEventListener('click',()=>{ hideSpin(); confirmEl.hidden=false; document.getElementById('stay').focus(); });
 document.getElementById('stay').addEventListener('click',()=>{ confirmEl.hidden=true; if(isCpuTurn()) cpuTurn(); });
-function toMenu(){ if(NET.on){ const ok=window.__netLeave&&window.__netLeave(); netStop(); if(ok) return; } hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); }
+function toMenu(){ leaveFull(); if(NET.on){ const ok=window.__netLeave&&window.__netLeave(); netStop(); if(ok) return; } hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); }
 document.getElementById('leave').addEventListener('click',toMenu);
 document.getElementById('tomenu').addEventListener('click',toMenu);
 window.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!confirmEl.hidden) confirmEl.hidden=true; });
@@ -4181,6 +4230,7 @@ function setOpp(d){
   vsRender();
 }
 function startOnline(o){
+  goFull();
   CPU.on=false; CPU.busy=false;
   NET.on=true; NET.me=o.me; NET.send=o.send; NET.premio=o.premio; NET.ficha=o.ficha; NET.bar=o.bar||'';
   NET.turnNo=0; NET.pending=null; NET.shooter=-1; NET.timedOut=false; NET.mism=0; NET.audN=0; NET.flagged=false; NET.replay=null; NET.to=[0,0];
@@ -4202,9 +4252,10 @@ window.SINUCA={
   cueCss:(id)=>{ const c=cueById(id); return c?cueCSS(c,'90deg'):''; },
   sheet:(t,html)=>{ document.getElementById('exTit').textContent=t; const b=document.getElementById('exBody'); b.innerHTML=html; openSheet('extra'); return b; },
   reTemp:()=>{ if(tpData) renderTemporada(tpData); },
-  startOnline, recv:netRecv, stop:()=>{ netStop(); },
+  startOnline, recv:netRecv, stop:()=>{ netStop(); leaveFull(); },
   startCpu:(lv)=>{ netStop(); closeSheets(); startMode(true,lv==null?selLv:lv); },
-  menu:()=>{ netStop(); hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); },
+  goFull:()=>goFull(),
+  menu:()=>{ leaveFull(); netStop(); hideTalk(); confirmEl.hidden=true; document.getElementById('over').hidden=true; CPU.on=false; CPU.busy=false; hideSpin(); menuEl.hidden=false; document.documentElement.classList.add('menu-open'); layoutMode(); },
   setPts:(v)=>{ prof.pts=v; syncPts(); try{ if(!document.getElementById('shop').hidden) renderShop(); }catch(e){} },
   pts:()=>prof.pts, toast:(m,ms)=>toast(m,ms), narrate:(t)=>narrate(t),
   rank:()=>RANKS[rankIdx(prof.xp)].nome, icon:()=>myIcon(), icHtml:(id)=>icHtml(id), setOppIcon:(id)=>{ if(NET.on&&ICONS.some(i=>i.id===id)) setAv(1-NET.me,id); }, openIcons:()=>openSheet('icons'), openPerfil:()=>openSheet('perfil'), setIcons:(l)=>setIcons(l), rankOf:(xp)=>RANKS[rankIdx(xp||0)].nome, inGame:()=>menuEl.hidden, online:()=>NET.on,
