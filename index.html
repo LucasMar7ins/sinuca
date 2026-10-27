@@ -736,6 +736,11 @@ html.land.cue-side .status{position:absolute;top:6px;left:50%;right:auto;transfo
 html.land.cue-side .status:empty{display:none}
 html.land.cue-side .xbtn{position:fixed;top:4px;left:max(6px,env(safe-area-inset-left,0px));width:60px;height:38px;border-radius:10px}
 html.land.cue-side .narr{max-width:52%}
+/* um aviso de cada vez em cima da mesa */
+.app:has(#toast:not([hidden])) .status,.app:has(#over:not([hidden])) .status,.app:has(#tut:not([hidden])) .status{visibility:hidden}
+.sp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.sp-row .btn{min-height:44px;padding:0 8px}
+html.land .sp-row .btn{min-height:40px;height:40px;font-size:14px}
 /* celular em pé com a partida girada: a câmera e a hora ficam à esquerda da tela girada, a barrinha do iPhone à direita */
 html.rot.land.cue-side #root{padding:max(4px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px)) max(8px,env(safe-area-inset-top,0px))}
 html.rot.land.cue-side .xbtn{left:max(8px,env(safe-area-inset-top,0px));top:max(4px,env(safe-area-inset-right,0px))}
@@ -3737,8 +3742,8 @@ function ballBody(n,dark){
   if(n>8){ ctx.fillStyle='#f4efe2'; ctx.fillRect(-R,-R,2*R,2*R); ctx.fillStyle=c; ctx.fillRect(-R,-R*.56,2*R,R*1.12); }
   else { ctx.fillStyle=c; ctx.fillRect(-R,-R,2*R,2*R); }
   if(n!==0){
-    ctx.fillStyle='#f7f2e6'; ctx.beginPath(); ctx.arc(0,0,R*.48,0,7); ctx.fill();
-    ctx.fillStyle='#16110d'; ctx.font=`700 ${R*.66}px "Barlow Condensed", sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#f7f2e6'; ctx.beginPath(); ctx.arc(0,0,R*.56,0,7); ctx.fill();
+    ctx.fillStyle='#16110d'; ctx.font=`700 ${R*.76}px "Barlow Condensed", sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(n,0,R*.04);
   }
   const sh=ctx.createRadialGradient(-R*.38,-R*.42,R*.05,0,0,R*1.05);
@@ -4009,7 +4014,7 @@ function touchTip(){
   let seen=false; try{ seen=localStorage.getItem('sinuca-dica-mira')==='1'; }catch(e){}
   if(seen||!window.matchMedia('(pointer:coarse)').matches) return;
   try{ localStorage.setItem('sinuca-dica-mira','1'); }catch(e){}
-  setTimeout(()=>toast('Arraste na mesa para girar a mira · toque para mirar direto',4200),600);
+  setTimeout(()=>toast('Arraste na mesa pra mirar · toque pra mirar direto',4200),600);
 }
 /* ---------- tutorial de 30 s com o Seu Zé (primeiro treino) ---------- */
 const TUT={on:false,k:0,iv:null,aim0:0,moved:0,fine:false,shot:false};
